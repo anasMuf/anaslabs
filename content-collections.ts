@@ -8,6 +8,7 @@ const blog = defineCollection({
 	name: "blog",
 	directory: "content/blog",
 	include: "**/*.{md,mdx}",
+	exclude: ["_*"],
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
