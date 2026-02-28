@@ -1,0 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+	--bg-base: #0a0a0a;
+	--header-bg: rgba(10, 10, 10, 0.8);
+	--line: rgba(255, 255, 255, 0.05);
+	--surface: rgba(255, 255, 255, 0.02);
+	--surface-hover: rgba(255, 255, 255, 0.04);
+	--text-primary: #ffffff;
+	--text-secondary: #a3a3a3;
+	--text-muted: #737373;
+	--emerald: #10b981;
+	--emerald-dim: #059669;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+	min-height: 100%;
+}
+
+body {
+	min-height: 100%;
+	background-color: var(--bg-base);
+	color: var(--text-secondary);
+}
+
+a {
+	text-decoration: none;
+	transition: color 180ms ease;
+}
+
+code {
+	font-size: 0.9em;
+	border: 1px solid var(--line);
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 6px;
+	padding: 2px 7px;
+	color: #e5e5e5;
+}
+
+pre code {
+	border: 0;
+	background: transparent;
+	padding: 0;
+	border-radius: 0;
+	font-size: inherit;
+	color: inherit;
+}
+
+.prose pre {
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: #171717;
+	color: #e5e5e5;
+	overflow-x: auto;
+}
+
+.prose {
+	overflow-wrap: anywhere;
+}
+
+.prose h2 {
+	color: #ffffff;
+	font-weight: 500;
+	letter-spacing: -0.025em;
+}
+
+.prose p {
+	color: var(--text-secondary);
+}
+
+.prose table {
+	display: block;
+	width: 100%;
+	overflow-x: auto;
+}
+
+.bg-grid {
+	background-size: 40px 40px;
+	background-image:
+		linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.fade-in {
+	animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

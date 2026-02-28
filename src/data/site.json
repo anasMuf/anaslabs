@@ -1,0 +1,24 @@
+{
+	"name": "anaslabs",
+	"title": "anaslabs",
+	"tagline": "Context Engineer & Fullstack Developer.",
+	"description": "Architecting high-performance web applications and intelligent systems. Specializing in modern stacks to deliver seamless user experiences and robust backends.",
+	"role": "Context Engineer",
+	"email": "hello@anaslabs.com",
+	"available": true,
+	"social": {
+		"github": "https://github.com/anasmufti",
+		"twitter": "https://twitter.com/anasmufti",
+		"linkedin": "https://linkedin.com/in/anasmufti"
+	},
+	"techStack": [
+		{ "label": "ReactJS", "icon": "code" },
+		{ "label": "TanStack", "icon": "layers" },
+		{ "label": "HonoJS", "icon": "server" },
+		{ "label": "ExpressJS", "icon": "server" },
+		{ "label": "PostgreSQL", "icon": "database" },
+		{ "label": "MySQL", "icon": "database" },
+		{ "label": "Prisma", "icon": "box" },
+		{ "label": "Laravel", "icon": "code-2" }
+	]
+}

@@ -1,0 +1,114 @@
+[
+	{
+		"slug": "edge-context-engine",
+		"title": "Edge Context Engine",
+		"description": "A globally distributed application state manager built on the edge, enabling sub-50ms latency for real-time synchronization across clients.",
+		"shortDescription": "A globally distributed application state manager built on the edge. Utilizing HonoJS for ultra-low latency routing and TanStack for seamless client-side data synchronization.",
+		"tags": ["React", "TanStack Query", "Hono", "Cloudflare Workers"],
+		"icon": "cpu",
+		"featured": true,
+		"sections": [
+			{
+				"heading": "The Challenge",
+				"body": "Modern web applications often suffer from latency issues when relying on centralized databases for rapid state updates. Our client needed a solution to synchronize complex configuration states across thousands of concurrent users globally, without introducing noticeable delays or complex websocket architectures."
+			},
+			{
+				"heading": "Architecture & Implementation",
+				"body": "We engineered a lightweight, highly-available API using HonoJS deployed directly to Cloudflare Workers. By utilizing the Edge network, compute processes occur geographically closest to the user.",
+				"bullets": [
+					{
+						"title": "Edge Routing",
+						"text": "Hono provided an ultra-fast routing layer with standard web request/response objects, keeping the bundle size under 15kb."
+					},
+					{
+						"title": "Client Sync",
+						"text": "Integrated TanStack Query on the React frontend to handle aggressive background refetching and optimistic UI updates, rendering perceived latency to zero."
+					},
+					{
+						"title": "KV Storage",
+						"text": "Leveraged low-latency Key-Value stores to persist application state, utilizing eventual consistency to ensure high throughput."
+					}
+				]
+			},
+			{
+				"heading": "The Result",
+				"body": "The new architecture reduced round-trip times by over 70%, averaging 45ms globally. The seamless integration between TanStack Query and the Hono API provided an unparalleled developer experience, making future iterations highly predictable and type-safe."
+			}
+		]
+	},
+	{
+		"slug": "financial-data-aggregator",
+		"title": "Financial Data Aggregator",
+		"description": "A robust monolithic backend to aggregate and process millions of financial records, served to a highly interactive React dashboard.",
+		"shortDescription": "A robust monolithic backend built with Laravel to aggregate and process millions of financial records via MySQL, served to a highly interactive React dashboard.",
+		"tags": ["Laravel", "MySQL", "React"],
+		"icon": "bar-chart",
+		"featured": false,
+		"sections": [
+			{
+				"heading": "The Challenge",
+				"body": "The client needed a centralised platform to ingest, normalise, and render financial data streams from multiple third-party providers with complex reconciliation rules."
+			},
+			{
+				"heading": "Architecture & Implementation",
+				"body": "A Laravel monolith was chosen for rapid iteration and battle-tested queuing. MySQL view layers and indexed queries kept p99 dashboard loads under 300ms.",
+				"bullets": [
+					{
+						"title": "Data Ingestion",
+						"text": "Laravel Horizon queues processed over 2 million records per day from external APIs with automatic retry logic."
+					},
+					{
+						"title": "Query Optimisation",
+						"text": "Composite indexes and MySQL materialised views cut heavy aggregation queries from 4 seconds to under 80ms."
+					},
+					{
+						"title": "Interactive Dashboard",
+						"text": "React with Recharts delivered real-time chart updates driven by SWR polling against a JSON API."
+					}
+				]
+			},
+			{
+				"heading": "The Result",
+				"body": "The platform now processes and visualises more than 50 million financial records monthly with 99.9% uptime, replacing a legacy spreadsheet workflow entirely."
+			}
+		]
+	},
+	{
+		"slug": "iam-api",
+		"title": "Identity & Access Management API",
+		"description": "A scalable microservice for user authentication and role-based access control with type-safe database access.",
+		"shortDescription": "Designed a scalable microservice for user authentication and role-based access control. Leveraged Prisma ORM for type-safe database access and complex relation querying in PostgreSQL.",
+		"tags": ["ExpressJS", "PostgreSQL", "Prisma"],
+		"icon": "shield",
+		"featured": false,
+		"wide": true,
+		"sections": [
+			{
+				"heading": "The Challenge",
+				"body": "Multiple product teams shared a monolithic auth layer that had grown brittle. We needed to extract it into a standalone API that could handle granular permission scopes and integrate cleanly via JWT."
+			},
+			{
+				"heading": "Architecture & Implementation",
+				"body": "The service was built on ExpressJS with Prisma as the ORM, giving us end-to-end type safety from schema to route handler.",
+				"bullets": [
+					{
+						"title": "Role-Based Access Control",
+						"text": "A flexible RBAC model using Prisma relations allowed permissions to be composed hierarchically without n+1 query problems."
+					},
+					{
+						"title": "JWT & Refresh Tokens",
+						"text": "Short-lived access tokens and rotating refresh tokens stored in an HttpOnly cookie eliminated XSS token theft."
+					},
+					{
+						"title": "Audit Logging",
+						"text": "Every auth event written to an append-only PostgreSQL table for compliance and incident forensics."
+					}
+				]
+			},
+			{
+				"heading": "The Result",
+				"body": "The extracted service handles 10k+ daily active users with average auth latency under 20ms, and every downstream team now shares a single, versioned auth contract."
+			}
+		]
+	}
+]
