@@ -1,5 +1,6 @@
 services:
   app:
+    build: .
     image: ${IMAGE:-ghcr.io/anasmuf/anaslabs}:latest
     container_name: anaslabs
     restart: unless-stopped

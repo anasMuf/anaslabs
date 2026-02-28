@@ -1,9 +1,9 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import Footer                                    from "../components/Footer";
-import Header                                    from "../components/Header";
-import siteData                                  from "#/data/site.json";
+import siteData from "#/data/site.json";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
-import appCss                                    from "../styles.css?url";
+import appCss from "../styles.css?url";
 
 const ogImageMeta = siteData.avatar
 	? [
@@ -26,9 +26,7 @@ export const Route = createRootRoute({
 				rel: "stylesheet",
 				href: appCss,
 			},
-			...(siteData.avatar
-				? [{ rel: "icon", href: siteData.avatar }]
-				: []),
+			...(siteData.avatar ? [{ rel: "icon", href: siteData.avatar }] : []),
 		],
 	}),
 	shellComponent: RootDocument,

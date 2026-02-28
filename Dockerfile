@@ -26,4 +26,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["node", "dist/server/server.js"]
+CMD ["pnpm", "preview", "--port", "3000", "--host"]

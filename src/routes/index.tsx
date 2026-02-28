@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { allBlogs }              from "content-collections";
-import projects                  from "#/data/projects.json";
-import siteData                  from "#/data/site.json";
+import { allBlogs } from "content-collections";
+import projects from "#/data/projects.json";
+import siteData from "#/data/site.json";
 
 export const Route = createFileRoute("/")({ component: Home });
 
