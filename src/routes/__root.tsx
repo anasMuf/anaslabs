@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import siteData from "#/data/site.json";
 
 import appCss from "../styles.css?url";
 
@@ -17,7 +18,14 @@ export const Route = createRootRoute({
 			{
 				title: "anaslabs | Context Engineer",
 			},
+			...(siteData.avatar
+				? [
+						{ property: "og:image", content: siteData.avatar },
+						{ name: "twitter:image", content: siteData.avatar },
+					]
+				: []),
 		],
+
 		links: [
 			{
 				rel: "stylesheet",

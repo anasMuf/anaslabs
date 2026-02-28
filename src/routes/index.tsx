@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { allBlogs } from "content-collections";
-import projects from "#/data/projects.json";
-import siteData from "#/data/site.json";
+import { allBlogs }              from "content-collections";
+import projects                  from "#/data/projects.json";
+import siteData                  from "#/data/site.json";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -250,41 +250,7 @@ function Home() {
 							params={{ slug: project.slug }}
 							className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-white/2 p-6 sm:p-8 hover:bg-white/4 transition-all duration-300 h-full"
 						>
-							<div>
-								<div className="flex flex-wrap gap-2 mb-6">
-									{project.tags.map((tag) => (
-										<span
-											key={tag}
-											className="text-xs font-medium text-neutral-300 bg-white/5 border border-white/5 px-2 py-1 rounded"
-										>
-											{tag}
-										</span>
-									))}
-								</div>
-								<h3 className="text-xl font-medium tracking-tight text-white mb-3 flex items-center justify-between">
-									{project.title}
-									<span className="text-neutral-500 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0">
-										<ArrowUpRight />
-									</span>
-								</h3>
-								<p className="text-sm text-neutral-400 leading-relaxed mb-8">
-									{project.shortDescription}
-								</p>
-							</div>
-							<div className="w-full h-48 bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden flex items-center justify-center relative">
-								<ProjectIcon name={project.icon} />
-							</div>
-						</Link>
-					))}
-
-					{wideProjects.map((project) => (
-						<Link
-							key={project.slug}
-							to="/projects/$slug"
-							params={{ slug: project.slug }}
-							className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-white/2 p-6 sm:p-8 hover:bg-white/4 transition-all duration-300 h-full md:col-span-2"
-						>
-							<div className="flex flex-col md:flex-row gap-8">
+							<div className="flex flex-col gap-6 h-full">
 								<div className="flex-1">
 									<div className="flex flex-wrap gap-2 mb-6">
 										{project.tags.map((tag) => (
@@ -296,17 +262,53 @@ function Home() {
 											</span>
 										))}
 									</div>
-									<h3 className="text-xl font-medium tracking-tight text-white mb-3 flex items-center gap-2">
+									<h3 className="text-xl font-medium tracking-tight text-white mb-3 flex items-center justify-between">
 										{project.title}
-										<span className="text-neutral-500 group-hover:text-white transition-colors">
+										<span className="text-neutral-500 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0">
 											<ArrowUpRight />
 										</span>
 									</h3>
-									<p className="text-sm text-neutral-400 leading-relaxed max-w-lg">
+									<p className="text-sm text-neutral-400 leading-relaxed">
 										{project.shortDescription}
 									</p>
 								</div>
-								<div className="w-full md:w-1/3 h-40 md:h-auto bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden flex items-center justify-center shrink-0">
+								<div className="w-full h-48 bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden flex items-center justify-center">
+									<ProjectIcon name={project.icon} />
+								</div>
+							</div>
+						</Link>
+					))}
+
+					{wideProjects.map((project) => (
+						<Link
+							key={project.slug}
+							to="/projects/$slug"
+							params={{ slug: project.slug }}
+							className="group relative flex flex-col justify-between rounded-2xl border border-white/5 bg-white/2 p-6 sm:p-8 hover:bg-white/4 transition-all duration-300 h-full"
+						>
+							<div className="flex flex-col gap-6 h-full">
+								<div className="flex-1">
+									<div className="flex flex-wrap gap-2 mb-6">
+										{project.tags.map((tag) => (
+											<span
+												key={tag}
+												className="text-xs font-medium text-neutral-300 bg-white/5 border border-white/5 px-2 py-1 rounded"
+											>
+												{tag}
+											</span>
+										))}
+									</div>
+									<h3 className="text-xl font-medium tracking-tight text-white mb-3 flex items-center justify-between">
+										{project.title}
+										<span className="text-neutral-500 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0">
+											<ArrowUpRight />
+										</span>
+									</h3>
+									<p className="text-sm text-neutral-400 leading-relaxed max-w-2xl">
+										{project.shortDescription}
+									</p>
+								</div>
+								<div className="w-full h-48 bg-neutral-900/50 rounded-lg border border-white/5 overflow-hidden flex items-center justify-center">
 									<ProjectIcon name={project.icon} />
 								</div>
 							</div>

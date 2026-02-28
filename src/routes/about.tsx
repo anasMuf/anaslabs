@@ -10,9 +10,17 @@ function About() {
 		<main className="grow pt-32 pb-20 px-6 max-w-5xl mx-auto">
 			<div className="max-w-2xl">
 				{/* Avatar */}
-				<div className="w-16 h-16 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center text-2xl font-medium text-white mb-8">
-					A
-				</div>
+				{siteData.avatar ? (
+					<img
+						src={siteData.avatar}
+						alt={siteData.name}
+						className="w-16 h-16 rounded-full border border-white/10 object-cover mb-8"
+					/>
+				) : (
+					<div className="w-16 h-16 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center text-2xl font-medium text-white mb-8">
+						{siteData.name[0].toUpperCase()}
+					</div>
+				)}
 
 				<h1 className="text-4xl sm:text-5xl font-semibold tracking-tighter text-white mb-6 leading-tight">
 					Hey, I'm Anas.
