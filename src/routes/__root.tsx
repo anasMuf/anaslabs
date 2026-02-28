@@ -1,29 +1,24 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import siteData from "#/data/site.json";
+import Footer                                    from "../components/Footer";
+import Header                                    from "../components/Header";
+import siteData                                  from "#/data/site.json";
 
-import appCss from "../styles.css?url";
+import appCss                                    from "../styles.css?url";
+
+const ogImageMeta = siteData.avatar
+	? [
+			{ property: "og:image", content: siteData.avatar },
+			{ name: "twitter:image", content: siteData.avatar },
+		]
+	: [];
 
 export const Route = createRootRoute({
 	head: () => ({
 		meta: [
-			{
-				charSet: "utf-8",
-			},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				title: "anaslabs | Context Engineer",
-			},
-			...(siteData.avatar
-				? [
-						{ property: "og:image", content: siteData.avatar },
-						{ name: "twitter:image", content: siteData.avatar },
-					]
-				: []),
+			{ charSet: "utf-8" },
+			{ name: "viewport", content: "width=device-width, initial-scale=1" },
+			{ title: "anaslabs | Context Engineer" },
+			...ogImageMeta,
 		],
 
 		links: [

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import siteData from "#/data/site.json";
+import siteData            from "#/data/site.json";
 
 export const Route = createFileRoute("/about")({
 	component: About,
@@ -15,6 +15,7 @@ function About() {
 						src={siteData.avatar}
 						alt={siteData.name}
 						className="w-16 h-16 rounded-full border border-white/10 object-cover mb-8"
+						style={{ objectPosition: "center 8px" }}
 					/>
 				) : (
 					<div className="w-16 h-16 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center text-2xl font-medium text-white mb-8">

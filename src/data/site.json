@@ -5,11 +5,11 @@
 	"tagline": "Context Engineer & Fullstack Developer.",
 	"description": "Architecting high-performance web applications and intelligent systems. Specializing in modern stacks to deliver seamless user experiences and robust backends.",
 	"role": "Context Engineer",
-	"email": "hello@anaslabs.com",
-	"available": true,
+	"email": "hello@anaslabs.my.id",
+	"available": false,
 	"social": {
-		"github": "https://github.com/anasmufti",
-		"twitter": "https://twitter.com/anasmufti",
+		"github": "https://github.com/anasMuf",
+		"twitter": "https://x.com/nosugarpeople",
 		"linkedin": "https://linkedin.com/in/anasmufti"
 	},
 	"techStack": [
