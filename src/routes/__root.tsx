@@ -5,10 +5,17 @@ import Header from "../components/Header";
 
 import appCss from "../styles.css?url";
 
-const ogImageMeta = siteData.avatar
+const domain = "https://anaslabs.my.id";
+const ogImageUrl = siteData.avatar
+	? siteData.avatar.startsWith("http")
+		? siteData.avatar
+		: `${domain}${siteData.avatar}`
+	: "";
+
+const ogImageMeta = ogImageUrl
 	? [
-			{ property: "og:image", content: siteData.avatar },
-			{ name: "twitter:image", content: siteData.avatar },
+			{ property: "og:image", content: ogImageUrl },
+			{ name: "twitter:image", content: ogImageUrl },
 		]
 	: [];
 
@@ -18,6 +25,13 @@ export const Route = createRootRoute({
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
 			{ title: "anaslabs | Context Engineer" },
+			{ property: "og:title", content: "anaslabs | Context Engineer" },
+			{ property: "og:description", content: siteData.description },
+			{ property: "og:url", content: domain },
+			{ property: "og:type", content: "website" },
+			{ name: "twitter:card", content: "summary_large_image" },
+			{ name: "twitter:title", content: "anaslabs | Context Engineer" },
+			{ name: "twitter:description", content: siteData.description },
 			...ogImageMeta,
 		],
 
