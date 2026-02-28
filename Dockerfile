@@ -26,4 +26,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["pnpm", "preview", "--port", "3000", "--host"]
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "3000"]
