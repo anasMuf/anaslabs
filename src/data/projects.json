@@ -74,6 +74,171 @@
 		]
 	},
 	{
+		"slug": "bodyfit",
+		"title": "BodyFit",
+		"description": "Web application untuk membantu pengguna menjalani program diet dan kebugaran — menghitung BMI, kebutuhan kalori (TDEE), zona heart rate, dan asupan air dalam satu platform minimalis.",
+		"shortDescription": "Satu platform untuk semua kalkulasi kesehatan: BMI, TDEE, zona heart rate, dan kebutuhan air harian — tanpa perlu berpindah website.",
+		"tags": ["React", "TypeScript", "Tailwind CSS"],
+		"icon": "activity",
+		"featured": true,
+		"comingSoon": true,
+		"sections": [
+			{
+				"heading": "Masalah yang Dipecahkan",
+				"body": "Kalkulator kesehatan yang ada hari ini tersebar di berbagai website terpisah dan banyak aplikasi kebugaran terlalu kompleks untuk kebutuhan sehari-hari. Pengguna terpaksa membuka 3-4 website berbeda hanya untuk mendapatkan angka BMI, TDEE, dan target detak jantung mereka."
+			},
+			{
+				"heading": "Fitur Utama",
+				"body": "BodyFit hadir dengan pendekatan minimalis: satu profil tersimpan, semua angka langsung tersedia.",
+				"bullets": [
+					{
+						"title": "BMI & Kategori",
+						"text": "Menghitung Body Mass Index dan langsung memberikan label kategori (Underweight, Normal, Overweight, Obese) berdasarkan standar WHO."
+					},
+					{
+						"title": "TDEE Calculator",
+						"text": "Menggunakan rumus Mifflin-St Jeor untuk menghitung Total Daily Energy Expenditure berdasarkan tingkat aktivitas fisik harian pengguna."
+					},
+					{
+						"title": "Heart Rate Zone",
+						"text": "Menghitung zona detak jantung optimal untuk pembakaran lemak (60-70% MHR) agar olahraga lebih efektif dan terarah."
+					},
+					{
+						"title": "Weight Tracker",
+						"text": "Pencatatan berat badan harian dengan riwayat lengkap, memungkinkan pengguna memantau tren perubahan dari waktu ke waktu."
+					}
+				]
+			},
+			{
+				"heading": "Roadmap",
+				"body": "Versi berikutnya akan mencakup visualisasi grafik tren berat badan, meal planner generator berdasarkan target kalori, dan fitur ekspor data ke format CSV/PDF."
+			}
+		]
+	},
+	{
+		"slug": "weeklycash",
+		"title": "WeeklyCash",
+		"description": "Aplikasi manajemen keuangan pribadi berbasis penganggaran mingguan — memecah alokasi bulanan menjadi unit yang lebih kecil agar pengeluaran lebih terkontrol setiap harinya.",
+		"shortDescription": "Kontrol pengeluaran lebih ketat dengan sistem budget mingguan. Jawab pertanyaan paling penting: 'Sisa uang saya minggu ini berapa?'",
+		"tags": ["React", "TypeScript", "Tailwind CSS"],
+		"icon": "wallet",
+		"featured": true,
+		"wide": true,
+		"comingSoon": true,
+		"sections": [
+			{
+				"heading": "Masalah yang Dipecahkan",
+				"body": "Banyak orang gagal mengelola anggaran bulanan karena terlalu 'royal' di minggu pertama setelah gajian dan kehabisan uang di akhir bulan. Evaluasi bulanan terlalu jarang untuk membangun kedisiplinan finansial yang konsisten."
+			},
+			{
+				"heading": "Fitur Utama",
+				"body": "Interface minimalis yang fokus pada satu pertanyaan: berapa sisa budget minggu ini?",
+				"bullets": [
+					{
+						"title": "Weekly Budget",
+						"text": "Pengguna menetapkan batas maksimal pengeluaran per minggu, bukan per bulan — unit yang lebih mudah dikontrol dan dievaluasi."
+					},
+					{
+						"title": "Transaction Logging",
+						"text": "Input cepat untuk mencatat pengeluaran dan pemasukan lengkap dengan kategori, nominal, dan tanggal."
+					},
+					{
+						"title": "Real-time Dashboard",
+						"text": "Progress bar yang langsung menunjukkan persentase budget terpakai — termasuk peringatan otomatis saat mendekati batas 80%."
+					},
+					{
+						"title": "History Ledger",
+						"text": "Riwayat transaksi lengkap dengan filter waktu untuk evaluasi dan perbandingan antar minggu."
+					}
+				]
+			},
+			{
+				"heading": "Roadmap",
+				"body": "Versi selanjutnya akan mencakup multi-wallet (tunai, rekening, e-wallet), recurring transactions untuk tagihan rutin, AI categorization berbasis NLP, dan dukungan PWA agar bisa diakses seperti aplikasi native."
+			}
+		]
+	},
+	{
+		"slug": "istiqomah",
+		"title": "Istiqomah.io",
+		"description": "Aplikasi pelacak sholat berbasis web yang mengukur kedisiplinan waktu secara objektif — bukan sekadar mencatat sudah/belum, tapi mengukur seberapa cepat respons terhadap panggilan adzan.",
+		"shortDescription": "Prayer tracker yang mengukur response time dari adzan ke pelaksanaan sholat, dengan Smart Buffer untuk memperhitungkan waktu wudhu dan perjalanan.",
+		"tags": ["React", "TypeScript", "Geolocation API"],
+		"icon": "clock",
+		"featured": false,
+		"comingSoon": true,
+		"sections": [
+			{
+				"heading": "Masalah yang Dipecahkan",
+				"body": "Aplikasi habit tracker biasa hanya mencatat status biner (sudah/belum) tanpa mempertimbangkan apakah sholat dilakukan di awal atau akhir waktu. Sulit mengukur tren perbaikan diri secara objektif jika metriknya tidak akurat."
+			},
+			{
+				"heading": "Fitur Utama",
+				"body": "Precision tracking dengan Smart Buffer System yang memperhitungkan realita kehidupan sehari-hari.",
+				"bullets": [
+					{
+						"title": "Smart Buffer System",
+						"text": "Toleransi waktu yang dapat dipersonalisasi (misal 15-25 menit) untuk mencakup waktu wudhu, perjalanan, dan persiapan — sehingga pengguna tidak dihitung 'terlambat' karena faktor yang wajar."
+					},
+					{
+						"title": "Precision Timestamp",
+						"text": "Tombol satu klik merekam waktu presisi setiap sholat selesai, menghasilkan data akurat untuk evaluasi."
+					},
+					{
+						"title": "Jadwal Otomatis",
+						"text": "Integrasi API jadwal sholat Kemenag berdasarkan koordinat GPS untuk jadwal yang akurat di setiap lokasi di Indonesia."
+					},
+					{
+						"title": "Discipline Analytics",
+						"text": "Visualisasi rata-rata response time per minggu dan streak sistem untuk memotivasi konsistensi ketepatan waktu."
+					}
+				]
+			},
+			{
+				"heading": "Roadmap",
+				"body": "Fitur lanjutan mencakup Location-Based Buffer (otomatis menyesuaikan toleransi berdasarkan jarak dari masjid), Social Leaderboard untuk kompetisi positif dalam lingkaran keluarga, dan AI Insight berbasis pola data historis."
+			}
+		]
+	},
+	{
+		"slug": "hydrocalc",
+		"title": "HydroCalc",
+		"description": "Kalkulator web untuk mengestimasi waktu pengisian berbagai jenis wadah air berdasarkan volume dan debit — dilengkapi timer otomatis agar tidak ada air yang terbuang.",
+		"shortDescription": "Hitung berapa lama bak mandi, tandon, atau drum penuh — dengan input dimensi wadah dan debit air, dapatkan estimasi waktu presisi plus countdown timer.",
+		"tags": ["React", "TypeScript", "Tailwind CSS"],
+		"icon": "droplet",
+		"featured": false,
+		"comingSoon": true,
+		"sections": [
+			{
+				"heading": "Masalah yang Dipecahkan",
+				"body": "Banyak orang meninggalkan keran menyala saat mengisi bak mandi atau tandon karena tidak tahu berapa lama prosesnya. Akibatnya air meluber, lantai licin, dan biaya air membengkak."
+			},
+			{
+				"heading": "Fitur Utama",
+				"body": "Kombinasi kalkulator volume, input debit, dan timer dalam satu antarmuka yang sederhana.",
+				"bullets": [
+					{
+						"title": "Volume Calculator",
+						"text": "Input dimensi wadah berdasarkan bentuk (balok/bak, tabung/drum, kerucut) — sistem menghitung volume secara otomatis."
+					},
+					{
+						"title": "Uji Debit Air",
+						"text": "Panduan interaktif untuk mengukur debit keran: isi botol 1 liter dan catat waktunya — aplikasi otomatis menghitung flow rate."
+					},
+					{
+						"title": "Estimasi & Timer",
+						"text": "Hasil estimasi ditampilkan dalam format Jam:Menit:Detik lengkap dengan countdown timer dan progress bar visual."
+					}
+				]
+			},
+			{
+				"heading": "Roadmap",
+				"body": "Pengembangan selanjutnya mencakup notifikasi suara saat pengisian hampir selesai, preset wadah tersimpan untuk rumah/usaha, mode pengisian parsial, dan cost estimator berdasarkan tarif air PDAM setempat."
+			}
+		]
+	},
+	{
 		"slug": "iam-api",
 		"title": "Identity & Access Management API",
 		"description": "A scalable microservice for user authentication and role-based access control with type-safe database access.",

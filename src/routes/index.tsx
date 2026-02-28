@@ -49,6 +49,81 @@ function ProjectIcon({ name }: { name: string }) {
 				<line x1="6" x2="6" y1="20" y2="14" />
 			</svg>
 		);
+	if (name === "activity")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="48"
+				height="48"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+			</svg>
+		);
+	if (name === "wallet")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="48"
+				height="48"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+				<path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+				<path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+			</svg>
+		);
+	if (name === "clock")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="48"
+				height="48"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="10" />
+				<polyline points="12 6 12 12 16 14" />
+			</svg>
+		);
+	if (name === "droplet")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="48"
+				height="48"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+			</svg>
+		);
 	// shield
 	return (
 		<svg
