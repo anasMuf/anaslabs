@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${IMAGE}:latest
+    image: ${IMAGE:-ghcr.io/anasmuf/anaslabs}:latest
     container_name: anaslabs
     restart: unless-stopped
     ports:
