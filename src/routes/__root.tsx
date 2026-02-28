@@ -26,6 +26,9 @@ export const Route = createRootRoute({
 				rel: "stylesheet",
 				href: appCss,
 			},
+			...(siteData.avatar
+				? [{ rel: "icon", href: siteData.avatar }]
+				: []),
 		],
 	}),
 	shellComponent: RootDocument,
