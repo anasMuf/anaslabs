@@ -21,6 +21,13 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
+# Copy config files needed by vite preview
+COPY --from=builder /app/vite.config.ts ./vite.config.ts
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/content-collections.ts ./content-collections.ts
+COPY --from=builder /app/.content-collections ./.content-collections
+COPY --from=builder /app/src ./src
+
 ENV NODE_ENV=production
 ENV PORT=3000
 
