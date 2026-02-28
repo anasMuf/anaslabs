@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+.env*
+.output
+.content-collections
+dist
+docs
+README.md
+*.local
