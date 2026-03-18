@@ -29,12 +29,18 @@ export const Route = createFileRoute("/blog/$slug")({
 		const meta: Array<Record<string, string>> = [
 			{ title },
 			{ name: "description", content: description },
+			{ property: "og:title", content: title },
+			{ property: "og:description", content: description },
+			{ property: "og:type", content: "article" },
+			{ property: "og:url", content: `${SITE_URL}/blog/${params.slug}` },
+			{ name: "twitter:title", content: title },
+			{ name: "twitter:description", content: description },
+			{ name: "twitter:card", content: "summary_large_image" },
 		];
 		if (image) {
-			meta.push({
-				property: "og:image",
-				content: image.startsWith("http") ? image : `${SITE_URL}${image}`,
-			});
+			const imageUrl = image.startsWith("http") ? image : `${SITE_URL}${image}`;
+			meta.push({ property: "og:image", content: imageUrl });
+			meta.push({ name: "twitter:image", content: imageUrl });
 		}
 		return {
 			links: [{ rel: "canonical", href: `${SITE_URL}/blog/${params.slug}` }],
