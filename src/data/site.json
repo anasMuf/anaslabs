@@ -45,5 +45,15 @@
 			"label": "Laravel",
 			"icon": "code-2"
 		}
+	],
+	"certifications": [
+		{
+			"title": "Fullstack Javascript Bootcamp",
+			"issuer": "Devscale Indonesia",
+			"date": "Dec 2025 - Mar 2026",
+			"predicate": "Honors",
+			"verifyUrl": "https://devscale.id/certificate-verify/?code=PGP57I",
+			"description": "Program bootcamp intensif yang mencakup fundamental JavaScript & TypeScript, React JS & Express JS, serta Framework TanStack (Router, Query, Start) dan Hono JS. Menekankan pada pemanfaatan AI yang efektif dan efisien dalam seluruh tahapan SDLC mulai dari ide hingga deployment."
+		}
 	]
 }
