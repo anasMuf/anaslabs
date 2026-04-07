@@ -108,6 +108,10 @@
 				"body": "Project ini dikerjakan sebagai syarat kelulusan (Final Project) pada program Fullstack Javascript Bootcamp di Devscale Indonesia yang dilaksanakan pada bulan Desember 2025 hingga Maret 2026."
 			},
 			{
+				"heading": "AI-Powered SDLC",
+				"body": "Seluruh proses pengembangan Sholatify — mulai dari penentuan ide, perancangan sistem, penulisan kode, hingga tahap deployment — memanfaatkan bantuan AI secara efektif dan efisien demi mendalami Software Development Life Cycle (SDLC) yang didukung penuh oleh teknologi kecerdasan buatan."
+			},
+			{
 				"heading": "Masalah yang Dipecahkan",
 				"body": "Aplikasi habit tracker biasa hanya mencatat status biner (sudah/belum) tanpa mempertimbangkan apakah sholat dilakukan di awal atau akhir waktu. Sulit mengukur tren perbaikan diri secara objektif jika metriknya tidak akurat."
 			},
