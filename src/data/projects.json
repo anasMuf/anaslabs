@@ -91,7 +91,14 @@
 		"githubUrl": "https://github.com/codelixDevscale2026/tracking-sholat",
 		"description": "Aplikasi pelacak sholat berbasis web yang mengukur kedisiplinan waktu secara objektif — dikerjakan sebagai final project pada bootcamp Devscale Indonesia (Desember 2025 - Maret 2026).",
 		"shortDescription": "Final project Devscale Indonesia: Prayer tracker yang mengukur response time dari adzan ke pelaksanaan sholat.",
-		"tags": ["React", "TypeScript", "Geolocation API"],
+		"tags": [
+			"TanStack (Router + Query)",
+			"Tailwind CSS",
+			"Hono JS",
+			"Prisma PostgreSQL",
+			"Geolocation",
+			"MyQuran API"
+		],
 		"icon": "clock",
 		"featured": false,
 		"comingSoon": false,
