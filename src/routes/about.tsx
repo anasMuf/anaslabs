@@ -62,6 +62,64 @@ function About() {
 					</div>
 				</div>
 
+				{/* Licenses & Certifications */}
+				<div className="mt-12">
+					<h2 className="text-lg font-medium text-white mb-6">
+						Licenses & certifications
+					</h2>
+					<div className="space-y-8">
+						{siteData.certifications.map((cert) => (
+							<div
+								key={cert.title}
+								className="group relative flex flex-col p-6 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-colors"
+							>
+								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+									<div>
+										<h3 className="text-white font-medium">{cert.title}</h3>
+										<p className="text-sm text-neutral-500">
+											{cert.issuer} • {cert.date}
+										</p>
+									</div>
+									{cert.predicate && (
+										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 w-fit">
+											{cert.predicate} Predicate
+										</span>
+									)}
+								</div>
+								<p className="text-sm text-neutral-400 mb-6 leading-relaxed">
+									{cert.description}
+								</p>
+								<div className="mt-auto">
+									<a
+										href={cert.verifyUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-neutral-300 transition-colors"
+									>
+										Show credential
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+											<polyline points="15 3 21 3 21 9" />
+											<line x1="10" y1="14" x2="21" y2="3" />
+										</svg>
+									</a>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
 				{/* Contact */}
 				<div className="mt-12 pt-10 border-t border-white/5">
 					<h2 className="text-lg font-medium text-white mb-2">Get in touch</h2>
