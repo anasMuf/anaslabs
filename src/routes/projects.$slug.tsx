@@ -226,6 +226,43 @@ function ProjectDetail() {
 							</span>
 						))}
 					</div>
+					<div className="flex flex-wrap gap-4 mt-8">
+						{project.liveUrl && (
+							<a
+								href={project.liveUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-sm font-medium text-neutral-950 bg-white hover:bg-neutral-200 px-6 py-2.5 rounded-full transition-colors flex items-center gap-2"
+							>
+								Live View
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									aria-hidden="true"
+								>
+									<path d="M7 7h10v10" />
+									<path d="M7 17 17 7" />
+								</svg>
+							</a>
+						)}
+						{project.githubUrl && (
+							<a
+								href={project.githubUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-sm font-medium text-white bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-2.5 rounded-full transition-colors flex items-center gap-2"
+							>
+								GitHub Repository
+							</a>
+						)}
+					</div>
 				</header>
 
 				{/* Featured image placeholder */}

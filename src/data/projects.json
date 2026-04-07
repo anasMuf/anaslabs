@@ -85,15 +85,28 @@
 		]
 	},
 	{
-		"slug": "istiqomah",
-		"title": "Istiqomah.io",
-		"description": "Aplikasi pelacak sholat berbasis web yang mengukur kedisiplinan waktu secara objektif — bukan sekadar mencatat sudah/belum, tapi mengukur seberapa cepat respons terhadap panggilan adzan.",
-		"shortDescription": "Prayer tracker yang mengukur response time dari adzan ke pelaksanaan sholat, dengan Smart Buffer untuk memperhitungkan waktu wudhu dan perjalanan.",
-		"tags": ["React", "TypeScript", "Geolocation API"],
+		"slug": "sholatify",
+		"title": "Sholatify",
+		"liveUrl": "https://sholatify.anaslabs.my.id",
+		"githubUrl": "https://github.com/codelixDevscale2026/tracking-sholat",
+		"description": "Aplikasi pelacak sholat berbasis web yang mengukur kedisiplinan waktu secara objektif — dikerjakan sebagai final project pada bootcamp Devscale Indonesia (Desember 2025 - Maret 2026).",
+		"shortDescription": "Final project Devscale Indonesia: Prayer tracker yang mengukur response time dari adzan ke pelaksanaan sholat.",
+		"tags": [
+			"TanStack (Router + Query)",
+			"Tailwind CSS",
+			"Hono JS",
+			"Prisma PostgreSQL",
+			"Geolocation",
+			"MyQuran API"
+		],
 		"icon": "clock",
 		"featured": false,
-		"comingSoon": true,
+		"comingSoon": false,
 		"sections": [
+			{
+				"heading": "Latar Belakang",
+				"body": "Project ini dikerjakan sebagai syarat kelulusan (Final Project) pada program Fullstack Javascript Bootcamp di Devscale Indonesia yang dilaksanakan pada bulan Desember 2025 hingga Maret 2026."
+			},
 			{
 				"heading": "Masalah yang Dipecahkan",
 				"body": "Aplikasi habit tracker biasa hanya mencatat status biner (sudah/belum) tanpa mempertimbangkan apakah sholat dilakukan di awal atau akhir waktu. Sulit mengukur tren perbaikan diri secara objektif jika metriknya tidak akurat."
