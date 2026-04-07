@@ -5,21 +5,45 @@
 	"tagline": "Context Engineer & Fullstack Developer.",
 	"description": "Architecting high-performance web applications and intelligent systems. Specializing in modern stacks to deliver seamless user experiences and robust backends.",
 	"role": "Context Engineer",
-	"email": "hello@anaslabs.my.id",
+	"email": "anas.muhammadakbar@gmail.com",
 	"available": false,
 	"social": {
 		"github": "https://github.com/anasMuf",
 		"twitter": "https://x.com/nosugarpeople",
-		"linkedin": "https://linkedin.com/in/anasmufti"
+		"linkedin": "https://www.linkedin.com/in/m-anas-mufti-akbar-b718a71a5/"
 	},
 	"techStack": [
-		{ "label": "ReactJS", "icon": "code" },
-		{ "label": "TanStack", "icon": "layers" },
-		{ "label": "HonoJS", "icon": "server" },
-		{ "label": "ExpressJS", "icon": "server" },
-		{ "label": "PostgreSQL", "icon": "database" },
-		{ "label": "MySQL", "icon": "database" },
-		{ "label": "Prisma", "icon": "box" },
-		{ "label": "Laravel", "icon": "code-2" }
+		{
+			"label": "ReactJS",
+			"icon": "code"
+		},
+		{
+			"label": "TanStack",
+			"icon": "layers"
+		},
+		{
+			"label": "HonoJS",
+			"icon": "server"
+		},
+		{
+			"label": "ExpressJS",
+			"icon": "server"
+		},
+		{
+			"label": "PostgreSQL",
+			"icon": "database"
+		},
+		{
+			"label": "MySQL",
+			"icon": "database"
+		},
+		{
+			"label": "Prisma",
+			"icon": "box"
+		},
+		{
+			"label": "Laravel",
+			"icon": "code-2"
+		}
 	]
 }

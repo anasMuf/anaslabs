@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import projects from "#/data/projects.json";
+import siteData from "#/data/site.json";
 import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
 export const Route = createFileRoute("/projects/")({
@@ -42,7 +43,8 @@ function ProjectsIndex() {
 				</h1>
 				<p className="text-neutral-400 max-w-xl">
 					A collection of selected works spanning fullstack web apps, APIs, and
-					distributed systems.
+					distributed systems. Or you can see more in my{" "}
+					<a href={siteData.social.github}>GitHub Repository</a>
 				</p>
 			</header>
 
