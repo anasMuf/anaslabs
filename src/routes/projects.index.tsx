@@ -7,8 +7,8 @@ export const Route = createFileRoute("/projects/")({
 	head: () => ({
 		links: [{ rel: "canonical", href: `${SITE_URL}/projects` }],
 		meta: [
-			{ title: `Projects | ${SITE_TITLE}` },
-			{ name: "description", content: "Selected works and case studies." },
+			{ title: `Projek | ${SITE_TITLE}` },
+			{ name: "description", content: "Karya terpilih dan studi kasus." },
 		],
 	}),
 	component: ProjectsIndex,
@@ -39,12 +39,12 @@ function ProjectsIndex() {
 		<main className="grow pt-32 pb-20 px-6 max-w-5xl mx-auto">
 			<header className="mb-16">
 				<h1 className="text-4xl sm:text-5xl font-semibold tracking-tighter text-white mb-4">
-					All Projects
+					Semua Projek
 				</h1>
 				<p className="text-neutral-400 max-w-xl">
-					A collection of selected works spanning fullstack web apps, APIs, and
-					distributed systems. Or you can see more in my{" "}
-					<a href={siteData.social.github}>GitHub Repository</a>
+					Kumpulan karya terpilih mulai dari aplikasi web fullstack, API, hingga
+					sistem terdistribusi. Atau Anda dapat melihat lebih banyak di{" "}
+					<a href={siteData.social.github}>Repositori GitHub</a>
 				</p>
 			</header>
 

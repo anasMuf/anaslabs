@@ -24,32 +24,35 @@ function About() {
 				)}
 
 				<h1 className="text-4xl sm:text-5xl font-semibold tracking-tighter text-white mb-6 leading-tight">
-					Hey, I'm Anas.
+					Halo, saya Anas.
 				</h1>
 
 				<div className="space-y-5 text-base text-neutral-400 leading-relaxed">
 					<p>
-						I'm a Context Engineer and Fullstack Developer based in the web. I
-						specialise in building high-performance applications that bridge
-						intelligent systems with beautiful, responsive user interfaces.
+						Saya adalah seorang Context Engineer dan Fullstack Developer yang
+						berbasis di web. Saya spesialis dalam membangun aplikasi berperforma
+						tinggi yang menjembatani sistem cerdas dengan antarmuka pengguna
+						yang indah dan responsif.
 					</p>
 					<p>
-						My toolkit spans the full stack — from React and TanStack on the
-						frontend, to HonoJS, ExpressJS, and Laravel on the backend, with
-						PostgreSQL and MySQL as my data layers. I'm particularly interested
-						in edge computing, type-safe architectures, and developer
-						experience.
+						Toolkit saya mencakup seluruh stack — mulai dari React dan TanStack
+						di bagian frontend, hingga HonoJS, ExpressJS, dan Laravel di bagian
+						backend, dengan PostgreSQL dan MySQL sebagai lapisan data. Saya
+						sangat tertarik pada edge computing, arsitektur type-safe, dan
+						developer experience.
 					</p>
 					<p>
-						When I'm not writing code I'm usually reading about distributed
-						systems, contributing to open source, or exploring how AI can
-						augment developer workflows.
+						Saat sedang tidak menulis kode, saya biasanya membaca tentang
+						distributed systems, berkontribusi pada open source, atau
+						mengeksplorasi bagaimana AI dapat meningkatkan alur kerja developer.
 					</p>
 				</div>
 
 				{/* Skills */}
 				<div className="mt-12">
-					<h2 className="text-lg font-medium text-white mb-4">Tech stack</h2>
+					<h2 className="text-lg font-medium text-white mb-4">
+						Stack teknologi
+					</h2>
 					<div className="flex flex-wrap gap-2">
 						{siteData.techStack.map((tech) => (
 							<span
@@ -65,7 +68,7 @@ function About() {
 				{/* Licenses & Certifications */}
 				<div className="mt-12">
 					<h2 className="text-lg font-medium text-white mb-6">
-						Licenses & certifications
+						Lisensi & sertifikasi
 					</h2>
 					<div className="space-y-8">
 						{siteData.certifications.map((cert) => (
@@ -82,7 +85,7 @@ function About() {
 									</div>
 									{cert.predicate && (
 										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 w-fit">
-											{cert.predicate} Predicate
+											{cert.predicate} Predikat
 										</span>
 									)}
 								</div>
@@ -96,7 +99,7 @@ function About() {
 										rel="noopener noreferrer"
 										className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-neutral-300 transition-colors"
 									>
-										Show credential
+										Tampilkan sertifikat
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											width="14"
@@ -122,10 +125,9 @@ function About() {
 
 				{/* Contact */}
 				<div className="mt-12 pt-10 border-t border-white/5">
-					<h2 className="text-lg font-medium text-white mb-2">Get in touch</h2>
+					<h2 className="text-lg font-medium text-white mb-2">Hubungi saya</h2>
 					<p className="text-sm text-neutral-500 mb-4">
-						Open to new opportunities, collaborations, and interesting
-						conversations.
+						Terbuka untuk peluang baru, kolaborasi, dan percakapan menarik.
 					</p>
 					<a
 						href={`mailto:${siteData.email}`}

@@ -185,7 +185,7 @@ function Home() {
 							<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
 							<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
 						</span>
-						Available for new opportunities
+						Tersedia untuk kesempatan baru
 					</div>
 				)}
 
@@ -218,13 +218,13 @@ function Home() {
 			>
 				<div className="flex items-center justify-between mb-12">
 					<h2 className="text-2xl font-medium tracking-tight text-white">
-						Selected Works
+						Projek Terpilih
 					</h2>
 					<Link
 						to="/projects"
 						className="text-sm font-medium text-neutral-400 hover:text-white flex items-center gap-1 transition-colors"
 					>
-						View all
+						Lihat semua
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="16"
@@ -323,7 +323,7 @@ function Home() {
 				className="py-20 px-6 max-w-5xl mx-auto border-t border-white/5"
 			>
 				<h2 className="text-2xl font-medium tracking-tight text-white mb-12">
-					Recent Writing
+					Tulisan Terbaru
 				</h2>
 				<div className="flex flex-col gap-0">
 					{recentPosts.map((post) => (
@@ -334,7 +334,7 @@ function Home() {
 							className="group flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-8 py-6 border-b border-white/5 hover:border-white/10 transition-colors"
 						>
 							<time className="text-sm text-neutral-500 w-32 shrink-0">
-								{new Date(post.pubDate).toLocaleDateString("en-US", {
+								{new Date(post.pubDate).toLocaleDateString("id-ID", {
 									month: "short",
 									day: "numeric",
 									year: "numeric",

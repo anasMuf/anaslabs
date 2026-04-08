@@ -14,13 +14,13 @@ export default function Header() {
 
 				<div className="hidden sm:flex items-center gap-8 text-sm font-medium text-neutral-400">
 					<a href="/#projects" className="hover:text-white transition-colors">
-						Projects
+						Projek
 					</a>
 					<Link to="/blog" className="hover:text-white transition-colors">
-						Articles
+						Tulisan
 					</Link>
 					<Link to="/about" className="hover:text-white transition-colors">
-						About
+						Tentang
 					</Link>
 				</div>
 
@@ -28,7 +28,7 @@ export default function Header() {
 					href={`mailto:${siteData.email}`}
 					className="text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/10 px-4 py-2 rounded-full transition-all flex items-center gap-2"
 				>
-					Get in touch
+					Hubungi saya
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="16"
