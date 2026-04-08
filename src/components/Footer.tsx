@@ -9,7 +9,7 @@ export default function Footer() {
 						{siteData.name}
 					</span>
 					<span className="text-sm text-neutral-500">
-						© {new Date().getFullYear()}. All rights reserved.
+						© {new Date().getFullYear()}. Hak cipta dilindungi undang-undang.
 					</span>
 				</div>
 

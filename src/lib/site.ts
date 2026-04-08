@@ -1,4 +1,4 @@
 export const SITE_TITLE = "anaslabs";
 export const SITE_DESCRIPTION =
-	"Architecting high-performance web applications and intelligent systems. Specializing in modern stacks to deliver seamless user experiences and robust backends.";
+	"Membangun aplikasi web berperforma tinggi dan sistem cerdas. Spesialisasi dalam stack modern untuk memberikan pengalaman pengguna yang mulus dan backend yang kokoh.";
 export const SITE_URL = "https://anaslabs.my.id";

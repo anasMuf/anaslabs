@@ -205,7 +205,7 @@ function ProjectDetail() {
 					>
 						<path d="m12 19-7-7 7-7M19 12H5" />
 					</svg>
-					Back to projects
+					Kembali ke projek
 				</Link>
 
 				{/* Header */}
@@ -259,7 +259,7 @@ function ProjectDetail() {
 								rel="noopener noreferrer"
 								className="text-sm font-medium text-white bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-2.5 rounded-full transition-colors flex items-center gap-2"
 							>
-								GitHub Repository
+								Repositori GitHub
 							</a>
 						)}
 					</div>
@@ -301,17 +301,18 @@ function ProjectDetail() {
 					<div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
 						<div className="text-center sm:text-left">
 							<h3 className="text-lg font-medium text-white">
-								Interested in a similar solution?
+								Tertarik dengan solusi serupa?
 							</h3>
 							<p className="text-sm text-neutral-500 mt-1">
-								Let's discuss how we can build something great together.
+								Mari diskusikan bagaimana kita bisa membangun sesuatu yang hebat
+								bersama.
 							</p>
 						</div>
 						<a
 							href={`mailto:${siteData.email}`}
 							className="text-sm font-medium text-neutral-950 bg-white hover:bg-neutral-200 px-6 py-3 rounded-full transition-colors flex items-center gap-2 whitespace-nowrap"
 						>
-							Contact Me
+							Hubungi Saya
 						</a>
 					</div>
 				</div>
