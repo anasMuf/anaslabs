@@ -2,6 +2,30 @@ import { createFileRoute } from "@tanstack/react-router";
 import siteData from "#/data/site.json";
 
 export const Route = createFileRoute("/about")({
+	head: () => {
+		const title = `Tentang | anaslabs`;
+		const description =
+			"Seorang Context Engineer dan Fullstack Developer yang spesialis dalam membangun aplikasi berperforma tinggi dan sistem cerdas.";
+		const url = "https://anaslabs.my.id/about";
+		const ogImage = "https://anaslabs.my.id/profile.png";
+
+		return {
+			links: [{ rel: "canonical", href: url }],
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:url", content: url },
+				{ property: "og:type", content: "website" },
+				{ property: "og:image", content: ogImage },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: ogImage },
+			],
+		};
+	},
 	component: About,
 });
 

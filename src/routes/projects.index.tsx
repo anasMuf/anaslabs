@@ -4,13 +4,30 @@ import siteData from "#/data/site.json";
 import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
 export const Route = createFileRoute("/projects/")({
-	head: () => ({
-		links: [{ rel: "canonical", href: `${SITE_URL}/projects` }],
-		meta: [
-			{ title: `Projek | ${SITE_TITLE}` },
-			{ name: "description", content: "Karya terpilih dan studi kasus." },
-		],
-	}),
+	head: () => {
+		const title = `Projek | ${SITE_TITLE}`;
+		const description =
+			"Kumpulan karya terpilih mulai dari aplikasi web fullstack, API, hingga sistem terdistribusi.";
+		const url = `${SITE_URL}/projects`;
+		const ogImage = `${SITE_URL}${siteData.avatar}`;
+
+		return {
+			links: [{ rel: "canonical", href: url }],
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:url", content: url },
+				{ property: "og:type", content: "website" },
+				{ property: "og:image", content: ogImage },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: ogImage },
+			],
+		};
+	},
 	component: ProjectsIndex,
 });
 

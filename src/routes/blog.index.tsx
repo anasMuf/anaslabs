@@ -1,18 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { allBlogs } from "content-collections";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "#/lib/site";
+import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
 const canonical = `${SITE_URL}/blog`;
 const pageTitle = `Articles | ${SITE_TITLE}`;
 
 export const Route = createFileRoute("/blog/")({
-	head: () => ({
-		links: [{ rel: "canonical", href: canonical }],
-		meta: [
-			{ title: pageTitle },
-			{ name: "description", content: SITE_DESCRIPTION },
-		],
-	}),
+	head: () => {
+		const description =
+			"Pikiran tentang pengembangan fullstack, sistem terdistribusi, dan perkakas modern.";
+		const ogImage = `${SITE_URL}/profile.png`;
+
+		return {
+			links: [{ rel: "canonical", href: canonical }],
+			meta: [
+				{ title: pageTitle },
+				{ name: "description", content: description },
+				{ property: "og:title", content: pageTitle },
+				{ property: "og:description", content: description },
+				{ property: "og:url", content: canonical },
+				{ property: "og:type", content: "website" },
+				{ property: "og:image", content: ogImage },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: pageTitle },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: ogImage },
+			],
+		};
+	},
 	component: BlogIndex,
 });
 

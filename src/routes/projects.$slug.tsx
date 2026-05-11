@@ -9,15 +9,30 @@ export const Route = createFileRoute("/projects/$slug")({
 		if (!project) throw notFound();
 		return project;
 	},
-	head: ({ loaderData }) => ({
-		links: [
-			{ rel: "canonical", href: `${SITE_URL}/projects/${loaderData?.slug}` },
-		],
-		meta: [
-			{ title: `${loaderData?.title ?? "Project"} | ${SITE_TITLE}` },
-			{ name: "description", content: loaderData?.description ?? "" },
-		],
-	}),
+	head: ({ loaderData }) => {
+		const title = `${loaderData?.title ?? "Project"} | ${SITE_TITLE}`;
+		const description =
+			loaderData?.shortDescription ?? loaderData?.description ?? "";
+		const url = `${SITE_URL}/projects/${loaderData?.slug}`;
+		const ogImage = `${SITE_URL}${siteData.avatar}`;
+
+		return {
+			links: [{ rel: "canonical", href: url }],
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:url", content: url },
+				{ property: "og:type", content: "website" },
+				{ property: "og:image", content: ogImage },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: ogImage },
+			],
+		};
+	},
 	component: ProjectDetail,
 });
 
