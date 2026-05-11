@@ -1,6 +1,7 @@
 {
 	"name": "main",
 	"private": true,
+	"packageManager": "pnpm@10.19.0",
 	"type": "module",
 	"imports": {
 		"#/*": "./src/*"
