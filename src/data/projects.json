@@ -1,5 +1,55 @@
 [
 	{
+		"slug": "maqam-detector",
+		"title": "MaqamDetector",
+		"description": "Aplikasi web yang membantu musisi, arranger, dan penggemar musik banjari untuk mengidentifikasi maqam (tangga nada modal) dari lagu-lagu Arab dan Timur Tengah secara otomatis — baik dari file audio, link YouTube, rekaman mikrofon, maupun humming melodi.",
+		"shortDescription": "Pendeteksi maqam otomatis via audio, YouTube, atau humming — solusi cerdas bagi musisi banjari dalam eksplorasi aransemen lagu Arab.",
+		"tags": [
+			"Golang",
+			"Python",
+			"FastAPI",
+			"TanStack Start",
+			"Tailwind CSS",
+			"CREPE",
+			"Claude API"
+		],
+		"icon": "music",
+		"featured": true,
+		"comingSoon": true,
+		"sections": [
+			{
+				"heading": "Masalah yang Dipecahkan",
+				"body": "Anggota komunitas musik banjari sering kesulitan mengidentifikasi maqam pada lagu referensi Arab/Timur Tengah karena keterbatasan alat bantu otomatis dan sifat tangga nada maqam yang mikrotonal (quarter-tone). Proses manual memakan waktu dan membutuhkan pakar yang tidak selalu tersedia."
+			},
+			{
+				"heading": "Fitur Utama",
+				"body": "MaqamDetector menggabungkan pitch extraction presisi dengan AI untuk memberikan jawaban instan.",
+				"bullets": [
+					{
+						"title": "Multi-Input Detection",
+						"text": "Identifikasi maqam melalui link YouTube, upload file audio (MP3/WAV), rekaman mikrofon langsung, hingga senandung (humming) melodi."
+					},
+					{
+						"title": "Quarter-Tone Aware",
+						"text": "Menggunakan engine CREPE dan template matching berbasis 24-TET untuk mendeteksi interval mikrotonal yang khas pada musik Timur Tengah."
+					},
+					{
+						"title": "AI-Powered Explanation",
+						"text": "Integrasi Claude API untuk menghasilkan penjelasan karakteristik maqam, nuansa emosi, dan tips aransemen dalam Bahasa Indonesia yang mudah dipahami."
+					},
+					{
+						"title": "Confidence & Alternatives",
+						"text": "Menampilkan skor keyakinan deteksi beserta kandidat maqam alternatif untuk akurasi yang lebih transparan bagi pengguna."
+					}
+				]
+			},
+			{
+				"heading": "Roadmap",
+				"body": "Fase pengembangan selanjutnya mencakup visualisasi grafis pitch class profile, deteksi modulasi (perubahan maqam dalam satu lagu), mode edukasi ear-training, dan fitur koreksi komunitas untuk meningkatkan akurasi engine secara kolektif."
+			}
+		]
+	},
+	{
 		"slug": "bodyfit",
 		"title": "BodyFit",
 		"description": "Web application untuk membantu pengguna menjalani program diet dan kebugaran — menghitung BMI, kebutuhan kalori (TDEE), zona heart rate, dan asupan air dalam satu platform minimalis.",
