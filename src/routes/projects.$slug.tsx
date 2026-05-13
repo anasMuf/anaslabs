@@ -280,11 +280,30 @@ function ProjectDetail() {
 					</div>
 				</header>
 
-				{/* Featured image placeholder */}
-				<div className="w-full h-64 sm:h-96 bg-neutral-900/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center mb-16 relative">
-					<ProjectIcon name={project.icon} />
-					<div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
-				</div>
+				{/* Featured media */}
+				{project.media ? (
+					<div className="w-full rounded-2xl border border-white/5 overflow-hidden mb-16 relative bg-neutral-900/40">
+						<video
+							src={project.media}
+							controls
+							autoPlay
+							muted
+							loop
+							playsInline
+							className="w-full h-auto block"
+							style={{
+								maxHeight: "540px",
+								objectFit: "contain",
+								background: "#0a0a0a",
+							}}
+						/>
+					</div>
+				) : (
+					<div className="w-full h-64 sm:h-96 bg-neutral-900/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center mb-16 relative">
+						<ProjectIcon name={project.icon} />
+						<div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+					</div>
+				)}
 
 				{/* Sections */}
 				<div className="space-y-12 max-w-3xl">
