@@ -13,9 +13,11 @@
 			"CREPE",
 			"Claude API"
 		],
+		"liveUrl": "https://maqom.anaslabs.my.id/",
+		"githubUrl": "https://github.com/anasMuf/maqom-detector",
 		"icon": "music",
 		"featured": true,
-		"comingSoon": true,
+		"comingSoon": false,
 		"sections": [
 			{
 				"heading": "Masalah yang Dipecahkan",
