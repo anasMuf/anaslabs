@@ -36,6 +36,13 @@ export const Route = createFileRoute("/projects/$slug")({
 	component: ProjectDetail,
 });
 
+function getYouTubeId(url: string) {
+	const match = url.match(
+		/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+	);
+	return match?.[1] ?? null;
+}
+
 function CheckCircle() {
 	return (
 		<svg
@@ -174,6 +181,30 @@ function ProjectIcon({ name }: { name: string }) {
 				<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
 			</svg>
 		);
+	if (name === "drum")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="80"
+				height="80"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="0.75"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<path d="m2 2 8 8" />
+				<path d="m22 2-8 8" />
+				<ellipse cx="12" cy="9" rx="10" ry="5" />
+				<path d="M7 13.4v7.9" />
+				<path d="M12 14v8" />
+				<path d="M17 13.4v7.9" />
+				<path d="M2 9v8a10 5 0 0 0 20 0V9" />
+			</svg>
+		);
 	// shield (default)
 	return (
 		<svg
@@ -197,6 +228,8 @@ function ProjectIcon({ name }: { name: string }) {
 
 function ProjectDetail() {
 	const project = Route.useLoaderData();
+	const mediaUrl = "media" in project ? project.media : undefined;
+	const youtubeId = mediaUrl ? getYouTubeId(mediaUrl) : null;
 
 	return (
 		<main className="grow pt-32 pb-20">
@@ -281,22 +314,35 @@ function ProjectDetail() {
 				</header>
 
 				{/* Featured media */}
-				{project.media ? (
+				{mediaUrl ? (
 					<div className="w-full rounded-2xl border border-white/5 overflow-hidden mb-16 relative bg-neutral-900/40">
-						<video
-							src={project.media}
-							controls
-							autoPlay
-							muted
-							loop
-							playsInline
-							className="w-full h-auto block"
-							style={{
-								maxHeight: "540px",
-								objectFit: "contain",
-								background: "#0a0a0a",
-							}}
-						/>
+						{youtubeId ? (
+							<div className="relative w-full aspect-video">
+								<iframe
+									src={`https://www.youtube.com/embed/${youtubeId}`}
+									title={`${project.title} — video preview`}
+									className="absolute inset-0 w-full h-full"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									referrerPolicy="strict-origin-when-cross-origin"
+									allowFullScreen
+								/>
+							</div>
+						) : (
+							<video
+								src={mediaUrl}
+								controls
+								autoPlay
+								muted
+								loop
+								playsInline
+								className="w-full h-auto block"
+								style={{
+									maxHeight: "540px",
+									objectFit: "contain",
+									background: "#0a0a0a",
+								}}
+							/>
+						)}
 					</div>
 				) : (
 					<div className="w-full h-64 sm:h-96 bg-neutral-900/40 rounded-2xl border border-white/5 overflow-hidden flex items-center justify-center mb-16 relative">

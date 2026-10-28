@@ -1,54 +1,81 @@
 [
 	{
-		"slug": "maqam-detector",
-		"title": "MaqamDetector",
-		"description": "Aplikasi web yang membantu musisi, arranger, dan penggemar musik banjari untuk mengidentifikasi maqam (tangga nada modal) dari lagu-lagu Arab dan Timur Tengah secara otomatis — baik dari file audio, link YouTube, rekaman mikrofon, maupun humming melodi.",
-		"shortDescription": "Pendeteksi maqam otomatis via audio, YouTube, atau humming — solusi cerdas bagi musisi banjari dalam eksplorasi aransemen lagu Arab.",
+		"slug": "bandjari",
+		"title": "BandJari",
+		"description": "Aplikasi web untuk menyusun dan memainkan pola pukulan rebana Al-Banjari — 4 rebana plus 1 bass per section — lalu memicunya secara live lewat Pattern Launcher. Bermain musik selayaknya sebuah band, cukup dengan jari.",
+		"shortDescription": "Penyusun & pemutar pola pukulan rebana Al-Banjari. Susun steps 4 rebana + bass per section, lalu mainkan live dengan transisi antarsection yang musikal.",
 		"tags": [
 			"Golang",
-			"Python",
-			"FastAPI",
-			"TanStack Start",
+			"Echo",
+			"PostgreSQL",
+			"React 19",
+			"TanStack",
 			"Tailwind CSS",
-			"CREPE",
-			"Claude API"
+			"Cloudflare R2",
+			"Nx"
 		],
-		"liveUrl": "https://maqom.anaslabs.my.id/",
-		"githubUrl": "https://github.com/anasMuf/maqom-detector",
-		"media": "https://res.cloudinary.com/dc135ht3y/video/upload/v1778659212/Screen_Recording_2026-05-13_at_14.57.02_exkmii.mov",
-		"icon": "music",
+		"liveUrl": "https://bandjari.net",
+		"githubUrl": "https://github.com/anasMuf/bandjari",
+		"media": "https://youtu.be/OKp8yikU9AA",
+		"icon": "drum",
 		"featured": true,
 		"comingSoon": false,
 		"sections": [
 			{
 				"heading": "Masalah yang Dipecahkan",
-				"body": "Anggota komunitas musik banjari sering kesulitan mengidentifikasi maqam pada lagu referensi Arab/Timur Tengah karena keterbatasan alat bantu otomatis dan sifat tangga nada maqam yang mikrotonal (quarter-tone). Proses manual memakan waktu dan membutuhkan pakar yang tidak selalu tersedia."
+				"body": "Untuk mengiringi vokal Al-Banjari dibutuhkan satu tim rebana lengkap — 4 rebana dan 1 bass — yang belum tentu tersedia setiap saat. Pola pukulan tiap grup juga jarang terdokumentasi, sehingga vokalis mandiri maupun pelatih sulit berlatih, mendigitalkan variasi pukulan, dan mengajarkannya kembali ke anggota baru."
 			},
 			{
 				"heading": "Fitur Utama",
-				"body": "MaqamDetector menggabungkan pitch extraction presisi dengan AI untuk memberikan jawaban instan.",
+				"body": "BandJari memisahkan penyusunan pola dari pemutarannya: susun sekali di Sequencer, mainkan kapan saja di Launcher.",
 				"bullets": [
 					{
-						"title": "Multi-Input Detection",
-						"text": "Identifikasi maqam melalui link YouTube, upload file audio (MP3/WAV), rekaman mikrofon langsung, hingga senandung (humming) melodi."
+						"title": "Sequencer Dinamis",
+						"text": "Tiap Section punya 5 part (rebana 1–4 dan bass) dengan grid step, multi-bunyi per kolom, langkah istirahat, mute per part, serta preview audio real-time."
 					},
 					{
-						"title": "Quarter-Tone Aware",
-						"text": "Menggunakan engine CREPE dan template matching berbasis 24-TET untuk mendeteksi interval mikrotonal yang khas pada musik Timur Tengah."
+						"title": "SoundSlot & Library Sample",
+						"text": "Jenis bunyi bebas didefinisikan per part (Tak, Dung, Duk, dan lainnya), lalu dipasangkan ke sample .wav yang bisa dipakai ulang lintas section maupun lintas lagu."
 					},
 					{
-						"title": "AI-Powered Explanation",
-						"text": "Integrasi Claude API untuk menghasilkan penjelasan karakteristik maqam, nuansa emosi, dan tips aransemen dalam Bahasa Indonesia yang mudah dipahami."
+						"title": "Pattern Launcher",
+						"text": "Grid pad satu per Section dengan quantized trigger, sehingga perpindahan antarbagian lagu menunggu akhir siklus dan tetap musikal — lengkap dengan mode antrian section."
 					},
 					{
-						"title": "Confidence & Alternatives",
-						"text": "Menampilkan skor keyakinan deteksi beserta kandidat maqam alternatif untuk akurasi yang lebih transparan bagi pengguna."
+						"title": "BPM Fleksibel",
+						"text": "BPM dasar per lagu plus override opsional per Section, dengan hard cut saat berpindah tempo dan kontrol BPM sementara saat tampil."
+					},
+					{
+						"title": "Coba Tanpa Login",
+						"text": "Guest dapat langsung memainkan Song Template System bawaan — susunan section standar Al-Banjari yang sudah terisi sample — sebelum memutuskan mendaftar."
+					}
+				]
+			},
+			{
+				"heading": "Di Balik Layar",
+				"body": "Monorepo Nx yang memisahkan API dan platform, dengan playback engine yang sepenuhnya berjalan di sisi klien.",
+				"bullets": [
+					{
+						"title": "Backend Go",
+						"text": "Echo v4 + GORM + PostgreSQL, autentikasi JWT dengan role yang dibaca ulang dari database pada setiap request, serta dokumentasi Swagger."
+					},
+					{
+						"title": "Playback Engine",
+						"text": "Web Worker sebagai clock dengan lookahead scheduling berbasis AudioContext — 1 step setara 1/16 ketukan — agar timing tidak drift meski tab tidak aktif."
+					},
+					{
+						"title": "Object Storage",
+						"text": "Sample audio disimpan di storage S3-compatible: MinIO untuk development dan Cloudflare R2 untuk produksi."
+					},
+					{
+						"title": "Kontrak API",
+						"text": "Swagger menjadi sumber kontrak, lalu Orval men-generate hook React Query sehingga tipe klien selalu sinkron dengan backend."
 					}
 				]
 			},
 			{
 				"heading": "Roadmap",
-				"body": "Fase pengembangan selanjutnya mencakup visualisasi grafis pitch class profile, deteksi modulasi (perubahan maqam dalam satu lagu), mode edukasi ear-training, dan fitur koreksi komunitas untuk meningkatkan akurasi engine secara kolektif."
+				"body": "Fase 1 (MVP) sudah menyelesaikan fitur inti: penyusunan pola, playback live, template system, dan peran admin. Fase berikutnya mencakup breakdown pola pukulan otomatis dari audio eksternal (YouTube/MP3), platform berbagi pattern antar pengguna, dukungan part vokal, hingga mode operasional untuk penggunaan langsung di acara."
 			}
 		]
 	},
