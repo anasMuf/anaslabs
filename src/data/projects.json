@@ -1,5 +1,143 @@
 [
 	{
+		"slug": "undangan-digital",
+		"title": "Undangan Digital",
+		"description": "Undangan pernikahan digital pribadi yang digarap sendiri dari desain Figma sampai deploy: satu halaman personal per tamu, photobooth kamera yang seluruh prosesnya berjalan di perangkat, dan amplop digital dengan tombol salin rekening. Semua konten bersifat statis dan bertipe — tanpa database, autentikasi, maupun layanan pihak ketiga.",
+		"shortDescription": "Undangan pernikahan digital full-custom: personalisasi tamu lewat slug, photobooth canvas di perangkat, dan amplop digital.",
+		"tags": [
+			"TanStack Start",
+			"React 19",
+			"TypeScript",
+			"Tailwind CSS",
+			"Canvas API",
+			"MediaDevices API"
+		],
+		"liveUrl": "https://anaslabs.my.id/invitation/tamu-undangan",
+		"icon": "camera",
+		"featured": false,
+		"comingSoon": false,
+		"sections": [
+			{
+				"heading": "Latar Belakang",
+				"body": "Undangan digital umumnya bergantung pada SaaS berlangganan dengan branding pihak ketiga, dan link-nya seringkali sama untuk semua orang sehingga sapaan tamu terasa generik. Halaman ini dibangun sendiri di atas stack yang sudah dipakai untuk portfolio, dengan desain yang digambar di Figma lalu diterjemahkan 1:1 ke komponen — termasuk tipografi Playfair Display + Montserrat, ornamen garis, dan palette cream-maroon."
+			},
+			{
+				"heading": "Section Undangan",
+				"body": "Tujuh section disusun mengikuti frame Figma, mobile-first dengan lebar konten 348px dan jarak antar-section yang konsisten.",
+				"bullets": [
+					{
+						"title": "Cover",
+						"text": "Ornamen cincin, label 'Undangan Pernikahan' berhuruf renggang, nama pasangan 64px Playfair dengan ampersand italic berwarna maroon, rentang tanggal yang diapit garis tipis, sapaan 'Kepada, <Nama Tamu>' dari slug URL, dan tautan gulir ke section berikutnya."
+					},
+					{
+						"title": "Mempelai",
+						"text": "Heading dan pengantar, lalu profil mempelai pria dan wanita: label kecil berhuruf renggang, nama lengkap 30px Playfair, dan keterangan orang tua. Ilustrasi buket menjadi jeda visual di antara keduanya."
+					},
+					{
+						"title": "Hari Bahagia",
+						"text": "Dua kartu acara yang bisa ditambah lewat data: Akad Nikah dengan jadwal akad & resepsi (08:00 / 14:00 WIB), serta Unduh Mantu dengan rentang waktu 08:00-20:00 WIB. Masing-masing menampilkan alamat lengkap dan tombol 'Petunjuk Arah' ke Google Maps, dengan label aksesibel yang membedakan kedua acara."
+					},
+					{
+						"title": "Kisah Kami",
+						"text": "Timeline editorial untuk tiga milestone (Awal Pertemuan, Tumbuh Bersama, Lembaran Baru). Setiap milestone mendukung tanggal opsional, judul 27px Playfair, dan cerita singkat, dihubungkan garis tipis dengan titik maroon."
+					},
+					{
+						"title": "Photobooth",
+						"text": "Section pengantar dengan ilustrasi kamera vintage dan strip foto keepsake, ditutup tombol yang membuka photobooth di tab baru. Tamu bisa memotret sendiri lalu mengunduh kartu bergaya polaroid berisi nama dan tanggal pernikahan."
+					},
+					{
+						"title": "Tanda Kasih",
+						"text": "Amplop digital untuk dua rekening (BCA dan BSI). Tiap blok menampilkan logo bank, nomor rekening dengan tombol 'Salin' (Clipboard API plus fallback untuk konteks non-HTTPS), dan nama pemilik rekening, ditutup ucapan terima kasih."
+					},
+					{
+						"title": "Penutup",
+						"text": "Pesan terima kasih, ajakan merayakan, dan tanda tangan 'Dengan Cinta' berisi nama pasangan, ditutup ornamen ampersand yang sama seperti section lain agar ritme visual tetap konsisten."
+					}
+				]
+			},
+			{
+				"heading": "Photobooth Interaktif",
+				"body": "Photobooth berjalan sebagai halaman terpisah di /invitation/<slug>/photobooth sehingga modul kamera tidak membebani halaman undangan.",
+				"bullets": [
+					{
+						"title": "Grid & Timer",
+						"text": "Tamu memilih layout 1, 2, atau 4 foto, dengan hitung mundur nonaktif / 3 detik / 5 detik. Bingkai dashed selalu menunjukkan area yang benar-benar masuk ke kartu, jadi hasil tidak mengejutkan."
+					},
+					{
+						"title": "Kamera & Fallback",
+						"text": "getUserMedia diminta dengan facingMode exact lalu ideal agar kamera belakang benar-benar dipakai di ponsel; ada tombol ganti kamera, mirror otomatis untuk kamera depan, dan pesan jelas ketika izin ditolak. Jika kamera tidak tersedia, foto bisa diunggah dari galeri dan tetap mengisi slot berikutnya."
+					},
+					{
+						"title": "Komposisi Canvas",
+						"text": "Kartu hasil digambar di <canvas> memakai geometri Figma (348 unit, scale 3 sehingga keluar 1044px), dengan foto di-cover-crop, teks 'The Wedding of / Anas & Mila / 19 - 20 Desember 2026', lalu diunduh sebagai JPEG. Preview dan file unduhan berasal dari kode gambar yang sama."
+					},
+					{
+						"title": "Privasi",
+						"text": "Tidak ada foto yang diunggah atau disimpan di server — seluruh proses kamera dan komposisi terjadi di perangkat tamu."
+					}
+				]
+			},
+			{
+				"heading": "Personalisasi Tamu",
+				"body": "Setiap tamu menerima link dengan slug unik, misalnya /invitation/anas-dan-keluarga.",
+				"bullets": [
+					{
+						"title": "Lookup di Server",
+						"text": "Pemetaan slug ke nama tamu dijalankan sebagai server function, sehingga daftar tamu tidak ikut terkirim ke browser — yang dikirim hanya nama untuk slug yang diminta."
+					},
+					{
+						"title": "Slug Tak Dikenal = 404",
+						"text": "Slug yang tidak terdaftar menampilkan halaman 404 bergaya sama, bukan nama generik, sehingga link yang salah tidak tampil sebagai undangan yang valid."
+					},
+					{
+						"title": "Tidak Terindeks",
+						"text": "Seluruh route undangan memasang robots noindex, nofollow; undangan hanya bisa diakses lewat link yang dibagikan."
+					}
+				]
+			},
+			{
+				"heading": "Arsitektur & Keputusan Teknis",
+				"body": "Satu codebase, satu pipeline deploy, tanpa menambah infrastruktur.",
+				"bullets": [
+					{
+						"title": "Layout Terisolasi",
+						"text": "Header, footer, dan background portfolio dipindahkan ke pathless layout /_site, sehingga halaman undangan tampil full-bleed tanpa chrome portfolio dan route lama tetap berjalan."
+					},
+					{
+						"title": "Konten Statis Bertipe",
+						"text": "Semua teks, acara, rekening, dan geometri kartu photobooth berada di src/data/invitation.ts — tidak ada copy yang ditulis di komponen. Tanpa database karena tidak ada RSVP maupun buku ucapan."
+					},
+					{
+						"title": "Dokumen Desain",
+						"text": "Keputusan arsitektur, requirement immutable, anti-pattern, dan hasil audit dicatat di docs/invitation/prd.md sebagai acuan perubahan berikutnya."
+					}
+				]
+			},
+			{
+				"heading": "Aksesibilitas & Performa",
+				"body": "Diukur dan diverifikasi, bukan diasumsikan.",
+				"bullets": [
+					{
+						"title": "Kontras & Target Sentuh",
+						"text": "Kontras teks 4.85-10.97:1 (AA/AAA); label 'Scroll Down' yang semula 4.31:1 diperbaiki. Semua kontrol punya target sentuh minimal 44px dengan focus ring yang terlihat, plus label aksesibel untuk tautan peta, CTA tab baru, dan canvas hasil photobooth."
+					},
+					{
+						"title": "Aset & Font",
+						"text": "Ilustrasi dikonversi ke WebP sesuai ukuran tampil: 696 KB menjadi 164 KB. Font Playfair Display, Montserrat, dan Inter di-self-host lewat fontsource, sehingga tidak ada permintaan ke Google Fonts."
+					},
+					{
+						"title": "Animasi yang Menghormati Pengguna",
+						"text": "Reveal per section memakai IntersectionObserver dan otomatis dimatikan pada prefers-reduced-motion; konten tetap terbaca tanpa JavaScript."
+					}
+				]
+			},
+			{
+				"heading": "Status & Roadmap",
+				"body": "Tujuh section, photobooth, personalisasi tamu, OG image, dan musik latar sudah berjalan; cerita milestone, file musik, dan daftar tamu asli masih menunggu konten. Roadmap berikutnya: galeri foto pre-wedding dan dukungan beberapa template undangan bila dibutuhkan."
+			}
+		]
+	},
+	{
 		"slug": "bandjari",
 		"title": "BandJari",
 		"description": "Aplikasi web untuk menyusun dan memainkan pola pukulan rebana Al-Banjari — 4 rebana plus 1 bass per section — lalu memicunya secara live lewat Pattern Launcher. Bermain musik selayaknya sebuah band, cukup dengan jari.",
