@@ -1,5 +1,6 @@
 import { invitation } from "#/data/invitation";
 import { formatCoverDateRange } from "#/lib/invitation";
+import InkLine from "./ui/InkLine";
 
 interface CoverProps {
 	guestName: string;
@@ -39,12 +40,12 @@ export default function Cover({ guestName }: CoverProps) {
 				</h1>
 
 				<div className="mt-[clamp(36px,7vh,60px)] flex w-full max-w-[312px] items-center gap-2">
-					{/* Figma `357:2215` / `357:2218`: 2px lines in full ink, not a hairline. */}
-					<span className="h-0.5 flex-1 bg-inv-ink" />
+					{/* Figma `357:2215` / `357:2218`: 2px drawn rules in full ink. */}
+					<InkLine className="h-0.5 flex-1 text-inv-ink" />
 					<span className="shrink-0 font-body text-[12px] tracking-[0.06em]">
 						{dateLabel}
 					</span>
-					<span className="h-0.5 flex-1 bg-inv-ink" />
+					<InkLine variant="b" className="h-0.5 flex-1 text-inv-ink" />
 				</div>
 
 				<div className="mt-[clamp(36px,7vh,60px)]">

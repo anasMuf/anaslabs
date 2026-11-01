@@ -171,6 +171,8 @@ src/components/invitation/
   Cover.tsx                     # cover + nama tamu
   sections/{Couple,Event,Story,Photobooth,Gift,Closing}.tsx
   ui/{Ornament,SectionHeading,CopyButton,MapsButton,BankLogo,Reveal}.tsx
+  ui/InkLine.tsx                # garis tangan dari Figma (357:2215/357:2218), reusable
+  ui/ink-line-paths.ts          # data path kedua varian garis (generated dari ekspor Figma)
   audio/{InvitationAudio,MusicButton}.tsx
   photobooth/{PhotoboothPage,PhotoboothCapture,PhotoboothPreview}.tsx
 
@@ -197,6 +199,21 @@ Pemetaan dari `docs/references/`:
 | `icon/BankLogo.tsx` | Port dengan import per-logo (`idn-finlogos`) hanya untuk bank yang dipakai. |
 
 ### 5.4 Tema & font
+
+`ui/InkLine.tsx` adalah satu-satunya sumber garis dekoratif: dua stroke tangan dari
+Figma (`357:2215`/`357:2218`) disimpan sebagai path `fill` di dalam viewBox 76×2,
+di-*stretch* dengan `preserveAspectRatio="none"` sehingga bisa dipakai di lebar
+apa pun tanpa kehilangan ujung stroke yang tidak rata. Warna mengikuti
+`currentColor`, jadi pemakaian di tempat lain cukup:
+
+```tsx
+<InkLine className="h-0.5 flex-1 text-inv-ink" />            // cover, garis tanggal
+<InkLine variant="b" className="h-0.5 w-[52px] text-inv-rule" /> // mis. Ornament
+```
+
+Koordinat path dibulatkan ke 0.1 unit (0.1px pada tinggi 2px) untuk memangkas
+payload: total ±15,7 KB mentah / ±4,3 KB gzip untuk dua varian, dengan selisih
+render rata-rata 0,9/255 per channel dibanding path asli (tidak terlihat mata).
 
 - Tambah `@theme` di `src/styles.css`: `--font-display: "Playfair Display"`,
   `--font-body: "Montserrat"`, plus variabel warna undangan
