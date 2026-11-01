@@ -227,7 +227,7 @@ export default function PhotoboothCapture({
 				<main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
 					<div
 						ref={cameraBoxRef}
-						className="relative mx-auto h-full w-full max-w-[520px] overflow-hidden bg-neutral-800 landscape:max-w-none"
+						className="relative mx-auto h-full w-full overflow-hidden bg-neutral-800"
 						style={{ containerType: "size" }}
 					>
 						<video
@@ -312,11 +312,11 @@ export default function PhotoboothCapture({
 			</div>
 
 			<footer
-				className="w-full shrink-0 px-2 pt-1 landscape:h-full landscape:w-[240px] landscape:border-l landscape:border-white/10 landscape:px-3 landscape:py-4"
+				className="w-full shrink-0 px-4 pt-1 [@media(orientation:portrait)_and_(min-width:420px)]:px-5 [@media(orientation:portrait)_and_(min-width:640px)]:px-8 [@media(orientation:portrait)_and_(min-width:900px)]:px-12 landscape:h-full landscape:w-[240px] landscape:border-l landscape:border-white/10 landscape:px-3 landscape:py-4"
 				style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
 			>
-				<div className="mx-auto flex w-full max-w-[420px] flex-col items-center gap-6 landscape:h-full landscape:max-w-none landscape:justify-center landscape:gap-5">
-					<div className="flex items-center justify-center gap-4 landscape:flex-col landscape:gap-4">
+				<div className="mx-auto flex w-full flex-col items-center gap-6 landscape:h-full landscape:justify-center landscape:gap-5">
+					<div className="flex w-full items-center justify-center gap-2 min-[360px]:gap-4 landscape:flex-col landscape:gap-4">
 						<Selector
 							label="grid"
 							active={grid}
@@ -333,7 +333,7 @@ export default function PhotoboothCapture({
 						/>
 					</div>
 
-					<div className="flex w-full items-center justify-center gap-[clamp(24px,calc(50vw-108px),56px)] landscape:gap-2">
+					<div className="flex w-full items-center justify-between gap-[clamp(24px,calc(50vw-108px),56px)] landscape:justify-center landscape:gap-2">
 						<button
 							type="button"
 							onClick={handleSwitchCamera}
@@ -402,16 +402,16 @@ function Selector<T extends number>({
 	onSelect,
 }: SelectorProps<T>) {
 	return (
-		<div className="flex flex-col items-center gap-1">
+		<div className="flex w-full max-w-[190px] flex-1 flex-col items-center gap-1">
 			<span className="text-[12px] lowercase text-white/80">{label}</span>
-			<div className="flex rounded-full border border-white/50 p-[3px]">
+			<div className="flex w-full rounded-full border border-white/50 p-[3px]">
 				{options.map((option) => (
 					<button
 						key={option}
 						type="button"
 						onClick={() => onSelect(option)}
 						aria-pressed={active === option}
-						className={`relative min-w-[42px] rounded-full px-2.5 py-2 text-[13px] transition-colors after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] ${
+						className={`relative min-w-[42px] flex-1 rounded-full px-2 py-2 text-[13px] transition-colors after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] ${
 							active === option
 								? "bg-white text-neutral-900"
 								: "text-white/80 hover:text-white"

@@ -223,9 +223,16 @@ Tiga layar, semua ada di Figma:
 **Layar capture** — latar `#000000`, teks/ikon putih:
 - Tombol kembali bulat **44 px** di kiri atas (header ±64 px tinggi).
 - Area kamera **full-bleed**: mengisi lebar penuh dan sisa tinggi viewport setelah
-  header + kontrol (dibatasi `max-w-[520px]` hanya pada orientasi portrait). Rasio
-  kotak dibaca langsung dari DOM saat tombol shutter ditekan, jadi hasil foto selalu
-  sama dengan area yang dibingkai, tanpa bergantung pada timing render React.
+  header + kontrol — tanpa batas lebar pada portrait (dulu dibatasi 520px, yang
+  menyisakan margin pada 520–807px). Rasio kotak dibaca langsung dari DOM saat
+  tombol shutter ditekan, jadi hasil foto selalu sama dengan area yang dibingkai,
+  tanpa bergantung pada timing render React.
+- Footer portrait memakai lebar penuh (dulu isinya dibatasi 420px): baris tombol
+  memakai `justify-between` sehingga ganti kamera dan galeri berada dekat tepi layar,
+  shutter tetap di tengah. Padding horizontal bertahap: 16px (<420), 20px (≥420),
+  32px (≥640), 48px (≥900) — panel landscape tetap 12px. Pilihan grid/timer
+  memakai lebar fluid (maks 190px per grup) supaya padding bisa lega tanpa overflow
+  di 320px; target sentuh opsi tetap ≥44px.
 - Bingkai dashed mengikuti rasio slot dan selalu di-*fit* oleh CSS memakai container
   query units (`100cqh`) — tidak pernah keluar dari kotak kamera meski orientasi
   berubah. Thumbnail slot berada di sisi kanan dalam area kamera.
@@ -270,8 +277,10 @@ warna `#000000`, relatif terhadap `text.y`:
   sehingga kartu tidak pernah tersimpan dengan font fallback.
 - Kartu dirender sebagai `<canvas>` (WYSIWYG dengan file unduhan), bukan DOM →
   tidak ada perbedaan hasil layar vs hasil simpan.
-- Aksi hasil: `Simpan`, `Ulangi`, `Kembali` — tidak digambar di Figma; disepakati
-  ditempatkan di bawah kartu dengan gaya cream/maroon (lihat Open Questions).
+- Aksi hasil: **hanya** `Ulangi` dan `Simpan`. Layar hasil tidak menampilkan header
+  atau tombol kembali, dan tombol back perangkat/browser diblokir selama fase ini
+  (history entry dipasang ulang pada `popstate`) sehingga hasil tidak terbuang
+  tanpa sengaja.
 - Fallback: kamera ditolak/tidak ada → unggah dari galeri; status jelas
   (`requesting`, `denied`, `unavailable`).
 - Route terpisah, dibuka di tab baru dari section Photobooth (`target="_blank"`).
