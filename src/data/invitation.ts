@@ -65,7 +65,7 @@ export const invitation = {
 		bride: {
 			label: "Mempelai Wanita",
 			fullName: "Fajriyatul Kamila",
-			parents: "Putri dari Bapak Salimin & Ibu Siti Masrukhah",
+			parents: "Putri dari Bapak Salamin & Ibu Siti Masrukhah",
 		},
 	},
 	cover: {
