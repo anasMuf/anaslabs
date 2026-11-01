@@ -245,10 +245,25 @@ function ProjectIcon({ name }: { name: string }) {
 	);
 }
 
+const IMAGE_MEDIA = /\.(png|jpe?g|webp|avif|gif)$/i;
+
 function ProjectDetail() {
 	const project = Route.useLoaderData();
 	const mediaUrl = "media" in project ? project.media : undefined;
 	const youtubeId = mediaUrl ? getYouTubeId(mediaUrl) : null;
+	const isImage = Boolean(mediaUrl && IMAGE_MEDIA.test(mediaUrl));
+	const mediaAlt =
+		"mediaAlt" in project && typeof project.mediaAlt === "string"
+			? project.mediaAlt
+			: `${project.title} — preview`;
+	const mediaWidth =
+		"mediaWidth" in project && typeof project.mediaWidth === "number"
+			? project.mediaWidth
+			: undefined;
+	const mediaHeight =
+		"mediaHeight" in project && typeof project.mediaHeight === "number"
+			? project.mediaHeight
+			: undefined;
 
 	return (
 		<main className="grow pt-32 pb-20">
@@ -346,6 +361,21 @@ function ProjectDetail() {
 									allowFullScreen
 								/>
 							</div>
+						) : isImage ? (
+							<img
+								src={mediaUrl}
+								alt={mediaAlt}
+								width={mediaWidth}
+								height={mediaHeight}
+								loading="lazy"
+								decoding="async"
+								className="w-full h-auto block"
+								style={{
+									maxHeight: "540px",
+									objectFit: "contain",
+									background: "#0a0a0a",
+								}}
+							/>
 						) : (
 							<video
 								src={mediaUrl}

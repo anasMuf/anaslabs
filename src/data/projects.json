@@ -13,6 +13,10 @@
 			"MediaDevices API"
 		],
 		"liveUrl": "https://anaslabs.my.id/invitation/tamu-undangan",
+		"media": "/images/projects/undangan-digital.webp",
+		"mediaAlt": "Tiga layar undangan digital: cover Anas & Mila, halaman mempelai, dan section photobooth",
+		"mediaWidth": 1920,
+		"mediaHeight": 1080,
 		"icon": "camera",
 		"featured": false,
 		"comingSoon": false,
