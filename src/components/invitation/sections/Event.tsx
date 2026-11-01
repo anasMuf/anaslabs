@@ -14,7 +14,7 @@ export default function Event() {
 	return (
 		<section
 			id="acara"
-			className="snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-16 font-body text-inv-ink"
+			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-10 font-body text-inv-ink"
 		>
 			<Reveal className="mx-auto flex w-full max-w-[348px] flex-col items-center">
 				<SectionHeading
@@ -22,10 +22,10 @@ export default function Event() {
 					intro={sections.event.intro}
 				/>
 
-				<div className="mt-6 flex w-full flex-col">
+				<div className="mt-3 flex w-full flex-col">
 					{events.map((event, index) => (
 						<Fragment key={event.id}>
-							{index > 0 && <Ornament className="my-6" />}
+							{index > 0 && <Ornament className="my-2" />}
 							<EventCard event={event} />
 						</Fragment>
 					))}
@@ -37,7 +37,7 @@ export default function Event() {
 
 function EventCard({ event }: { event: InvitationEvent }) {
 	return (
-		<article className="flex flex-col items-center gap-4 py-6 text-center">
+		<article className="flex flex-col items-center gap-3 py-3 text-center">
 			<p className="text-[10px] font-body uppercase leading-[1.4] tracking-[0.18em] text-inv-accent">
 				{event.label}
 			</p>

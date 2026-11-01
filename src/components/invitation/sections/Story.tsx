@@ -11,7 +11,7 @@ export default function Story() {
 	return (
 		<section
 			id="kisah"
-			className="snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-16 font-body text-inv-ink"
+			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-16 font-body text-inv-ink"
 		>
 			<Reveal className="mx-auto flex w-full max-w-[348px] flex-col items-center">
 				<SectionHeading

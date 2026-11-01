@@ -157,6 +157,16 @@ pre code {
 	}
 }
 
+/* Full-page snap stays on for every viewport. Sections are exact 100dvh and
+   their content is scaled down by Reveal when it would not fit, so there is no
+   inner scroll and no snap toggle. Short screens also get tighter padding. */
+@media (max-height: 839px) {
+	.invite-section {
+		padding-top: 2rem;
+		padding-bottom: 2rem;
+	}
+}
+
 /* Section scrollers use this to keep the snap experience clean. */
 .no-scrollbar::-webkit-scrollbar {
 	display: none;

@@ -298,9 +298,9 @@ warna `#000000`, relatif terhadap `text.y`:
   dengan `sips`; regenerate bila nama/tanggal berubah), `robots: noindex, nofollow`.
 - Gambar: format modern (WebP/AVIF), `width`/`height` eksplisit, `loading="lazy"`
   untuk section di bawah cover, `fetchPriority="high"` untuk ornamen cover.
-- Animasi reveal per section memakai `IntersectionObserver` sekali jalan; konten tetap
-  tampil tanpa JS (fallback `<noscript>` + `@media (scripting: none)`) dan saat
-  `prefers-reduced-motion: reduce`.
+- Animasi reveal per section memutar ulang setiap kali section masuk viewport lagi;
+  konten tetap tampil tanpa JS (fallback `<noscript>` + `@media (scripting: none)`)
+  dan saat `prefers-reduced-motion: reduce`.
 - Photobooth route memuat modul kamera secara lazy agar bundle undangan utama ringan.
 
 ### 5.9 Perilaku scroll & zoom
@@ -313,21 +313,43 @@ warna `#000000`, relatif terhadap `text.y`:
   dan viewport meta-nya normal). Ini trade-off aksesibilitas (WCAG 1.4.4) yang
   diminta secara eksplisit, dan Safari tetap bisa mengabaikan `user-scalable=no`
   sehingga listener gesture menjadi lapisan kedua.
-- **Scroll per section** (mengikuti pola referensi `docs/references/midnight-glamour`):
-  halaman undangan memakai scroll container sendiri (`h-dvh overflow-y-auto
-  overscroll-contain no-scrollbar`) dengan `snap-y snap-mandatory` dan
-  `scroll-snap-align: start` pada setiap section. Setiap section **tepat 100dvh**
-  (`h-dvh`), jadi satu gesture = satu section.
-- Section yang kontennya lebih tinggi dari layar (acara, photobooth, hadiah) memakai
-  **scroll internal** (`overflow-y-auto no-scrollbar`) seperti section Couple di
-  referensi, sehingga bagian bawah tetap terjangkau tanpa merusak snap. Konten
-  di tengah dengan `my-auto` (bukan `justify-center`) agar bagian atas tidak
-  terpotong saat konten melebihi tinggi layar. Diukur pada 390×844: semua section
-  844px; `acara` 951px dengan inner scroll 107px; outer scroll 900 → snap 844.
-- **Reveal berulang**: `IntersectionObserver` tidak lagi di-disconnect; section
+- **Scroll per section** (pola referensi `docs/references/midnight-glamour`): scroll
+  container sendiri (`h-dvh overflow-y-auto overscroll-contain no-scrollbar`) dengan
+  `snap-y snap-mandatory`; setiap section `scroll-snap-align: start` dan tepat
+  `100dvh`. Mandatory (bukan `proximity`) supaya tiap gestur selalu mendarat pas di
+  batas section.
+- **Tanpa nested scroll:** gestur tidak boleh pernah masuk ke scroll container
+  section, karena itu yang dulu membuat scroll terasa berhenti lalu lanjut (jeda).
+  Selain merapatkan spacing (Hari Bahagia, Photobooth, Tanda Kasih), konten tiap
+  section di-*fit* otomatis oleh `ui/Reveal.tsx`: bila konten lebih tinggi dari
+  ruang section, `zoom` diturunkan bertahap (mulai 1, minimum 0.8) sampai muat.
+  Pengukuran memakai `getBoundingClientRect()` (bukan `offsetHeight`, yang tidak
+  akurat saat `zoom` aktif), `ResizeObserver` pada section **dan** node konten
+  (menangkap font yang baru selesai dimuat), plus reset ke 100% saat `resize`
+  (rotasi/papan ketik) agar pembesaran layar tetap memakai ukuran penuh.
+  `overflow-y-auto` tetap dipasang sebagai jaring pengaman bila konten masih meluber
+  di bawah zoom 0.8 (layar sangat pendek).
+- **Snap selalu aktif di semua ukuran:** tidak ada lagi media query yang mematikan
+  snap (perilaku lama: snap mati di tinggi < 840px / lebar < 360px — itu yang membuat
+  snap “hilang” di ponsel). Untuk layar pendek hanya padding section yang dirapatkan
+  (`@media (max-height: 839px)` → `padding-block: 2rem`).
+- **Reveal berulang**: `IntersectionObserver` tidak di-disconnect; section
   disembunyikan lagi setelah keluar viewport sehingga animasi diputar ulang setiap
-  kali section itu dilewati. Terverifikasi lewat CDP: hidden → visible → hidden →
-  visible pada scroll bolak-balik.
+  kali section itu dilewati.
+
+**Verifikasi CDP (Chrome headless, viewport asli):**
+
+| Viewport | `scrollSnapType` | Section meluber | `zoom` terpakai |
+|---|---|---|---|
+| 390×844, 360×844, 768×1024 | `y mandatory` | 0 | 1 (tidak perlu) |
+| 390×800 | `y mandatory` | 0 | 1 (tidak perlu) |
+| 390×740 | `y mandatory` | 0 | 0.967–0.981 |
+| 320×640 | `y mandatory` | 0 | 0.80–0.901 |
+
+Scroll 100px dari posisi 0 mendarat tepat di `scrollTop = 0`; scroll ke
+`2 × tinggi + 300` mendarat tepat di `2 × tinggi` — snap bekerja, bukan sekadar
+`proximity`. Setelah viewport diperbesar ke 390×844, `zoom` kembali ke 1 di semua
+section.
 
 ### 5.8 Deploy
 

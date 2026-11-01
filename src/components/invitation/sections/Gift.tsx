@@ -14,7 +14,7 @@ export default function Gift() {
 	return (
 		<section
 			id="hadiah"
-			className="snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-16 font-body text-inv-ink"
+			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-10 font-body text-inv-ink"
 		>
 			<Reveal className="mx-auto flex w-full max-w-[348px] flex-col items-center">
 				<SectionHeading
@@ -22,16 +22,16 @@ export default function Gift() {
 					intro={sections.gift.intro}
 				/>
 
-				<div className="mt-10 flex w-full flex-col items-center">
+				<div className="mt-8 flex w-full flex-col items-center">
 					{gifts.map((account, index) => (
 						<Fragment key={account.accountNumber}>
-							{index > 0 ? <Ornament className="my-8" /> : null}
+							{index > 0 ? <Ornament className="my-6" /> : null}
 							<GiftAccount {...account} />
 						</Fragment>
 					))}
 				</div>
 
-				<div className="mt-10 flex flex-col items-center gap-6">
+				<div className="mt-8 flex flex-col items-center gap-5">
 					<p className="text-center text-[13px] font-body leading-[1.7] text-inv-muted">
 						{giftThanks}
 					</p>

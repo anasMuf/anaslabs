@@ -23,7 +23,7 @@ function InvitationPage() {
 	useLockZoom();
 
 	return (
-		<main className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth motion-reduce:scroll-auto no-scrollbar touch-pan-y bg-inv-bg font-body text-inv-ink">
+		<main className="invite-scroller h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth motion-reduce:scroll-auto no-scrollbar touch-pan-y bg-inv-bg font-body text-inv-ink">
 			<Cover guestName={guest.name} />
 			<Couple />
 			<Event />
