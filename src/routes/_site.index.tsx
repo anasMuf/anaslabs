@@ -3,7 +3,7 @@ import { allBlogs } from "content-collections";
 import projects from "#/data/projects.json";
 import siteData from "#/data/site.json";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/_site/")({ component: Home });
 
 // Minimal inline SVG icons keyed by name
 function ProjectIcon({ name }: { name: string }) {
@@ -146,6 +146,25 @@ function ProjectIcon({ name }: { name: string }) {
 				<path d="M12 14v8" />
 				<path d="M17 13.4v7.9" />
 				<path d="M2 9v8a10 5 0 0 0 20 0V9" />
+			</svg>
+		);
+	if (name === "camera")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="48"
+				height="48"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="1"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+				<circle cx="12" cy="13" r="3" />
 			</svg>
 		);
 	// shield

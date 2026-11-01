@@ -7,7 +7,7 @@ import { MdxMetrics } from "#/components/MdxMetrics";
 import siteData from "#/data/site.json";
 import { SITE_URL } from "#/lib/site";
 
-export const Route = createFileRoute("/blog/$slug")({
+export const Route = createFileRoute("/_site/blog/$slug")({
 	loader: ({ params }) => {
 		const post = Array.from(
 			new Map(

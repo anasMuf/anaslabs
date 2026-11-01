@@ -3,7 +3,7 @@ import projects from "#/data/projects.json";
 import siteData from "#/data/site.json";
 import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
-export const Route = createFileRoute("/projects/$slug")({
+export const Route = createFileRoute("/_site/projects/$slug")({
 	loader: ({ params }) => {
 		const project = projects.find((p) => p.slug === params.slug);
 		if (!project) throw notFound();
@@ -205,6 +205,25 @@ function ProjectIcon({ name }: { name: string }) {
 				<path d="M2 9v8a10 5 0 0 0 20 0V9" />
 			</svg>
 		);
+	if (name === "camera")
+		return (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="80"
+				height="80"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				strokeWidth="0.75"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+				className={cls}
+				aria-hidden="true"
+			>
+				<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+				<circle cx="12" cy="13" r="3" />
+			</svg>
+		);
 	// shield (default)
 	return (
 		<svg
@@ -226,10 +245,25 @@ function ProjectIcon({ name }: { name: string }) {
 	);
 }
 
+const IMAGE_MEDIA = /\.(png|jpe?g|webp|avif|gif)$/i;
+
 function ProjectDetail() {
 	const project = Route.useLoaderData();
 	const mediaUrl = "media" in project ? project.media : undefined;
 	const youtubeId = mediaUrl ? getYouTubeId(mediaUrl) : null;
+	const isImage = Boolean(mediaUrl && IMAGE_MEDIA.test(mediaUrl));
+	const mediaAlt =
+		"mediaAlt" in project && typeof project.mediaAlt === "string"
+			? project.mediaAlt
+			: `${project.title} — preview`;
+	const mediaWidth =
+		"mediaWidth" in project && typeof project.mediaWidth === "number"
+			? project.mediaWidth
+			: undefined;
+	const mediaHeight =
+		"mediaHeight" in project && typeof project.mediaHeight === "number"
+			? project.mediaHeight
+			: undefined;
 
 	return (
 		<main className="grow pt-32 pb-20">
@@ -327,6 +361,21 @@ function ProjectDetail() {
 									allowFullScreen
 								/>
 							</div>
+						) : isImage ? (
+							<img
+								src={mediaUrl}
+								alt={mediaAlt}
+								width={mediaWidth}
+								height={mediaHeight}
+								loading="lazy"
+								decoding="async"
+								className="w-full h-auto block"
+								style={{
+									maxHeight: "540px",
+									objectFit: "contain",
+									background: "#0a0a0a",
+								}}
+							/>
 						) : (
 							<video
 								src={mediaUrl}

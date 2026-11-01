@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/inter':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/montserrat':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/playfair-display':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.2.1(vite@7.3.1(@types/node@22.19.13)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -32,6 +41,9 @@ importers:
       html-react-parser:
         specifier: ^5.2.17
         version: 5.2.17(@types/react@19.2.14)(react@19.2.4)
+      idn-finlogos:
+        specifier: ^2.5.0
+        version: 2.5.0(react@19.2.4)
       lucide-react:
         specifier: ^0.545.0
         version: 0.545.0(react@19.2.4)
@@ -666,6 +678,15 @@ packages:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2':
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
+
+  '@fontsource-variable/inter@5.3.0':
+    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
+
+  '@fontsource-variable/montserrat@5.3.0':
+    resolution: {integrity: sha512-7PaZoxaxrWLAyrhO46v65An9LhUhfkTExWLhfbywYZCnZEgg/W1rEHnlNmZKjNZ3nJTVYyicqxlJt10z/26yTA==}
+
+  '@fontsource-variable/playfair-display@5.3.0':
+    resolution: {integrity: sha512-IHdzTvE8eGIXHteZql7KXoqdc3Gfm+Zs1u4XlSC3MeplkwviT3sx/P6gI0tLwg/xIYLF4ZJYveZ5V+bl9cnDwA==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1736,6 +1757,28 @@ packages:
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+
+  idn-finlogos@2.5.0:
+    resolution: {integrity: sha512-i9yjfwFRHDi0dr58C7cFqztWOORILHG7+RAPmkwY+2yGLEjMQFXtDUmHpVz/F1Ycvtp0welCRMNOPew56hOWAA==}
+    engines: {node: '>=18'}
+    hasBin: true
+    peerDependencies:
+      react: '>=16.8'
+      react-native: '>=0.60'
+      react-native-svg: '>=12.0'
+      svelte: '>=4.0'
+      vue: '>=3.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-native:
+        optional: true
+      react-native-svg:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
 
   inline-style-parser@0.2.7:
     resolution: {integrity: sha512-Nb2ctOyNR8DqQoR0OwRG95uNWIC0C1lCgf5Naz5H6Ji72KZ8OcFZLz2P5sNgwlyoJ8Yif11oMuYs5pBQa86csA==}
@@ -3124,6 +3167,12 @@ snapshots:
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2': {}
 
+  '@fontsource-variable/inter@5.3.0': {}
+
+  '@fontsource-variable/montserrat@5.3.0': {}
+
+  '@fontsource-variable/playfair-display@5.3.0': {}
+
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -4413,6 +4462,10 @@ snapshots:
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
+
+  idn-finlogos@2.5.0(react@19.2.4):
+    optionalDependencies:
+      react: 19.2.4
 
   inline-style-parser@0.2.7: {}
 

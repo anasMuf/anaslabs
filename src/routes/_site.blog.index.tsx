@@ -5,7 +5,7 @@ import { SITE_TITLE, SITE_URL } from "#/lib/site";
 const canonical = `${SITE_URL}/blog`;
 const pageTitle = `Articles | ${SITE_TITLE}`;
 
-export const Route = createFileRoute("/blog/")({
+export const Route = createFileRoute("/_site/blog/")({
 	head: () => {
 		const description =
 			"Pikiran tentang pengembangan fullstack, sistem terdistribusi, dan perkakas modern.";

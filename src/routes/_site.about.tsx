@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import siteData from "#/data/site.json";
 
-export const Route = createFileRoute("/about")({
+export const Route = createFileRoute("/_site/about")({
 	head: () => {
 		const title = `Tentang | anaslabs`;
 		const description =

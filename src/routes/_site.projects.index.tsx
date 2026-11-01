@@ -3,7 +3,7 @@ import projects from "#/data/projects.json";
 import siteData from "#/data/site.json";
 import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
-export const Route = createFileRoute("/projects/")({
+export const Route = createFileRoute("/_site/projects/")({
 	head: () => {
 		const title = `Projek | ${SITE_TITLE}`;
 		const description =

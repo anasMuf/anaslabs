@@ -1,5 +1,11 @@
 {
 	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": [
+		"docs/references",
+		"dist",
+		"node_modules",
+		".content-collections"
+	],
 	"compilerOptions": {
 		"target": "ES2022",
 		"jsx": "react-jsx",
