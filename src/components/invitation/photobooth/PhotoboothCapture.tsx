@@ -68,6 +68,19 @@ export default function PhotoboothCapture({
 	/** Bumped whenever the grid changes so in-flight gallery decodes are dropped. */
 	const selectionEpoch = useRef(0);
 
+	// The camera box fills the remaining viewport, so its aspect changes with the
+	// device. Captures read it from the DOM at shutter time so the crop always
+	// matches the box, independent of React render timing.
+	const cameraBoxRef = useRef<HTMLDivElement | null>(null);
+
+	const measureBoxAspect = useCallback(() => {
+		const node = cameraBoxRef.current;
+		if (!node || node.clientWidth <= 0 || node.clientHeight <= 0) {
+			return CAMERA_BOX_ASPECT;
+		}
+		return node.clientWidth / node.clientHeight;
+	}, []);
+
 	shotsRef.current = shots;
 
 	const clearCountdown = useCallback(() => {
@@ -101,12 +114,19 @@ export default function PhotoboothCapture({
 			slot,
 			layout.scale,
 			mirrored,
-			CAMERA_BOX_ASPECT,
+			measureBoxAspect(),
 		);
 		const next = [...shotsRef.current, photo];
 		setShots(next);
 		finishIfComplete(next);
-	}, [finishIfComplete, layout.scale, mirrored, slots, videoRef]);
+	}, [
+		finishIfComplete,
+		layout.scale,
+		measureBoxAspect,
+		mirrored,
+		slots,
+		videoRef,
+	]);
 
 	const startShot = useCallback(() => {
 		if (countdown !== null) {
@@ -177,123 +197,126 @@ export default function PhotoboothCapture({
 	);
 
 	const cameraBlocked = status === "denied" || status === "unavailable";
-	const cameraWidth = `min(100%, 430px, calc((100dvh - 320px) * ${CAMERA_BOX_ASPECT}))`;
 
-	// The guide must fit inside the camera box in both axes: limit by width when
-	// the slot is wider than the box, otherwise by height.
-	const guideStyle =
-		aspect >= CAMERA_BOX_ASPECT
-			? { width: "100%", aspectRatio: `${aspect}` }
-			: { height: "100%", aspectRatio: `${aspect}` };
+	// The guide must fit inside the camera box in both axes. Container query units
+	// let CSS do the fitting itself: `100cqh` is the camera box height, so the
+	// guide width never exceeds the box regardless of orientation.
+	const guideStyle = {
+		width: `min(100%, calc(100cqh * ${aspect}))`,
+		aspectRatio: `${aspect}`,
+	};
 
 	return (
-		<div className="flex min-h-dvh flex-col bg-black text-white">
+		<div className="flex h-dvh flex-col overflow-hidden bg-black text-white landscape:flex-row">
 			<h1 className="sr-only">
 				Photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
 				{invitation.cover.secondNames}
 			</h1>
-			<header className="px-4 pt-4">
-				<button
-					type="button"
-					onClick={onBack}
-					aria-label="Kembali"
-					className="flex h-14 w-14 items-center justify-center rounded-full border border-white/40 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-				>
-					<ArrowLeft size={24} />
-				</button>
-			</header>
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col">
+				<header className="flex shrink-0 items-center px-4 pt-3 pb-2">
+					<button
+						type="button"
+						onClick={onBack}
+						aria-label="Kembali"
+						className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+					>
+						<ArrowLeft size={20} />
+					</button>
+				</header>
 
-			<main className="flex flex-1 items-center justify-center overflow-hidden">
-				<div
-					className="relative shrink-0 overflow-hidden bg-neutral-800"
-					style={{ width: cameraWidth, aspectRatio: "390 / 554" }}
-				>
-					<video
-						ref={videoRef}
-						muted
-						playsInline
-						autoPlay
-						className="absolute inset-0 h-full w-full object-cover"
-						style={{ transform: mirrored ? "scaleX(-1)" : undefined }}
-					/>
-
-					{/* Capture boundary: every grid shows the exact region that ends
-					    up in the card, so the preview never lies. */}
+				<main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
 					<div
-						className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-						style={{
-							...DASHED_BORDER,
-							...guideStyle,
-							boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.55)",
-						}}
-					/>
+						ref={cameraBoxRef}
+						className="relative mx-auto h-full w-full max-w-[520px] overflow-hidden bg-neutral-800 landscape:max-w-none"
+						style={{ containerType: "size" }}
+					>
+						<video
+							ref={videoRef}
+							muted
+							playsInline
+							autoPlay
+							className="absolute inset-0 h-full w-full object-cover"
+							style={{ transform: mirrored ? "scaleX(-1)" : undefined }}
+						/>
 
-					{grid > 1 ? (
-						<div className="pointer-events-none absolute top-1/2 right-3 flex w-[52px] -translate-y-1/2 flex-col items-end gap-2">
-							{slots.map((slot, index) => (
-								<div
-									key={`slot-${slot.x}-${slot.y}`}
-									className="relative w-[52px] overflow-hidden rounded-[4px] border border-white/50 bg-black/50"
-									style={{ aspectRatio: `${slot.w / slot.h}` }}
-								>
-									{thumbnails[index] ? (
-										<img
-											src={thumbnails[index]}
-											alt=""
-											className="h-full w-full object-cover"
-										/>
-									) : (
-										<span className="absolute inset-0 flex items-center justify-center text-[10px] text-white/60">
-											{index + 1}
-										</span>
-									)}
-								</div>
-							))}
-						</div>
-					) : null}
-
-					{status === "requesting" ? (
-						<output className="absolute inset-0 flex items-center justify-center bg-black/60 px-6 text-center text-[11px]">
-							Menyiapkan kamera…
-						</output>
-					) : null}
-
-					<p className="sr-only" aria-live="polite">
-						{shots.length} dari {grid} foto
-					</p>
-
-					{countdown !== null ? (
+						{/* Capture boundary: every grid shows the exact region that ends
+					    up in the card, so the preview never lies. */}
 						<div
-							aria-hidden="true"
-							className="absolute inset-0 flex items-center justify-center bg-black/40"
-						>
-							<span className="text-6xl tracking-[0.08em]">{countdown}</span>
-						</div>
-					) : null}
+							className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+							style={{
+								...DASHED_BORDER,
+								...guideStyle,
+								boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.55)",
+							}}
+						/>
 
-					{cameraBlocked ? (
-						<output className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/85 px-6 text-center">
-							<Camera size={22} />
-							<p className="text-[12px] leading-relaxed">
-								{status === "denied"
-									? "Izin kamera ditolak."
-									: "Kamera tidak tersedia."}
-							</p>
-							<p className="text-[10px] leading-relaxed opacity-70">
-								Izinkan akses kamera di pengaturan browser, atau unggah foto
-								dari galeri.
-							</p>
-						</output>
-					) : null}
-				</div>
-			</main>
+						{grid > 1 ? (
+							<div className="pointer-events-none absolute top-1/2 right-3 flex w-[52px] -translate-y-1/2 flex-col items-end gap-2">
+								{slots.map((slot, index) => (
+									<div
+										key={`slot-${slot.x}-${slot.y}`}
+										className="relative w-[52px] overflow-hidden rounded-[4px] border border-white/50 bg-black/50"
+										style={{ aspectRatio: `${slot.w / slot.h}` }}
+									>
+										{thumbnails[index] ? (
+											<img
+												src={thumbnails[index]}
+												alt=""
+												className="h-full w-full object-cover"
+											/>
+										) : (
+											<span className="absolute inset-0 flex items-center justify-center text-[10px] text-white/60">
+												{index + 1}
+											</span>
+										)}
+									</div>
+								))}
+							</div>
+						) : null}
+
+						{status === "requesting" ? (
+							<output className="absolute inset-0 flex items-center justify-center bg-black/60 px-6 text-center text-[11px]">
+								Menyiapkan kamera…
+							</output>
+						) : null}
+
+						<p className="sr-only" aria-live="polite">
+							{shots.length} dari {grid} foto
+						</p>
+
+						{countdown !== null ? (
+							<div
+								aria-hidden="true"
+								className="absolute inset-0 flex items-center justify-center bg-black/40"
+							>
+								<span className="text-6xl tracking-[0.08em]">{countdown}</span>
+							</div>
+						) : null}
+
+						{cameraBlocked ? (
+							<output className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/85 px-6 text-center">
+								<Camera size={22} />
+								<p className="text-[12px] leading-relaxed">
+									{status === "denied"
+										? "Izin kamera ditolak."
+										: "Kamera tidak tersedia."}
+								</p>
+								<p className="text-[10px] leading-relaxed opacity-70">
+									Izinkan akses kamera di pengaturan browser, atau unggah foto
+									dari galeri.
+								</p>
+							</output>
+						) : null}
+					</div>
+				</main>
+			</div>
 
 			<footer
-				className="w-full px-2 pt-2"
+				className="w-full shrink-0 px-2 pt-1 landscape:h-full landscape:w-[240px] landscape:border-l landscape:border-white/10 landscape:px-3 landscape:py-4"
 				style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
 			>
-				<div className="mx-auto flex w-full max-w-[420px] flex-col items-center gap-8">
-					<div className="flex items-center justify-center gap-6">
+				<div className="mx-auto flex w-full max-w-[420px] flex-col items-center gap-6 landscape:h-full landscape:max-w-none landscape:justify-center landscape:gap-5">
+					<div className="flex items-center justify-center gap-4 landscape:flex-col landscape:gap-4">
 						<Selector
 							label="grid"
 							active={grid}
@@ -310,7 +333,7 @@ export default function PhotoboothCapture({
 						/>
 					</div>
 
-					<div className="flex w-full items-center justify-center gap-[clamp(24px,calc(50vw-108px),56px)]">
+					<div className="flex w-full items-center justify-center gap-[clamp(24px,calc(50vw-108px),56px)] landscape:gap-2">
 						<button
 							type="button"
 							onClick={handleSwitchCamera}
@@ -388,7 +411,7 @@ function Selector<T extends number>({
 						type="button"
 						onClick={() => onSelect(option)}
 						aria-pressed={active === option}
-						className={`relative min-w-[46px] rounded-full px-3 py-2 text-[13px] transition-colors after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] ${
+						className={`relative min-w-[42px] rounded-full px-2.5 py-2 text-[13px] transition-colors after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] ${
 							active === option
 								? "bg-white text-neutral-900"
 								: "text-white/80 hover:text-white"

@@ -99,14 +99,14 @@ export default function PhotoboothPreview({
 				Hasil photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
 				{invitation.cover.secondNames}
 			</h1>
-			<header className="px-4 pt-4">
+			<header className="px-4 pt-3 pb-2">
 				<button
 					type="button"
 					onClick={onBack}
 					aria-label="Kembali ke undangan"
-					className="flex h-14 w-14 items-center justify-center rounded-full border border-inv-ink/25 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+					className="flex h-11 w-11 items-center justify-center rounded-full border border-inv-ink/25 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 				>
-					<ArrowLeft size={24} />
+					<ArrowLeft size={20} />
 				</button>
 			</header>
 

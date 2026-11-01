@@ -221,10 +221,17 @@ Tiga layar, semua ada di Figma:
 | Hasil grid 4 | `384:2787` | kartu 348×535 |
 
 **Layar capture** — latar `#000000`, teks/ikon putih:
-- Tombol kembali bulat 56 px di kiri atas (`384:2550`).
-- Area kamera dari ±56 px sampai ±610 px; bingkai dashed hanya untuk grid 2 & 4
-  (grid 1 tanpa bingkai, sesuai desain). Thumbnail slot berada di sisi kanan
-  dalam area kamera.
+- Tombol kembali bulat **44 px** di kiri atas (header ±64 px tinggi).
+- Area kamera **full-bleed**: mengisi lebar penuh dan sisa tinggi viewport setelah
+  header + kontrol (dibatasi `max-w-[520px]` hanya pada orientasi portrait). Rasio
+  kotak dibaca langsung dari DOM saat tombol shutter ditekan, jadi hasil foto selalu
+  sama dengan area yang dibingkai, tanpa bergantung pada timing render React.
+- Bingkai dashed mengikuti rasio slot dan selalu di-*fit* oleh CSS memakai container
+  query units (`100cqh`) — tidak pernah keluar dari kotak kamera meski orientasi
+  berubah. Thumbnail slot berada di sisi kanan dalam area kamera.
+- **Landscape / layar melebar:** kontrol (grid, timer, ganti kamera, shutter, galeri)
+  pindah ke panel kanan selebar 240px, sehingga kamera memakai seluruh lebar yang
+  tersisa (604px pada 844×390, 1200px pada 1440×900) alih-alih hanya 133px tinggi.
 - Bar kontrol di bawah: selector pill `grid` (1/2/4) dan `timer` (off/3s/5s),
   lalu tiga tombol bulat — ganti kamera (56 px), shutter (84 px), unggah dari
   galeri (56 px).
