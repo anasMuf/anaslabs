@@ -257,6 +257,10 @@ warna `#000000`, relatif terhadap `text.y`:
 
 - `scale: 3` → hasil unduh 1044×1590 / 1626 / 1605 px; teks canvas menunggu
   `document.fonts.ready` sebelum digambar.
+- Font canvas: hasil `document.fonts.load(font, text)` diverifikasi (`[]` berarti
+  `@font-face` belum terdaftar) dengan retry ±1,2 s, canvas digambar ulang pada
+  `document.fonts.ready`/`loadingdone`, dan digambar sekali lagi tepat sebelum unduh —
+  sehingga kartu tidak pernah tersimpan dengan font fallback.
 - Kartu dirender sebagai `<canvas>` (WYSIWYG dengan file unduhan), bukan DOM →
   tidak ada perbedaan hasil layar vs hasil simpan.
 - Aksi hasil: `Simpan`, `Ulangi`, `Kembali` — tidak digambar di Figma; disepakati

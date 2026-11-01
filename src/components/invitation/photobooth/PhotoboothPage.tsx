@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { invitation } from "#/data/invitation";
 import { buildPhotoboothSettings } from "#/lib/photobooth/draw-composition";
+import { loadPhotoboothFonts } from "#/lib/photobooth/fonts";
 import type { PhotoboothGrid, PhotoboothTimer } from "#/lib/photobooth/types";
 import PhotoboothCapture from "./PhotoboothCapture";
 import PhotoboothPreview from "./PhotoboothPreview";
@@ -54,27 +55,12 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 	useEffect(() => {
 		let cancelled = false;
 
-		const families = new Set(
-			Object.values(settings.layouts).flatMap((layout) =>
-				layout.text.map(
-					(line) => `${line.fontWeight ?? 400} 16px "${line.fontFamily}"`,
-				),
-			),
-		);
-
-		const load = async () => {
-			try {
-				await Promise.all(
-					Array.from(families).map((font) => document.fonts.load(font)),
-				);
-				await document.fonts.ready;
-			} catch {
-				// Drawing with fallback fonts is still better than blocking the page.
-			}
+		void loadPhotoboothFonts(settings).then(() => {
+			// `false` means the faces never registered (e.g. CSS failed to load).
+			// The card still draws and the preview repaints on `loadingdone`, so the
+			// guest is never blocked — only the save button waits for this attempt.
 			if (!cancelled) setFontsReady(true);
-		};
-
-		void load();
+		});
 
 		return () => {
 			cancelled = true;

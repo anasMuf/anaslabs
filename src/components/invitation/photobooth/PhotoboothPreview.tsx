@@ -1,5 +1,5 @@
 import { ArrowLeft, Download, RotateCcw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invitation } from "#/data/invitation";
 import {
 	downloadCanvas,
@@ -34,12 +34,31 @@ export default function PhotoboothPreview({
 	const revertTimer = useRef<number | null>(null);
 	const layout = settings.layouts[grid];
 
+	const redraw = useCallback(() => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+		drawComposition(canvas, layout, photos);
+	}, [layout, photos]);
+
 	useEffect(() => {
-		// Redraw once the card fonts are usable so the canvas never bakes in a
-		// fallback serif; the second run happens when photos change.
-		if (!canvasRef.current || !fontsReady) return;
-		drawComposition(canvasRef.current, layout, photos);
-	}, [fontsReady, layout, photos]);
+		redraw();
+	}, [redraw]);
+
+	// The card can be painted before the webfonts finish loading. Repaint when
+	// the font set settles or any face finishes, so the canvas (and the JPEG
+	// saved from it) never keeps a fallback serif. This is the safety net for
+	// the font-loading race: without it the first paint is final.
+	useEffect(() => {
+		if (typeof document === "undefined" || !document.fonts) return;
+
+		const handleLoadingDone = () => redraw();
+		document.fonts.addEventListener("loadingdone", handleLoadingDone);
+		void document.fonts.ready.then(handleLoadingDone);
+
+		return () => {
+			document.fonts.removeEventListener("loadingdone", handleLoadingDone);
+		};
+	}, [redraw]);
 
 	useEffect(() => {
 		return () => {
@@ -54,6 +73,13 @@ export default function PhotoboothPreview({
 
 		setSaving(true);
 		try {
+			// Paint once more after any in-flight font load settles; the save happens
+			// immediately after, so the JPEG cannot capture a fallback face.
+			if (typeof document !== "undefined" && document.fonts) {
+				await document.fonts.ready;
+			}
+			redraw();
+
 			await downloadCanvas(
 				canvas,
 				`${settings.downloadName ?? "photobooth"}.jpg`,
