@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, RotateCcw } from "lucide-react";
+import { Download, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invitation } from "#/data/invitation";
 import {
@@ -17,7 +17,6 @@ interface PhotoboothPreviewProps {
 	/** Canvas text needs the template fonts; redraw once they are usable. */
 	fontsReady: boolean;
 	onRetake: () => void;
-	onBack: () => void;
 }
 
 export default function PhotoboothPreview({
@@ -26,7 +25,6 @@ export default function PhotoboothPreview({
 	photos,
 	fontsReady,
 	onRetake,
-	onBack,
 }: PhotoboothPreviewProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -99,23 +97,13 @@ export default function PhotoboothPreview({
 				Hasil photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
 				{invitation.cover.secondNames}
 			</h1>
-			<header className="px-4 pt-3 pb-2">
-				<button
-					type="button"
-					onClick={onBack}
-					aria-label="Kembali ke undangan"
-					className="flex h-11 w-11 items-center justify-center rounded-full border border-inv-ink/25 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-				>
-					<ArrowLeft size={20} />
-				</button>
-			</header>
 
-			<main className="flex flex-1 items-center justify-center px-6 py-4">
+			<main className="flex flex-1 items-center justify-center px-6 py-8">
 				<canvas
 					ref={canvasRef}
 					role="img"
 					aria-label={`Kartu photobooth berisi ${photos.length} foto`}
-					className="max-h-[56vh] w-auto max-w-full rounded-[10px] shadow-[0_10px_30px_rgba(52,54,46,0.12)]"
+					className="max-h-[64vh] w-auto max-w-full rounded-[10px] shadow-[0_10px_30px_rgba(52,54,46,0.12)]"
 					style={{ backgroundColor: layout.canvas.background }}
 				/>
 			</main>
@@ -138,14 +126,6 @@ export default function PhotoboothPreview({
 				>
 					<RotateCcw size={16} />
 					Ulangi
-				</button>
-
-				<button
-					type="button"
-					onClick={onBack}
-					className="inline-flex min-h-[44px] items-center justify-center py-2 text-[12px] text-inv-muted transition-colors hover:text-inv-ink"
-				>
-					Kembali ke undangan
 				</button>
 			</footer>
 		</div>

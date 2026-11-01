@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invitation } from "#/data/invitation";
 import { buildPhotoboothSettings } from "#/lib/photobooth/draw-composition";
 import { loadPhotoboothFonts } from "#/lib/photobooth/fonts";
@@ -30,6 +30,11 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 	const [phase, setPhase] = useState<"capture" | "preview">("capture");
 	const [fontsReady, setFontsReady] = useState(false);
 
+	// Read inside the popstate listener without re-registering it on every phase
+	// change (which would push another history entry each time).
+	const phaseRef = useRef(phase);
+	phaseRef.current = phase;
+
 	// Closing the tab keeps the invitation tab in front; when the tab was not
 	// opened by a script `window.close()` is a no-op, so fall back to navigating
 	// back to the invitation in the same tab.
@@ -42,10 +47,20 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 		}, 200);
 	}, [navigate, slug]);
 
-	// Make the device back button behave like the on-screen back button.
+	// Make the device back button behave like the on-screen back button. On the
+	// result screen there is no back action, so the entry is re-armed: the guest
+	// stays on the card and can only retake or save.
 	useEffect(() => {
 		window.history.pushState({ photobooth: true }, "");
-		const handlePopState = () => exit();
+
+		const handlePopState = () => {
+			if (phaseRef.current === "preview") {
+				window.history.pushState({ photobooth: true }, "");
+				return;
+			}
+			exit();
+		};
+
 		window.addEventListener("popstate", handlePopState);
 		return () => window.removeEventListener("popstate", handlePopState);
 	}, [exit]);
@@ -85,7 +100,6 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 				photos={photos}
 				fontsReady={fontsReady}
 				onRetake={handleRetake}
-				onBack={exit}
 			/>
 		);
 	}
