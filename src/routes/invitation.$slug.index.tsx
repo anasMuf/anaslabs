@@ -8,6 +8,7 @@ import Gift from "#/components/invitation/sections/Gift";
 import Photobooth from "#/components/invitation/sections/Photobooth";
 import Story from "#/components/invitation/sections/Story";
 import { invitation } from "#/data/invitation";
+import { useLockZoom } from "#/lib/use-lock-zoom";
 
 const parentRoute = getRouteApi("/invitation/$slug");
 
@@ -19,8 +20,10 @@ function InvitationPage() {
 	const guest = parentRoute.useLoaderData();
 	const { slug } = parentRoute.useParams();
 
+	useLockZoom();
+
 	return (
-		<main className="bg-inv-bg font-body text-inv-ink">
+		<main className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth motion-reduce:scroll-auto no-scrollbar touch-pan-y bg-inv-bg font-body text-inv-ink">
 			<Cover guestName={guest.name} />
 			<Couple />
 			<Event />

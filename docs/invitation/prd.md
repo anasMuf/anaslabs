@@ -303,13 +303,39 @@ warna `#000000`, relatif terhadap `text.y`:
   `prefers-reduced-motion: reduce`.
 - Photobooth route memuat modul kamera secara lazy agar bundle undangan utama ringan.
 
+### 5.9 Perilaku scroll & zoom
+
+- **Zoom dikunci** hanya pada route undangan + photobooth: viewport meta
+  `maximum-scale=1, user-scalable=no` (satu-satunya meta viewport karena head rute
+  menimpa root), `touch-action: pan-y` pada wrapper, serta listener
+  `gesturestart/gesturechange/gestureend`, `touchmove` multi-touch, dan
+  ctrl/⌘+wheel. Portfolio tetap bisa di-zoom (terverifikasi: wheel tidak diblokir
+  dan viewport meta-nya normal). Ini trade-off aksesibilitas (WCAG 1.4.4) yang
+  diminta secara eksplisit, dan Safari tetap bisa mengabaikan `user-scalable=no`
+  sehingga listener gesture menjadi lapisan kedua.
+- **Scroll per section** (mengikuti pola referensi `docs/references/midnight-glamour`):
+  halaman undangan memakai scroll container sendiri (`h-dvh overflow-y-auto
+  overscroll-contain no-scrollbar`) dengan `snap-y snap-mandatory` dan
+  `scroll-snap-align: start` pada setiap section. Setiap section **tepat 100dvh**
+  (`h-dvh`), jadi satu gesture = satu section.
+- Section yang kontennya lebih tinggi dari layar (acara, photobooth, hadiah) memakai
+  **scroll internal** (`overflow-y-auto no-scrollbar`) seperti section Couple di
+  referensi, sehingga bagian bawah tetap terjangkau tanpa merusak snap. Konten
+  di tengah dengan `my-auto` (bukan `justify-center`) agar bagian atas tidak
+  terpotong saat konten melebihi tinggi layar. Diukur pada 390×844: semua section
+  844px; `acara` 951px dengan inner scroll 107px; outer scroll 900 → snap 844.
+- **Reveal berulang**: `IntersectionObserver` tidak lagi di-disconnect; section
+  disembunyikan lagi setelah keluar viewport sehingga animasi diputar ulang setiap
+  kali section itu dilewati. Terverifikasi lewat CDP: hidden → visible → hidden →
+  visible pada scroll bolak-balik.
+
 ### 5.8 Deploy
 
 Tidak ada perubahan pipeline. `Dockerfile` sudah menyalin `src`, `dist`, dan
 `.content-collections`; aset baru di `public/` ikut ke `dist/client`. Deploy tetap
 `docker compose up` melalui `.github/workflows/deploy.yml`.
 
-### 5.9 Audit aksesibilitas & performa
+### 5.10 Audit aksesibilitas & performa
 
 **Kontras (WCAG AA, teks normal ≥ 4.5:1)**
 

@@ -28,6 +28,11 @@ export const Route = createFileRoute("/invitation/$slug")({
 
 		return {
 			meta: [
+				{
+					name: "viewport",
+					content:
+						"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+				},
 				{ title },
 				{ name: "description", content: description },
 				{ name: "robots", content: "noindex, nofollow" },

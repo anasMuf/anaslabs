@@ -4,6 +4,7 @@ import { invitation } from "#/data/invitation";
 import { buildPhotoboothSettings } from "#/lib/photobooth/draw-composition";
 import { loadPhotoboothFonts } from "#/lib/photobooth/fonts";
 import type { PhotoboothGrid, PhotoboothTimer } from "#/lib/photobooth/types";
+import { useLockZoom } from "#/lib/use-lock-zoom";
 import PhotoboothCapture from "./PhotoboothCapture";
 import PhotoboothPreview from "./PhotoboothPreview";
 
@@ -23,6 +24,8 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 		[],
 	);
 	const navigate = useNavigate();
+
+	useLockZoom();
 
 	const [grid, setGrid] = useState<PhotoboothGrid>(1);
 	const [timer, setTimer] = useState<PhotoboothTimer>(0);

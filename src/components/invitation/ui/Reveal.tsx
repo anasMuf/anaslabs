@@ -6,7 +6,8 @@ interface RevealProps {
 }
 
 /**
- * Fades a section in when it scrolls into view.
+ * Fades a section in when it enters the viewport and hides it again on exit, so
+ * the animation replays every time the section is scrolled back into view.
  *
  * Content is visible without JS and for visitors who ask for reduced motion:
  * both cases are handled in CSS (`src/styles.css`), so the server-rendered
@@ -30,12 +31,12 @@ export default function Reveal({ children, className = "" }: RevealProps) {
 
 		const observer = new IntersectionObserver(
 			(entries) => {
-				if (entries.some((entry) => entry.isIntersecting)) {
-					setShown(true);
-					observer.disconnect();
-				}
+				const entry = entries[0];
+				if (entry) setShown(entry.isIntersecting);
 			},
-			{ threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
+			// Hide only once the section is mostly out of view, otherwise the
+			// content would fade mid-scroll.
+			{ threshold: 0.2, rootMargin: "0px 0px -10% 0px" },
 		);
 
 		observer.observe(node);
@@ -43,7 +44,11 @@ export default function Reveal({ children, className = "" }: RevealProps) {
 	}, []);
 
 	return (
-		<div ref={ref} data-hidden={!shown} className={`reveal ${className}`}>
+		<div
+			ref={ref}
+			data-hidden={!shown}
+			className={`reveal my-auto ${className}`}
+		>
 			{children}
 		</div>
 	);

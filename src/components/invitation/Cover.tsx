@@ -14,7 +14,7 @@ export default function Cover({ guestName }: CoverProps) {
 	const dateLabel = formatCoverDateRange(cover.startDate, cover.endDate);
 
 	return (
-		<section className="flex min-h-dvh flex-col items-center bg-inv-bg px-8 pt-[max(48px,14vh)] pb-10 text-center text-inv-ink">
+		<section className="snap-start flex h-dvh flex-col items-center overflow-y-auto no-scrollbar bg-inv-bg px-8 pt-[max(48px,14vh)] pb-10 text-center text-inv-ink">
 			<img
 				src={cover.ornament}
 				alt=""

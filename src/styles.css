@@ -156,3 +156,13 @@ pre code {
 		transform: none;
 	}
 }
+
+/* Section scrollers use this to keep the snap experience clean. */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}

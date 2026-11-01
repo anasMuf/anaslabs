@@ -92,7 +92,7 @@ export default function PhotoboothPreview({
 	};
 
 	return (
-		<div className="flex min-h-dvh flex-col bg-inv-bg text-inv-ink">
+		<div className="flex min-h-dvh touch-pan-y flex-col bg-inv-bg text-inv-ink">
 			<h1 className="sr-only">
 				Hasil photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
 				{invitation.cover.secondNames}

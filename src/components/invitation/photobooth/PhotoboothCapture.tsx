@@ -207,7 +207,7 @@ export default function PhotoboothCapture({
 	};
 
 	return (
-		<div className="flex h-dvh flex-col overflow-hidden bg-black text-white landscape:flex-row">
+		<div className="flex h-dvh touch-pan-y flex-col overflow-hidden bg-black text-white landscape:flex-row">
 			<h1 className="sr-only">
 				Photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
 				{invitation.cover.secondNames}
