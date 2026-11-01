@@ -409,7 +409,7 @@ diganti ke `--color-inv-muted` (4.85:1).
 
 | # | Section | Isi |
 |---|---|---|
-| 1 | Cover (`384:431`) | Ornamen simpul, eyebrow "UNDANGAN PERNIKAHAN", nama "Anas & Mila" (64 px Playfair, `&` maroon), tanggal "19 - 20 Desember 2026" dengan garis tipis kiri-kanan, "Kepada, <Nama>" dari slug, "Scroll Down", CTA buka undangan |
+| 1 | Cover (`384:431`) | Ornamen simpul, eyebrow "UNDANGAN PERNIKAHAN", nama "Anas & Mila" (64 px Playfair, `&` maroon), tanggal "19 - 20 Desember 2026" dengan garis kiri-kanan (`357:2215`/`357:2218`: stroke 2 px `#34362E`, ±75 px, konten di tengah layar), "Kepada, <Nama>" dari slug, "Scroll Down" di dasar layar, CTA buka undangan |
 | 2 | Couple (`384:430`) | Heading + intro, profil mempelai pria (label, nama, orang tua), gambar buket, profil mempelai wanita, ornamen penutup |
 | 3 | Event (`384:429`) | Heading + intro, kartu Akad Nikah (tanggal, jadwal 08:00 & 14:00, lokasi, tombol Petunjuk Arah), ornamen, kartu Unduh Mantu (tanggal, waktu, lokasi, Petunjuk Arah) |
 | 4 | Story (`384:2942`) | Heading + intro, timeline 3 milestone (tanggal, judul, cerita) dengan garis & marker vertikal, ornamen |

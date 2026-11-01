@@ -38,12 +38,13 @@ export default function Cover({ guestName }: CoverProps) {
 					</span>
 				</h1>
 
-				<div className="mt-[clamp(36px,7vh,60px)] flex w-full max-w-[312px] items-center gap-4">
-					<span className="h-px flex-1 bg-inv-ink/70" />
+				<div className="mt-[clamp(36px,7vh,60px)] flex w-full max-w-[312px] items-center gap-2">
+					{/* Figma `357:2215` / `357:2218`: 2px lines in full ink, not a hairline. */}
+					<span className="h-0.5 flex-1 bg-inv-ink" />
 					<span className="shrink-0 font-body text-[12px] tracking-[0.06em]">
 						{dateLabel}
 					</span>
-					<span className="h-px flex-1 bg-inv-ink/70" />
+					<span className="h-0.5 flex-1 bg-inv-ink" />
 				</div>
 
 				<div className="mt-[clamp(36px,7vh,60px)]">
