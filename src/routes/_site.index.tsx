@@ -3,7 +3,7 @@ import { allBlogs } from "content-collections";
 import projects from "#/data/projects.json";
 import siteData from "#/data/site.json";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/_site/")({ component: Home });
 
 // Minimal inline SVG icons keyed by name
 function ProjectIcon({ name }: { name: string }) {

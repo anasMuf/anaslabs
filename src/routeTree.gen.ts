@@ -10,115 +10,153 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
-import { Route as BlogIndexRouteImport } from './routes/blog.index'
-import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as SiteRouteImport } from './routes/_site'
+import { Route as SiteIndexRouteImport } from './routes/_site.index'
+import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
+import { Route as SiteAboutRouteImport } from './routes/_site.about'
+import { Route as InvitationSlugIndexRouteImport } from './routes/invitation.$slug.index'
+import { Route as SiteProjectsIndexRouteImport } from './routes/_site.projects.index'
+import { Route as SiteBlogIndexRouteImport } from './routes/_site.blog.index'
+import { Route as InvitationSlugPhotoboothRouteImport } from './routes/invitation.$slug.photobooth'
+import { Route as SiteProjectsSlugRouteImport } from './routes/_site.projects.$slug'
+import { Route as SiteBlogSlugRouteImport } from './routes/_site.blog.$slug'
 
 const RssDotxmlRoute = RssDotxmlRouteImport.update({
   id: '/rss.xml',
   path: '/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const SiteRoute = SiteRouteImport.update({
+  id: '/_site',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SiteRoute,
+} as any)
+const InvitationSlugRoute = InvitationSlugRouteImport.update({
+  id: '/invitation/$slug',
+  path: '/invitation/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+const SiteAboutRoute = SiteAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const InvitationSlugIndexRoute = InvitationSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InvitationSlugRoute,
+} as any)
+const SiteProjectsIndexRoute = SiteProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
 } as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
+const SiteBlogIndexRoute = SiteBlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
 } as any)
-const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
+const InvitationSlugPhotoboothRoute =
+  InvitationSlugPhotoboothRouteImport.update({
+    id: '/photobooth',
+    path: '/photobooth',
+    getParentRoute: () => InvitationSlugRoute,
+  } as any)
+const SiteProjectsSlugRoute = SiteProjectsSlugRouteImport.update({
   id: '/projects/$slug',
   path: '/projects/$slug',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
 } as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
+const SiteBlogSlugRoute = SiteBlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => SiteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/': typeof SiteIndexRoute
   '/rss.xml': typeof RssDotxmlRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/projects/$slug': typeof ProjectsSlugRoute
-  '/blog/': typeof BlogIndexRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/about': typeof SiteAboutRoute
+  '/invitation/$slug': typeof InvitationSlugRouteWithChildren
+  '/blog/$slug': typeof SiteBlogSlugRoute
+  '/projects/$slug': typeof SiteProjectsSlugRoute
+  '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/blog/': typeof SiteBlogIndexRoute
+  '/projects/': typeof SiteProjectsIndexRoute
+  '/invitation/$slug/': typeof InvitationSlugIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/rss.xml': typeof RssDotxmlRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/projects/$slug': typeof ProjectsSlugRoute
-  '/blog': typeof BlogIndexRoute
-  '/projects': typeof ProjectsIndexRoute
+  '/about': typeof SiteAboutRoute
+  '/': typeof SiteIndexRoute
+  '/blog/$slug': typeof SiteBlogSlugRoute
+  '/projects/$slug': typeof SiteProjectsSlugRoute
+  '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/blog': typeof SiteBlogIndexRoute
+  '/projects': typeof SiteProjectsIndexRoute
+  '/invitation/$slug': typeof InvitationSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/_site': typeof SiteRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/projects/$slug': typeof ProjectsSlugRoute
-  '/blog/': typeof BlogIndexRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/_site/about': typeof SiteAboutRoute
+  '/invitation/$slug': typeof InvitationSlugRouteWithChildren
+  '/_site/': typeof SiteIndexRoute
+  '/_site/blog/$slug': typeof SiteBlogSlugRoute
+  '/_site/projects/$slug': typeof SiteProjectsSlugRoute
+  '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/_site/blog/': typeof SiteBlogIndexRoute
+  '/_site/projects/': typeof SiteProjectsIndexRoute
+  '/invitation/$slug/': typeof InvitationSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/rss.xml'
+    | '/about'
+    | '/invitation/$slug'
     | '/blog/$slug'
     | '/projects/$slug'
+    | '/invitation/$slug/photobooth'
     | '/blog/'
     | '/projects/'
+    | '/invitation/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/about'
     | '/rss.xml'
+    | '/about'
+    | '/'
     | '/blog/$slug'
     | '/projects/$slug'
+    | '/invitation/$slug/photobooth'
     | '/blog'
     | '/projects'
+    | '/invitation/$slug'
   id:
     | '__root__'
-    | '/'
-    | '/about'
+    | '/_site'
     | '/rss.xml'
-    | '/blog/$slug'
-    | '/projects/$slug'
-    | '/blog/'
-    | '/projects/'
+    | '/_site/about'
+    | '/invitation/$slug'
+    | '/_site/'
+    | '/_site/blog/$slug'
+    | '/_site/projects/$slug'
+    | '/invitation/$slug/photobooth'
+    | '/_site/blog/'
+    | '/_site/projects/'
+    | '/invitation/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  SiteRoute: typeof SiteRouteWithChildren
   RssDotxmlRoute: typeof RssDotxmlRoute
-  BlogSlugRoute: typeof BlogSlugRoute
-  ProjectsSlugRoute: typeof ProjectsSlugRoute
-  BlogIndexRoute: typeof BlogIndexRoute
-  ProjectsIndexRoute: typeof ProjectsIndexRoute
+  InvitationSlugRoute: typeof InvitationSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -130,59 +168,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/_site': {
+      id: '/_site'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SiteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_site/': {
+      id: '/_site/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/invitation/$slug': {
+      id: '/invitation/$slug'
+      path: '/invitation/$slug'
+      fullPath: '/invitation/$slug'
+      preLoaderRoute: typeof InvitationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects/': {
-      id: '/projects/'
+    '/_site/about': {
+      id: '/_site/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof SiteAboutRouteImport
+      parentRoute: typeof SiteRoute
+    }
+    '/invitation/$slug/': {
+      id: '/invitation/$slug/'
+      path: '/'
+      fullPath: '/invitation/$slug/'
+      preLoaderRoute: typeof InvitationSlugIndexRouteImport
+      parentRoute: typeof InvitationSlugRoute
+    }
+    '/_site/projects/': {
+      id: '/_site/projects/'
       path: '/projects'
       fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteProjectsIndexRouteImport
+      parentRoute: typeof SiteRoute
     }
-    '/blog/': {
-      id: '/blog/'
+    '/_site/blog/': {
+      id: '/_site/blog/'
       path: '/blog'
       fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteBlogIndexRouteImport
+      parentRoute: typeof SiteRoute
     }
-    '/projects/$slug': {
-      id: '/projects/$slug'
+    '/invitation/$slug/photobooth': {
+      id: '/invitation/$slug/photobooth'
+      path: '/photobooth'
+      fullPath: '/invitation/$slug/photobooth'
+      preLoaderRoute: typeof InvitationSlugPhotoboothRouteImport
+      parentRoute: typeof InvitationSlugRoute
+    }
+    '/_site/projects/$slug': {
+      id: '/_site/projects/$slug'
       path: '/projects/$slug'
       fullPath: '/projects/$slug'
-      preLoaderRoute: typeof ProjectsSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteProjectsSlugRouteImport
+      parentRoute: typeof SiteRoute
     }
-    '/blog/$slug': {
-      id: '/blog/$slug'
+    '/_site/blog/$slug': {
+      id: '/_site/blog/$slug'
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteBlogSlugRouteImport
+      parentRoute: typeof SiteRoute
     }
   }
 }
 
+interface SiteRouteChildren {
+  SiteAboutRoute: typeof SiteAboutRoute
+  SiteIndexRoute: typeof SiteIndexRoute
+  SiteBlogSlugRoute: typeof SiteBlogSlugRoute
+  SiteProjectsSlugRoute: typeof SiteProjectsSlugRoute
+  SiteBlogIndexRoute: typeof SiteBlogIndexRoute
+  SiteProjectsIndexRoute: typeof SiteProjectsIndexRoute
+}
+
+const SiteRouteChildren: SiteRouteChildren = {
+  SiteAboutRoute: SiteAboutRoute,
+  SiteIndexRoute: SiteIndexRoute,
+  SiteBlogSlugRoute: SiteBlogSlugRoute,
+  SiteProjectsSlugRoute: SiteProjectsSlugRoute,
+  SiteBlogIndexRoute: SiteBlogIndexRoute,
+  SiteProjectsIndexRoute: SiteProjectsIndexRoute,
+}
+
+const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
+
+interface InvitationSlugRouteChildren {
+  InvitationSlugPhotoboothRoute: typeof InvitationSlugPhotoboothRoute
+  InvitationSlugIndexRoute: typeof InvitationSlugIndexRoute
+}
+
+const InvitationSlugRouteChildren: InvitationSlugRouteChildren = {
+  InvitationSlugPhotoboothRoute: InvitationSlugPhotoboothRoute,
+  InvitationSlugIndexRoute: InvitationSlugIndexRoute,
+}
+
+const InvitationSlugRouteWithChildren = InvitationSlugRoute._addFileChildren(
+  InvitationSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  SiteRoute: SiteRouteWithChildren,
   RssDotxmlRoute: RssDotxmlRoute,
-  BlogSlugRoute: BlogSlugRoute,
-  ProjectsSlugRoute: ProjectsSlugRoute,
-  BlogIndexRoute: BlogIndexRoute,
-  ProjectsIndexRoute: ProjectsIndexRoute,
+  InvitationSlugRoute: InvitationSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

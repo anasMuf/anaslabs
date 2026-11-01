@@ -3,7 +3,7 @@ import projects from "#/data/projects.json";
 import siteData from "#/data/site.json";
 import { SITE_TITLE, SITE_URL } from "#/lib/site";
 
-export const Route = createFileRoute("/projects/$slug")({
+export const Route = createFileRoute("/_site/projects/$slug")({
 	loader: ({ params }) => {
 		const project = projects.find((p) => p.slug === params.slug);
 		if (!project) throw notFound();
