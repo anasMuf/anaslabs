@@ -435,7 +435,10 @@ diganti ke `--color-inv-muted` (4.85:1).
 | 7 | Closing (`384:427`) | Heading + intro, ornamen, pesan penutup, label & nama pemilik undangan, ornamen |
 
 Ornamen berulang (`Fine rule` 52×1 `#D6C4BC` + `&` italic 20 px maroon) dijadikan
-satu komponen `Ornament` dengan varian ukuran.
+satu komponen `Ornament` dengan varian ukuran. Kedua `Fine rule` kini dirender lewat
+`InkLine` (tinggi tetap 1 px, warna `inv-rule`) supaya semua garis dekoratif di
+undangan memakai stroke tangan yang sama; terverifikasi 8 ornamen di 7 section
+selalu menempatkan kedua garis pada `y` yang identik.
 
 ---
 
