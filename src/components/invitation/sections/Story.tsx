@@ -24,7 +24,7 @@ export default function Story() {
 						<Fragment key={milestone.date ?? index}>
 							<li className="flex w-full flex-col items-center gap-2 text-center">
 								{milestone.date ? (
-									<p className="text-[10px] font-body uppercase leading-[1.4] tracking-[0.2em] text-inv-accent">
+									<p className="text-[11px] font-body leading-[1.4] tracking-[0.12em] text-inv-accent">
 										{milestone.date}
 									</p>
 								) : null}
