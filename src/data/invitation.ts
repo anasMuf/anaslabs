@@ -36,8 +36,10 @@ export interface InvitationEvent {
 }
 
 export interface InvitationMilestone {
+	/** Small label above the title, e.g. a month or a chapter marker. */
 	date?: string;
-	title: string;
+	/** Optional: milestones that are pure prose skip the display heading. */
+	title?: string;
 	body?: string;
 }
 
@@ -140,9 +142,18 @@ export const invitation = {
 		},
 	] satisfies InvitationEvent[],
 	story: [
-		{ title: "Awal Pertemuan" },
-		{ title: "Tumbuh Bersama" },
-		{ title: "Lembaran Baru" },
+		{
+			date: "Pertama",
+			body: "Di penghujung tahun lalu, kita dipertemukan. Berawal dari obrolan kecil yang pelan-pelan menyisakan rasa. Kita sempat mengira itu sudah cukup untuk memulai sesuatu. Nyatanya tidak. Tanpa banyak penjelasan, percakapan itu mereda, dan berhenti begitu saja.",
+		},
+		{
+			date: "Kedua",
+			body: "Dengan dada yang lapang sekaligus berat, kita memilih jalan masing-masing. Tak ada lagi kabar, tak ada lagi tanya. Tujuh bulan pertama di tahun ini adalah badai yang menguji. Sampai di satu titik, kami berhenti melawan keadaan dan memilih berdamai, menjadikannya pelajaran untuk melangkah.",
+		},
+		{
+			date: "Ketiga",
+			body: "Orang bilang, apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang. Dan benar, di pertengahan tahun ini, kita dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kita memilih untuk benar-benar bertumbuh bersama.",
+		},
 	] as InvitationMilestone[],
 	gifts: [
 		{
