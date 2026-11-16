@@ -11,7 +11,7 @@ export default function Story() {
 	return (
 		<section
 			id="kisah"
-			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-10 font-body text-inv-ink"
+			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-8 font-body text-inv-ink"
 		>
 			<Reveal className="mx-auto flex w-full max-w-[348px] flex-col items-center">
 				<SectionHeading
@@ -19,17 +19,17 @@ export default function Story() {
 					intro={sections.story.intro}
 				/>
 
-				<ol className="flex w-full flex-col items-center py-4">
+				<ol className="flex w-full flex-col items-center py-2">
 					{story.map((milestone, index) => (
 						<Fragment key={milestone.date ?? index}>
-							<li className="flex w-full flex-col items-center gap-2 text-center">
+							<li className="flex w-full flex-col items-center gap-1 text-center">
 								{milestone.date ? (
 									<p className="text-[11px] font-body leading-[1.4] tracking-[0.12em] text-inv-accent">
 										{milestone.date}
 									</p>
 								) : null}
 								{milestone.title ? (
-									<h3 className="font-display text-[27px] leading-[1.3]">
+									<h3 className="font-display text-[24px] leading-[1.25]">
 										{milestone.title}
 									</h3>
 								) : null}
@@ -43,9 +43,9 @@ export default function Story() {
 							{index < story.length - 1 ? (
 								<li
 									aria-hidden="true"
-									className="flex w-3 flex-col items-center gap-[6px] py-[6px]"
+									className="flex w-3 flex-col items-center gap-[4px] py-[4px]"
 								>
-									<span className="h-[22px] w-px bg-inv-rule" />
+									<span className="h-[18px] w-px bg-inv-rule" />
 									<span className="h-1 w-1 rounded-full bg-inv-accent" />
 								</li>
 							) : null}

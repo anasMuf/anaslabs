@@ -368,12 +368,23 @@ Scroll 100px dari posisi 0 mendarat tepat di `scrollTop = 0`; scroll ke
 `proximity`. Setelah viewport diperbesar ke 390×844, `zoom` kembali ke 1 di semua
 section.
 
-**Section Kisah Kami (tiga paragraf cerita):** isinya paling panjang, jadi diukur
-tersendiri — 390×844 muat tanpa `zoom` (13px), 390×740 `zoom` 0.902 (11,7px),
-375×667 (iPhone SE) 0.8 (10,4px) dan masih muat. Padding `ol` dan konektor timeline
-dirapatkan khusus untuk ini. Di 320×640 `zoom` sudah mentok 0.8 dan sisa 27px
-meluber, jadi section memakai scroll internalnya sendiri (jaring pengaman) —
-satu-satunya ukuran yang melakukan itu.
+**Section Kisah Kami (heading + 3 label babak + 3 judul + 3 paragraf):** isinya
+paling panjang, jadi diukur tersendiri.
+
+| Viewport | `zoom` | Body / judul | Sisa luber |
+|---|---|---|---|
+| 430×932 | 1 | 13 / 24 px | 0 |
+| 390×844 | 0.966 | 12,6 / 23,2 px | 0 |
+| 390×800 | 0.911 | 11,8 / 21,9 px | 0 |
+| 390×740 | 0.837 | 10,9 / 20,1 px | 0 |
+| 375×667 (iPhone SE) | 0.8 | 10,4 / 19,2 px | 26 px |
+| 320×640 | 0.8 | 10,4 / 19,2 px | 70 px |
+
+Padding section (`py-8`), padding `ol`, gap label-judul-body, judul milestone
+(24 px, dari 27 px di Figma) dan konektor timeline dirapatkan khusus untuk section
+ini supaya sampai 390×740 semuanya masih satu layar. Di 375×667 ke bawah `zoom`
+sudah mentok 0.8 sehingga section memakai scroll internalnya sendiri (jaring
+pengaman) — hanya section ini yang melakukannya, dan snap tetap bekerja.
 
 ### 5.8 Deploy
 
@@ -436,7 +447,7 @@ diganti ke `--color-inv-muted` (4.85:1).
 | 1 | Cover (`384:431`) | Ornamen simpul, eyebrow "UNDANGAN PERNIKAHAN", nama "Anas & Mila" (64 px Playfair, `&` maroon), tanggal "19 - 20 Desember 2026" dengan garis kiri-kanan (`357:2215`/`357:2218`: stroke 2 px `#34362E`, ±75 px, konten di tengah layar), "Kepada, <Nama>" dari slug, "Scroll Down" di dasar layar, CTA buka undangan |
 | 2 | Couple (`384:430`) | Heading + intro, profil mempelai pria (label, nama, orang tua), gambar buket, profil mempelai wanita, ornamen penutup |
 | 3 | Event (`384:429`) | Heading + intro, kartu Akad Nikah (tanggal, jadwal 08:00 & 14:00, lokasi, tombol Petunjuk Arah), ornamen, kartu Unduh Mantu (tanggal, waktu, lokasi, Petunjuk Arah) |
-| 4 | Story (`384:2942`) | Heading + intro, timeline 3 babak berlabel `Pertama`/`Kedua`/`Ketiga` (ditampilkan apa adanya, tanpa `uppercase`/judul tambahan) dengan paragraf cerita, garis & marker vertikal, ornamen. `title` milestone opsional (babak murni prosa tidak memakai heading display) |
+| 4 | Story (`384:2942`) | Heading + intro, timeline 3 babak: label `Pertama`/`Kedua`/`Ketiga` ditampilkan apa adanya (tanpa `uppercase`), judul display `Awal Pertemuan`/`Tumbuh Bersama`/`Lembaran Baru` 24 px, paragraf cerita, garis & marker vertikal, ornamen. `title` milestone opsional |
 | 5 | Photobooth (`384:428`) + layar (`384:2550/2589/2631/2760/2817/2787`) | Heading "Potret Hari Ini, Kenangan Abadi", kamera vintage, strip foto dekoratif, tombol "Buka Photobooth" → layar capture gelap (grid 1/2/4, timer off/3s/5s, ganti kamera, galeri) → kartu hasil putih dengan 3 baris teks (lihat 5.5) |
 | 6 | Gift (`384:2909`) | Heading + intro, dua blok transfer bank (metode, nama bank, nomor + Salin, atas nama), divider ornamen, ucapan terima kasih, ornamen |
 | 7 | Closing (`384:427`) | Heading + intro, ornamen, pesan penutup, label & nama pemilik undangan, ornamen |
