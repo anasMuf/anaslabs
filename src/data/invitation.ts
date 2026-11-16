@@ -143,17 +143,14 @@ export const invitation = {
 	] satisfies InvitationEvent[],
 	story: [
 		{
-			date: "Pertama",
 			title: "Awal Pertemuan",
 			body: "Di penghujung tahun lalu, kita dipertemukan. Berawal dari obrolan kecil yang pelan-pelan menyisakan rasa. Kita sempat mengira itu sudah cukup untuk memulai sesuatu. Nyatanya tidak. Tanpa banyak penjelasan, percakapan itu mereda, dan berhenti begitu saja.",
 		},
 		{
-			date: "Kedua",
 			title: "Tumbuh Bersama",
 			body: "Dengan dada yang lapang sekaligus berat, kita memilih jalan masing-masing. Tak ada lagi kabar, tak ada lagi tanya. Tujuh bulan pertama di tahun ini adalah badai yang menguji. Sampai di satu titik, kami berhenti melawan keadaan dan memilih berdamai, menjadikannya pelajaran untuk melangkah.",
 		},
 		{
-			date: "Ketiga",
 			title: "Lembaran Baru",
 			body: "Orang bilang, apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang. Dan benar, di pertengahan tahun ini, kita dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kita memilih untuk benar-benar bertumbuh bersama.",
 		},

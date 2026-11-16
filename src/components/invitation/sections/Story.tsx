@@ -21,7 +21,7 @@ export default function Story() {
 
 				<ol className="flex w-full flex-col items-center py-2">
 					{story.map((milestone, index) => (
-						<Fragment key={milestone.date ?? index}>
+						<Fragment key={milestone.title ?? index}>
 							<li className="flex w-full flex-col items-center gap-1 text-center">
 								{milestone.date ? (
 									<p className="text-[11px] font-body leading-[1.4] tracking-[0.12em] text-inv-accent">
@@ -29,7 +29,7 @@ export default function Story() {
 									</p>
 								) : null}
 								{milestone.title ? (
-									<h3 className="font-display text-[24px] leading-[1.25]">
+									<h3 className="font-display text-[27px] leading-[1.3]">
 										{milestone.title}
 									</h3>
 								) : null}
@@ -45,7 +45,7 @@ export default function Story() {
 									aria-hidden="true"
 									className="flex w-3 flex-col items-center gap-[4px] py-[4px]"
 								>
-									<span className="h-[18px] w-px bg-inv-rule" />
+									<span className="h-[20px] w-px bg-inv-rule" />
 									<span className="h-1 w-1 rounded-full bg-inv-accent" />
 								</li>
 							) : null}
