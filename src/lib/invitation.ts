@@ -88,3 +88,19 @@ export function formatCoverDateRange(startIso: string, endIso: string): string {
 		start,
 	)} - ${dayFormatter.format(end)} ${monthYearFormatter.format(end)}`;
 }
+
+/**
+ * `0:24` for 24_000 ms, used by the photo wall voice notes. Returns null for
+ * missing or nonsense durations so callers can skip the label entirely.
+ */
+export function formatVoiceDuration(
+	ms: number | null | undefined,
+): string | null {
+	if (typeof ms !== "number" || !Number.isFinite(ms) || ms <= 0) return null;
+
+	const totalSeconds = Math.round(ms / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}

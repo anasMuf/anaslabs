@@ -39,7 +39,7 @@ export default function Photobooth({ slug }: { slug: string }) {
 				</div>
 
 				<Link
-					to="/invitation/$slug/photobooth"
+					to="/invitation/$slug/wall"
 					params={{ slug }}
 					target="_blank"
 					rel="noopener noreferrer"

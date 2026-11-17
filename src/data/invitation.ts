@@ -98,9 +98,19 @@ export const invitation = {
 		photobooth: {
 			heading: "Potret Hari Ini,\nKenangan Abadi",
 			intro: "Abadikan senyum dan momen bahagia bersama kami.",
-			cta: "Buka Photobooth",
+			cta: "Lihat Photo Wall",
 			camera: "/invitation/photobooth-camera.webp",
 			keepsake: "/invitation/photobooth-keepsake.webp",
+		},
+		wall: {
+			eyebrow: "Photo Wall",
+			heading: "Potret & Ucapan",
+			intro:
+				"Setiap kartu adalah potret dan ucapan dari tamu yang berbahagia hari ini.",
+			cta: "Buka Kamera",
+			empty:
+				"Belum ada kartu di wall. Jadilah yang pertama mengabadikan momen hari ini.",
+			back: "Kembali ke undangan",
 		},
 		gift: {
 			heading: "Tanda Kasih",

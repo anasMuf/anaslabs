@@ -17,6 +17,7 @@ import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as InvitationSlugIndexRouteImport } from './routes/invitation.$slug.index'
 import { Route as SiteProjectsIndexRouteImport } from './routes/_site.projects.index'
 import { Route as SiteBlogIndexRouteImport } from './routes/_site.blog.index'
+import { Route as InvitationSlugWallRouteImport } from './routes/invitation.$slug.wall'
 import { Route as InvitationSlugPhotoboothRouteImport } from './routes/invitation.$slug.photobooth'
 import { Route as SiteProjectsSlugRouteImport } from './routes/_site.projects.$slug'
 import { Route as SiteBlogSlugRouteImport } from './routes/_site.blog.$slug'
@@ -60,6 +61,11 @@ const SiteBlogIndexRoute = SiteBlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => SiteRoute,
 } as any)
+const InvitationSlugWallRoute = InvitationSlugWallRouteImport.update({
+  id: '/wall',
+  path: '/wall',
+  getParentRoute: () => InvitationSlugRoute,
+} as any)
 const InvitationSlugPhotoboothRoute =
   InvitationSlugPhotoboothRouteImport.update({
     id: '/photobooth',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/blog/': typeof SiteBlogIndexRoute
   '/projects/': typeof SiteProjectsIndexRoute
   '/invitation/$slug/': typeof InvitationSlugIndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/blog': typeof SiteBlogIndexRoute
   '/projects': typeof SiteProjectsIndexRoute
   '/invitation/$slug': typeof InvitationSlugIndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_site/blog/$slug': typeof SiteBlogSlugRoute
   '/_site/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
+  '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/_site/blog/': typeof SiteBlogIndexRoute
   '/_site/projects/': typeof SiteProjectsIndexRoute
   '/invitation/$slug/': typeof InvitationSlugIndexRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/projects/$slug'
     | '/invitation/$slug/photobooth'
+    | '/invitation/$slug/wall'
     | '/blog/'
     | '/projects/'
     | '/invitation/$slug/'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/projects/$slug'
     | '/invitation/$slug/photobooth'
+    | '/invitation/$slug/wall'
     | '/blog'
     | '/projects'
     | '/invitation/$slug'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/_site/blog/$slug'
     | '/_site/projects/$slug'
     | '/invitation/$slug/photobooth'
+    | '/invitation/$slug/wall'
     | '/_site/blog/'
     | '/_site/projects/'
     | '/invitation/$slug/'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteBlogIndexRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/invitation/$slug/wall': {
+      id: '/invitation/$slug/wall'
+      path: '/wall'
+      fullPath: '/invitation/$slug/wall'
+      preLoaderRoute: typeof InvitationSlugWallRouteImport
+      parentRoute: typeof InvitationSlugRoute
+    }
     '/invitation/$slug/photobooth': {
       id: '/invitation/$slug/photobooth'
       path: '/photobooth'
@@ -263,11 +282,13 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 interface InvitationSlugRouteChildren {
   InvitationSlugPhotoboothRoute: typeof InvitationSlugPhotoboothRoute
+  InvitationSlugWallRoute: typeof InvitationSlugWallRoute
   InvitationSlugIndexRoute: typeof InvitationSlugIndexRoute
 }
 
 const InvitationSlugRouteChildren: InvitationSlugRouteChildren = {
   InvitationSlugPhotoboothRoute: InvitationSlugPhotoboothRoute,
+  InvitationSlugWallRoute: InvitationSlugWallRoute,
   InvitationSlugIndexRoute: InvitationSlugIndexRoute,
 }
 

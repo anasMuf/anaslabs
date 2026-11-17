@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { resolveGuest } from "#/data/invitation-guests";
-import { formatCoverDateRange, formatEventDate } from "#/lib/invitation";
+import {
+	formatCoverDateRange,
+	formatEventDate,
+	formatVoiceDuration,
+} from "#/lib/invitation";
 
 describe("resolveGuest", () => {
 	it("returns the guest for an invited slug", () => {
@@ -64,5 +68,23 @@ describe("formatCoverDateRange", () => {
 
 	it("returns an empty string when the start date is invalid", () => {
 		expect(formatCoverDateRange("bukan-tanggal", "2026-12-20")).toBe("");
+	});
+});
+
+describe("formatVoiceDuration", () => {
+	it("formats seconds with a zero padded remainder", () => {
+		expect(formatVoiceDuration(24_000)).toBe("0:24");
+		expect(formatVoiceDuration(65_400)).toBe("1:05");
+	});
+
+	it("rounds to the nearest second", () => {
+		expect(formatVoiceDuration(9_600)).toBe("0:10");
+	});
+
+	it("returns null for missing or nonsense durations", () => {
+		expect(formatVoiceDuration(null)).toBeNull();
+		expect(formatVoiceDuration(undefined)).toBeNull();
+		expect(formatVoiceDuration(0)).toBeNull();
+		expect(formatVoiceDuration(Number.NaN)).toBeNull();
 	});
 });

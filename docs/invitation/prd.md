@@ -90,6 +90,7 @@ src/routes/
   rss[.]xml.ts                      # tetap
   invitation.$slug.tsx              # layout: loader tamu + head + 404
   invitation.$slug.index.tsx        # isi undangan (7 section)
+  invitation.$slug.wall.tsx         # photo wall (grid kartu + CTA kamera)
   invitation.$slug.photobooth.tsx   # photobooth full-screen
 ```
 
@@ -440,6 +441,27 @@ diganti ke `--color-inv-muted` (4.85:1).
 - Interaksi selain cover memakai CSS transition (tanpa library animasi).
 - Trade-off yang tersisa: subset italic Playfair (~38 KB) hanya dipakai untuk glyph
   `&`; bisa di-subset lebih lanjut bila ukuran jadi prioritas.
+
+### 5.11 Photo wall
+
+Halaman `/invitation/$slug/wall` adalah pendaratan dari section Photobooth di
+undangan (dulu tombolnya langsung membuka kamera). Alurnya: wall → tombol
+**Buka Kamera** → `/photobooth` → preview → layar ucapan → publish → kembali ke wall.
+
+- **Grid**: masonry CSS (`columns-2 sm:columns-3`) berisi kartu terbaru dulu;
+tiap kartu memakai thumbnail ±20 KB, bukan foto penuh. Kartu bisa diklik untuk
+membuka dialog berisi foto penuh, seluruh ucapan, dan pemutar audio.
+- **Data**: `listWallCards` (server function) mengembalikan 24 kartu default,
+maks 60, dengan signed URL berlaku 1 jam untuk thumbnail/foto/audio. Tidak ada
+key Supabase di browser; bucket `wall` private.
+- **Detail teknis storage, retensi 300 kartu, rate limit, moderasi blocklist**
+sudah dijelaskan di §5.2 (lapisan data) dan modul `src/lib/wall*.ts`.
+- **Aksesibilitas**: dialog `role="dialog"` + `aria-modal`, fokus pindah ke tombol
+tutup saat dibuka, `Escape` menutup, scroll body dikunci selama dialog terbuka,
+tombol tutup berukuran 36 px dan target sentuh lain ≥ 44 px.
+- **Verifikasi CDP**: 390×844 → 2 kolom, 4/4 thumbnail termuat, tanpa overflow
+horizontal; 768×1024 → 3 kolom; dialog terbuka dengan fokus pada tombol tutup,
+`Escape` menutup dan mengembalikan scroll body.
 
 ---
 
