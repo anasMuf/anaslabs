@@ -42,6 +42,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     environment: ANASLABS_VPS
+    permissions:
+      contents: read
+      packages: read
 
     steps:
       # The compose file on the VPS is not part of the image, so it drifts unless
@@ -69,9 +72,29 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
+            set -euo pipefail
+
             IMAGE=$(echo "ghcr.io/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Fail loudly: without `set -e` a failed pull used to be followed by a
+            # "successful" recreate of the *old* image, so the site silently ran
+            # stale code (an added route simply never appeared).
             docker pull ${IMAGE}:latest
+            docker image inspect ${IMAGE}:latest --format 'image digest: {{index .RepoDigests 0}}'
+
             cd ~/anaslabs
             IMAGE=${IMAGE} docker compose up -d --force-recreate
+
+            # Prove the container is the image we just pulled and that it answers.
+            docker compose ps
+            for attempt in 1 2 3 4 5; do
+              if curl -fsS http://localhost:3000/api/health; then
+                echo ""
+                break
+              fi
+              echo "health belum siap (percobaan $attempt)"
+              sleep 3
+            done
+
             docker image prune -f
