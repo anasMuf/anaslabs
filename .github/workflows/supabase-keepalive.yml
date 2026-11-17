@@ -1,0 +1,38 @@
+name: Supabase keep-alive
+
+# Supabase free projects pause after 7 days without activity, which would take
+# the photo wall down until someone unpauses it manually. The wall page runs a
+# REST query on the server, so a request every 3 days is enough to keep it awake
+# between the wedding day and the weeks the invitation link is shared.
+
+on:
+  schedule:
+    # Every 3 days at 03:00 UTC.
+    - cron: "0 3 */3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Ping photo wall
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request the wall page
+        run: |
+          set -eu
+          url="https://anaslabs.my.id/invitation/test/wall"
+          body=$(curl -sS --max-time 30 "$url")
+
+          if printf '%s' "$body" | grep -q "Wall belum bisa dimuat"; then
+            echo "::error::Wall gagal memuat data dari Supabase ($url)"
+            exit 1
+          fi
+
+          if ! printf '%s' "$body" | grep -q "Potret"; then
+            echo "::error::Halaman wall tidak seperti yang diharapkan ($url)"
+            exit 1
+          fi
+
+          echo "Wall OK: $url"
