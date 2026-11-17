@@ -477,7 +477,8 @@ undangan (dulu tombolnya langsung membuka kamera). Alurnya: wall → tombol
 
 - **Grid**: masonry CSS (`columns-2 sm:columns-3`) berisi kartu terbaru dulu;
 tiap kartu memakai thumbnail ±20 KB, bukan foto penuh. Kartu bisa diklik untuk
-membuka dialog berisi foto penuh, seluruh ucapan, dan pemutar audio.
+membuka dialog berisi foto penuh, seluruh ucapan, dan pemutar audio custom yang
+sama dengan layar ucapan (`ui/VoicePlayer.tsx`).
 - **Data**: `listWallCards` (server function) mengembalikan 24 kartu default,
 maks 60, dengan signed URL berlaku 1 jam untuk thumbnail/foto/audio. Tidak ada
 key Supabase di browser; bucket `wall` private.
@@ -486,6 +487,11 @@ sudah dijelaskan di §5.2 (lapisan data) dan modul `src/lib/wall*.ts`.
 - **Aksesibilitas**: dialog `role="dialog"` + `aria-modal`, fokus pindah ke tombol
 tutup saat dibuka, `Escape` menutup, scroll body dikunci selama dialog terbuka,
 tombol tutup berukuran 36 px dan target sentuh lain ≥ 44 px.
+- **Waveform di wall**: dialog tidak punya blob lokal, jadi `useAudioPeaks`
+  mengambil signed URL, men-decode sekali dengan `AudioContext` (Supabase Storage
+  mengirim `access-control-allow-origin: *`, terverifikasi) dan menyimpannya di
+  cache per URL; bila decode gagal, waveform jatuh ke bar minimum dan audio tetap
+  bisa diputar.
 - **Verifikasi CDP**: 390×844 → 2 kolom, 4/4 thumbnail termuat, tanpa overflow
 horizontal; 768×1024 → 3 kolom; dialog terbuka dengan fokus pada tombol tutup,
 `Escape` menutup dan mengembalikan scroll body.

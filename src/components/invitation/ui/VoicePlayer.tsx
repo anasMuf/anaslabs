@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { barsFromPeaks } from "#/lib/audio-peaks";
+import { barsFromPeaks, silenceBars } from "#/lib/audio-peaks";
 import { formatVoiceDuration } from "#/lib/invitation";
 
 interface VoiceWaveformProps {
@@ -81,7 +81,7 @@ export default function VoicePlayer({
 	const [current, setCurrent] = useState(0);
 	const [duration, setDuration] = useState(durationMs / 1000);
 
-	const bars = barsFromPeaks(peaks);
+	const bars = peaks.length > 0 ? barsFromPeaks(peaks) : silenceBars();
 	const fmt = (seconds: number) =>
 		formatVoiceDuration(seconds * 1000) ?? "0:00";
 	const progress = duration > 0 ? Math.min(1, current / duration) : 0;

@@ -51,3 +51,11 @@ export function barsFromPeaks(
 ): number[] {
 	return peaks.map((peak) => Math.max(minRatio, Math.min(1, peak)));
 }
+
+/** Placeholder waveform for audio whose peaks are not known (yet). */
+export function silenceBars(
+	count: number = VOICE_PEAK_BUCKETS,
+	minRatio: number = MIN_BAR_RATIO,
+): number[] {
+	return new Array(count).fill(minRatio);
+}

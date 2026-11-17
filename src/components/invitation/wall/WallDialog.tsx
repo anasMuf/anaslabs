@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { formatVoiceDuration } from "#/lib/invitation";
+import { useAudioPeaks } from "#/lib/use-audio-peaks";
 import type { WallCard } from "#/lib/wall";
+import VoicePlayer from "../ui/VoicePlayer";
 
 interface WallDialogProps {
 	card: WallCard;
@@ -11,6 +13,7 @@ interface WallDialogProps {
 export default function WallDialog({ card, onClose }: WallDialogProps) {
 	const closeRef = useRef<HTMLButtonElement | null>(null);
 	const duration = formatVoiceDuration(card.audioDurationMs);
+	const peaks = useAudioPeaks(card.audioUrl);
 
 	useEffect(() => {
 		closeRef.current?.focus();
@@ -91,16 +94,13 @@ export default function WallDialog({ card, onClose }: WallDialogProps) {
 							<p className="font-body text-[10px] font-semibold tracking-[0.12em] text-inv-accent">
 								UCAPAN SUARA{duration ? ` · ${duration}` : ""}
 							</p>
-							{/* Voice notes are guest recordings; there is no transcript to caption. */}
-							{/* biome-ignore lint/a11y/useMediaCaption: ucapan suara tamu, tidak ada transkrip */}
-							<audio
-								src={card.audioUrl}
-								controls
-								preload="none"
-								className="mt-2 w-full"
-							>
-								Browser Anda tidak mendukung pemutar audio.
-							</audio>
+							<div className="mt-2">
+								<VoicePlayer
+									src={card.audioUrl}
+									peaks={peaks}
+									durationMs={card.audioDurationMs ?? 0}
+								/>
+							</div>
 						</div>
 					) : null}
 				</div>

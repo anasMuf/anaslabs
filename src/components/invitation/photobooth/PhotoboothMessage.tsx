@@ -5,8 +5,8 @@ import type { WallImages } from "#/lib/photobooth/wall-export";
 import { useVoiceRecorder, VOICE_MAX_MS } from "#/lib/use-voice-recorder";
 import { publishWallCard } from "#/lib/wall";
 import { WALL_MESSAGE_MAX } from "#/lib/wall-validation";
+import VoicePlayer from "../ui/VoicePlayer";
 import VoiceMeter from "./VoiceMeter";
-import VoicePlayer from "./VoicePlayer";
 
 interface PhotoboothMessageProps {
 	slug: string;
