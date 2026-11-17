@@ -6,6 +6,9 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    # Secret Supabase & token admin wall; file ini ada di VPS (~/anaslabs/.env),
+    # bukan di repo. Tanpa ini wall gagal di produksi meski lokal jalan.
+    env_file: .env
     environment:
       - NODE_ENV=production
       - PORT=3000
