@@ -142,7 +142,8 @@ export type WallValidation =
 export function validateWallPublish(input: WallPublishInput): WallValidation {
 	const message = normalizeMessage(input.message);
 
-	if (!message) return { ok: false, error: "empty-message" };
+	// A photo may carry just a voice note; one of the two has to be there.
+	if (!message && !input.audio) return { ok: false, error: "empty-message" };
 	if (message.length > WALL_MESSAGE_MAX)
 		return { ok: false, error: "message-too-long" };
 	if (hasLink(message)) return { ok: false, error: "message-link" };
@@ -194,7 +195,7 @@ export function validateWallPublish(input: WallPublishInput): WallValidation {
 }
 
 export const WALL_ERROR_MESSAGES: Record<WallError, string> = {
-	"empty-message": "Tulis ucapan dulu ya.",
+	"empty-message": "Tulis ucapan atau rekam suara dulu ya.",
 	"message-too-long": `Ucapan maksimal ${WALL_MESSAGE_MAX} karakter.`,
 	"message-blocked": "Ucapan berisi kata yang tidak pantas, mohon diubah.",
 	"message-link": "Link tidak diperbolehkan di ucapan.",

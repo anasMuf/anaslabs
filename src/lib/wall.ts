@@ -207,7 +207,7 @@ export const publishWallCard = createServerFn({ method: "POST" })
 					id,
 					slug: data.slug,
 					guest_name: guest.name,
-					message: validation.message,
+					message: validation.message || null,
 					photo_path: photoPath,
 					thumb_path: thumbPath,
 					audio_path: audioPath,

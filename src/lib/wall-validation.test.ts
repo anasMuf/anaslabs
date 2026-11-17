@@ -75,11 +75,22 @@ describe("validateWallPublish", () => {
 		expect(result.ok).toBe(true);
 	});
 
-	it("rejects an empty or whitespace-only message", () => {
+	it("rejects a card with neither a message nor audio", () => {
 		expect(validateWallPublish({ ...base, message: "   " })).toEqual({
 			ok: false,
 			error: "empty-message",
 		});
+	});
+
+	it("accepts a photo that only carries a voice note", () => {
+		const result = validateWallPublish({
+			...base,
+			message: "  ",
+			audio: dataUrl("audio/webm", 90 * 1024),
+			audioDurationMs: 12_000,
+		});
+		expect(result.ok).toBe(true);
+		if (result.ok) expect(result.message).toBe("");
 	});
 
 	it("rejects a message over the limit", () => {

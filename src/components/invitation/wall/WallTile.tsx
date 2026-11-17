@@ -3,18 +3,28 @@ import type { WallCard } from "#/lib/wall";
 interface WallTileProps {
 	card: WallCard;
 	onOpen: (card: WallCard) => void;
+	/** Set for the card that was just published, so the guest can spot it. */
+	highlight?: boolean;
 }
 
 /**
  * One wall entry: framed photo, guest name and a preview of the message.
  * Voice notes are only played from the dialog so the grid stays quiet.
  */
-export default function WallTile({ card, onOpen }: WallTileProps) {
+export default function WallTile({
+	card,
+	onOpen,
+	highlight = false,
+}: WallTileProps) {
 	return (
 		<button
 			type="button"
 			onClick={() => onOpen(card)}
-			className="group block w-full overflow-hidden rounded-2xl border border-inv-rule/70 bg-inv-card text-left transition-shadow hover:shadow-[0_8px_24px_rgba(52,54,46,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+			className={`group block w-full overflow-hidden rounded-2xl border bg-inv-card text-left transition-shadow hover:shadow-[0_8px_24px_rgba(52,54,46,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent ${
+				highlight
+					? "border-inv-accent ring-2 ring-inv-accent ring-offset-2 ring-offset-inv-bg"
+					: "border-inv-rule/70"
+			}`}
 		>
 			<img
 				src={card.thumbUrl || card.photoUrl}

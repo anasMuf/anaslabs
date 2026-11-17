@@ -1,4 +1,4 @@
-import { Download, RotateCcw } from "lucide-react";
+import { Download, RotateCcw, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invitation } from "#/data/invitation";
 import {
@@ -17,6 +17,8 @@ interface PhotoboothPreviewProps {
 	/** Canvas text needs the template fonts; redraw once they are usable. */
 	fontsReady: boolean;
 	onRetake: () => void;
+	/** Hands the composed card over so it can be published to the photo wall. */
+	onPublish: (canvas: HTMLCanvasElement) => void;
 }
 
 export default function PhotoboothPreview({
@@ -25,6 +27,7 @@ export default function PhotoboothPreview({
 	photos,
 	fontsReady,
 	onRetake,
+	onPublish,
 }: PhotoboothPreviewProps) {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -111,22 +114,37 @@ export default function PhotoboothPreview({
 			<footer className="flex flex-col gap-3 px-8 pb-10">
 				<button
 					type="button"
-					onClick={() => void handleSave()}
-					disabled={saving || !fontsReady}
-					className="flex items-center justify-center gap-2 rounded-full bg-inv-accent px-5 py-3.5 text-[12px] tracking-[0.08em] text-inv-bg transition-opacity hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+					onClick={() => {
+						const canvas = canvasRef.current;
+						if (canvas) onPublish(canvas);
+					}}
+					disabled={!fontsReady}
+					className="flex items-center justify-center gap-2 rounded-full bg-inv-accent px-5 py-3.5 text-[12px] font-semibold tracking-[0.08em] text-inv-bg transition-opacity hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 				>
-					<Download size={16} />
-					{saving ? "Menyimpan…" : saved ? "Tersimpan" : "Simpan"}
+					<Send size={16} />
+					Kirim ke Wall
 				</button>
 
-				<button
-					type="button"
-					onClick={onRetake}
-					className="flex items-center justify-center gap-2 rounded-full border border-inv-ink/25 px-5 py-3.5 text-[12px] tracking-[0.08em] transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-				>
-					<RotateCcw size={16} />
-					Ulangi
-				</button>
+				<div className="flex gap-3">
+					<button
+						type="button"
+						onClick={() => void handleSave()}
+						disabled={saving || !fontsReady}
+						className="flex flex-1 items-center justify-center gap-2 rounded-full border border-inv-ink/25 px-5 py-3.5 text-[12px] tracking-[0.08em] transition-colors hover:bg-inv-ink/5 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+					>
+						<Download size={16} />
+						{saving ? "Menyimpan…" : saved ? "Tersimpan" : "Simpan"}
+					</button>
+
+					<button
+						type="button"
+						onClick={onRetake}
+						className="flex flex-1 items-center justify-center gap-2 rounded-full border border-inv-ink/25 px-5 py-3.5 text-[12px] tracking-[0.08em] transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+					>
+						<RotateCcw size={16} />
+						Ulangi
+					</button>
+				</div>
 			</footer>
 		</div>
 	);

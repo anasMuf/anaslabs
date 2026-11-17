@@ -4,8 +4,10 @@ import { invitation } from "#/data/invitation";
 import { buildPhotoboothSettings } from "#/lib/photobooth/draw-composition";
 import { loadPhotoboothFonts } from "#/lib/photobooth/fonts";
 import type { PhotoboothGrid, PhotoboothTimer } from "#/lib/photobooth/types";
+import { buildWallImages, type WallImages } from "#/lib/photobooth/wall-export";
 import { useLockZoom } from "#/lib/use-lock-zoom";
 import PhotoboothCapture from "./PhotoboothCapture";
+import PhotoboothMessage from "./PhotoboothMessage";
 import PhotoboothPreview from "./PhotoboothPreview";
 
 interface PhotoboothPageProps {
@@ -30,7 +32,10 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 	const [grid, setGrid] = useState<PhotoboothGrid>(1);
 	const [timer, setTimer] = useState<PhotoboothTimer>(0);
 	const [photos, setPhotos] = useState<HTMLCanvasElement[]>([]);
-	const [phase, setPhase] = useState<"capture" | "preview">("capture");
+	const [phase, setPhase] = useState<"capture" | "preview" | "message">(
+		"capture",
+	);
+	const [wallImages, setWallImages] = useState<WallImages | null>(null);
 	const [fontsReady, setFontsReady] = useState(false);
 
 	// Read inside the popstate listener without re-registering it on every phase
@@ -58,6 +63,12 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 
 		const handlePopState = () => {
 			if (phaseRef.current === "preview") {
+				window.history.pushState({ photobooth: true }, "");
+				return;
+			}
+			if (phaseRef.current === "message") {
+				// Back from the message step returns to the result card, not out of the tab.
+				setPhase("preview");
 				window.history.pushState({ photobooth: true }, "");
 				return;
 			}
@@ -92,8 +103,26 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 
 	const handleRetake = useCallback(() => {
 		setPhotos([]);
+		setWallImages(null);
 		setPhase("capture");
 	}, []);
+
+	// Encode once, when leaving the result screen: the canvas is still mounted
+	// there, and the message screen only needs the finished payload.
+	const handlePreparePublish = useCallback((canvas: HTMLCanvasElement) => {
+		setWallImages(buildWallImages(canvas));
+		setPhase("message");
+	}, []);
+
+	if (phase === "message" && wallImages) {
+		return (
+			<PhotoboothMessage
+				slug={slug}
+				images={wallImages}
+				onBack={() => setPhase("preview")}
+			/>
+		);
+	}
 
 	if (phase === "preview") {
 		return (
@@ -103,6 +132,7 @@ export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
 				photos={photos}
 				fontsReady={fontsReady}
 				onRetake={handleRetake}
+				onPublish={handlePreparePublish}
 			/>
 		);
 	}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invitation } from "#/data/invitation";
 import { useLockZoom } from "#/lib/use-lock-zoom";
 import type { WallCard } from "#/lib/wall";
@@ -29,6 +29,19 @@ export default function WallPage({
 	const { sections } = invitation;
 	const copy = sections.wall;
 	const [active, setActive] = useState<WallCard | null>(null);
+	const [newCardId] = useState<string | null>(() => {
+		if (typeof window === "undefined") return null;
+		const id = window.sessionStorage.getItem("wall:new-card");
+		if (id) window.sessionStorage.removeItem("wall:new-card");
+		return id;
+	});
+
+	useEffect(() => {
+		if (!newCardId) return;
+		document
+			.getElementById(`wall-card-${newCardId}`)
+			?.scrollIntoView({ block: "center", behavior: "smooth" });
+	}, [newCardId]);
 
 	return (
 		<main className="min-h-dvh bg-inv-bg font-body text-inv-ink">
@@ -111,8 +124,16 @@ export default function WallPage({
 				{cards.length ? (
 					<ul className="mt-8 columns-2 gap-3 sm:columns-3 [&>li]:mb-3">
 						{cards.map((card) => (
-							<li key={card.id} className="break-inside-avoid">
-								<WallTile card={card} onOpen={setActive} />
+							<li
+								key={card.id}
+								id={`wall-card-${card.id}`}
+								className="break-inside-avoid"
+							>
+								<WallTile
+									card={card}
+									onOpen={setActive}
+									highlight={card.id === newCardId}
+								/>
 							</li>
 						))}
 					</ul>

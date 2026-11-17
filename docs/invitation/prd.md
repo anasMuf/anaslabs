@@ -243,6 +243,22 @@ Tiga layar, semua ada di Figma:
 | Hasil grid 2 | `384:2817` | kartu 348×542 |
 | Hasil grid 4 | `384:2787` | kartu 348×535 |
 
+**Alur sekarang:** capture → hasil (Kirim ke Wall / Simpan / Ulangi) → layar ucapan →
+wall. Tombol **Kirim ke Wall** di layar hasil meng-encode kartu ke JPEG 900 px
+(`kualitas turun otomatis sampai ≤400 KB`) + thumbnail 320 px (`≤80 KB`), lalu
+membuka layar ucapan.
+
+**Layar ucapan** (`PhotoboothMessage.tsx`):
+
+- Teks maks 280 karakter dengan penghitung; opsional bila ada rekaman suara.
+- Rekaman suara opsional lewat `MediaRecorder` (`src/lib/use-voice-recorder.ts`):
+  maks 60 detik dengan auto-stop, mime dinormalisasi ke `audio/webm`/`audio/mp4`
+  (Safari hanya mp4) agar lolos allowlist server, pratinjau `<audio>`, tombol
+  hapus, dan pesan jelas bila mikrofon ditolak atau browser tidak mendukung.
+- Setelah sukses: id kartu disimpan di `sessionStorage`, lalu navigasi ke wall;
+  kartu tersebut diberi ring highlight dan di-scroll ke tengah.
+- Back browser di layar ini kembali ke kartu hasil, bukan keluar dari tab.
+
 **Layar capture** — latar `#000000`, teks/ikon putih:
 - Tombol kembali bulat **44 px** di kiri atas (header ±64 px tinggi).
 - Area kamera **full-bleed**: mengisi lebar penuh dan sisa tinggi viewport setelah
