@@ -10,9 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SiteRouteImport } from './routes/_site'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
+import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
+import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as InvitationSlugIndexRouteImport } from './routes/invitation.$slug.index'
 import { Route as SiteProjectsIndexRouteImport } from './routes/_site.projects.index'
@@ -27,9 +31,19 @@ const RssDotxmlRoute = RssDotxmlRouteImport.update({
   path: '/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
@@ -40,6 +54,16 @@ const InvitationSlugRoute = InvitationSlugRouteImport.update({
   id: '/invitation/$slug',
   path: '/invitation/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardLoginRoute = DashboardLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAuthRoute = DashboardAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const SiteAboutRoute = SiteAboutRouteImport.update({
   id: '/about',
@@ -85,9 +109,13 @@ const SiteBlogSlugRoute = SiteBlogSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
   '/about': typeof SiteAboutRoute
+  '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/login': typeof DashboardLoginRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
@@ -99,7 +127,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
   '/about': typeof SiteAboutRoute
+  '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/login': typeof DashboardLoginRoute
   '/': typeof SiteIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
@@ -111,10 +142,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
   '/_site/about': typeof SiteAboutRoute
+  '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/login': typeof DashboardLoginRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
   '/_site/': typeof SiteIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/_site/blog/$slug': typeof SiteBlogSlugRoute
   '/_site/projects/$slug': typeof SiteProjectsSlugRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
@@ -127,9 +162,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/rss.xml'
     | '/about'
+    | '/dashboard/auth'
+    | '/dashboard/login'
     | '/invitation/$slug'
+    | '/dashboard/'
     | '/blog/$slug'
     | '/projects/$slug'
     | '/invitation/$slug/photobooth'
@@ -141,7 +180,10 @@ export interface FileRouteTypes {
   to:
     | '/rss.xml'
     | '/about'
+    | '/dashboard/auth'
+    | '/dashboard/login'
     | '/'
+    | '/dashboard'
     | '/blog/$slug'
     | '/projects/$slug'
     | '/invitation/$slug/photobooth'
@@ -152,10 +194,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_site'
+    | '/dashboard'
     | '/rss.xml'
     | '/_site/about'
+    | '/dashboard/auth'
+    | '/dashboard/login'
     | '/invitation/$slug'
     | '/_site/'
+    | '/dashboard/'
     | '/_site/blog/$slug'
     | '/_site/projects/$slug'
     | '/invitation/$slug/photobooth'
@@ -167,6 +213,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
+  DashboardRoute: typeof DashboardRouteWithChildren
   RssDotxmlRoute: typeof RssDotxmlRoute
   InvitationSlugRoute: typeof InvitationSlugRouteWithChildren
 }
@@ -180,12 +227,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_site': {
       id: '/_site'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SiteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_site/': {
       id: '/_site/'
@@ -200,6 +261,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/invitation/$slug'
       preLoaderRoute: typeof InvitationSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/login': {
+      id: '/dashboard/login'
+      path: '/login'
+      fullPath: '/dashboard/login'
+      preLoaderRoute: typeof DashboardLoginRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/auth': {
+      id: '/dashboard/auth'
+      path: '/auth'
+      fullPath: '/dashboard/auth'
+      preLoaderRoute: typeof DashboardAuthRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_site/about': {
       id: '/_site/about'
@@ -280,6 +355,22 @@ const SiteRouteChildren: SiteRouteChildren = {
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
+interface DashboardRouteChildren {
+  DashboardAuthRoute: typeof DashboardAuthRoute
+  DashboardLoginRoute: typeof DashboardLoginRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAuthRoute: DashboardAuthRoute,
+  DashboardLoginRoute: DashboardLoginRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 interface InvitationSlugRouteChildren {
   InvitationSlugPhotoboothRoute: typeof InvitationSlugPhotoboothRoute
   InvitationSlugWallRoute: typeof InvitationSlugWallRoute
@@ -298,6 +389,7 @@ const InvitationSlugRouteWithChildren = InvitationSlugRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
+  DashboardRoute: DashboardRouteWithChildren,
   RssDotxmlRoute: RssDotxmlRoute,
   InvitationSlugRoute: InvitationSlugRouteWithChildren,
 }
