@@ -419,9 +419,25 @@ bekerja.
 
 ### 5.8 Deploy
 
-Tidak ada perubahan pipeline. `Dockerfile` sudah menyalin `src`, `dist`, dan
-`.content-collections`; aset baru di `public/` ikut ke `dist/client`. Deploy tetap
-`docker compose up` melalui `.github/workflows/deploy.yml`.
+`Dockerfile` sudah menyalin `src`, `dist`, dan `.content-collections`; aset baru di
+`public/` ikut ke `dist/client`. Deploy tetap `docker compose up` melalui
+`.github/workflows/deploy.yml`.
+
+Tambahan khusus photo wall:
+
+- **Compose kini ikut terkirim.** `docker-compose.yml` berada di VPS dan bukan
+  bagian dari image, jadi sebelumnya perubahan seperti `env_file: .env` tidak
+  pernah sampai ke server (kejadian nyata: produksi jalan tanpa kredensial
+  Supabase). Job deploy sekarang menjalankan `appleboy/scp-action` untuk
+  mengunggah compose sebelum recreate container.
+- **Env produksi** ada di `~/anaslabs/.env` (di luar repo, `chmod 600`):
+  `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `WALL_ADMIN_TOKEN`. Verifikasi setelah
+deploy: `docker compose exec app printenv | grep -c SUPABASE` → `2`.
+- **Keep-alive Supabase** (`.github/workflows/supabase-keepalive.yml`): cron tiap
+  3 hari meminta `/invitation/test/wall` dan gagal keras bila halaman
+  melaporkan "Wall belum bisa dimuat", sehingga project free tidak di-pause
+  (pause otomatis setelah 7 hari tanpa aktivitas) dan kita diberi tahu kalau
+  kredensial/DB bermasalah.
 
 ### 5.10 Audit aksesibilitas & performa
 
