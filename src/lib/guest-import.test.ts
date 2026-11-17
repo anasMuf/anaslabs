@@ -273,6 +273,26 @@ describe("planGuestImport", () => {
 		expect(restorePlan.archive).toHaveLength(0);
 	});
 
+	it("only archives guests of the sheet being imported", () => {
+		const otherSheet = existingGuest({
+			id: "guest-9",
+			slug: "abdullah",
+			name: "Abdullah",
+			nameKey: "abdullah",
+			source: "mila",
+		});
+
+		const plan = planGuestImport(
+			[row()],
+			[existingGuest({}), otherSheet],
+			"anas",
+			NOW,
+		);
+
+		expect(plan.archive).toHaveLength(0);
+		expect(plan.restore).toHaveLength(0);
+	});
+
 	it("never rewrites a slug because the name changed", () => {
 		const plan = planGuestImport(
 			[row({ name: "cak abid", nameKey: "cak abid" })],

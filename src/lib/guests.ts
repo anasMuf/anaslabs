@@ -208,10 +208,11 @@ export const importGuests = createServerFn({ method: "POST" })
 		}
 
 		const supabase = getSupabaseAdmin();
+		// Load every guest, not just this sheet: `slug` is unique across the whole
+		// table, so a Mila name must not reuse a slug Anas already took.
 		const { data: rows, error } = await supabase
 			.from("guests")
-			.select(GUEST_COLUMNS)
-			.eq("source_sheet", data.source);
+			.select(GUEST_COLUMNS);
 
 		if (error) {
 			return {
