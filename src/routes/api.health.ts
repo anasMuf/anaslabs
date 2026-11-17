@@ -19,6 +19,10 @@ export const Route = createFileRoute("/api/health")({
 						supabaseSecret: Boolean(process.env.SUPABASE_SECRET_KEY),
 						supabasePublishable: Boolean(process.env.SUPABASE_PUBLISHABLE_KEY),
 						sessionSecret: Boolean(process.env.DASHBOARD_SESSION_SECRET),
+						passwordMode: Boolean(process.env.DASHBOARD_PASSWORD_HASH),
+						// Length only: a mangled `.env` value shows up as a suspicious number.
+						passwordHashLength:
+							process.env.DASHBOARD_PASSWORD_HASH?.length ?? 0,
 						allowlistCount: parseDashboardAllowlist(
 							process.env.DASHBOARD_EMAILS,
 						).length,

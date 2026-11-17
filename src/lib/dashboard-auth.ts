@@ -2,8 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import {
 	deleteCookie,
 	getCookie,
+	getRequest,
 	setCookie,
 } from "@tanstack/react-start/server";
+import { verifyDashboardPassword } from "./dashboard-password";
 import {
 	DASHBOARD_COOKIE,
 	isAllowedDashboardEmail,
@@ -12,6 +14,11 @@ import {
 	signDashboardSession,
 	verifyDashboardSession,
 } from "./dashboard-session";
+import {
+	checkRateLimit,
+	type RateLimitState,
+	recordAttempt,
+} from "./rate-limit";
 
 /**
  * Dashboard auth server functions.
@@ -29,6 +36,44 @@ export interface DashboardAuthConfigPublic {
 	url: string;
 	publishableKey: string;
 }
+
+export type DashboardLoginMode = "password" | "magic-link" | "none";
+
+const LOGIN_LIMIT = 5;
+const LOGIN_WINDOW_MS = 10 * 60 * 1000;
+const attempts = new Map<string, RateLimitState>();
+
+function identity(): string {
+	return process.env.DASHBOARD_IDENTITY?.trim() || "Admin";
+}
+
+function clientKey(): string {
+	try {
+		const request = getRequest();
+		const forwarded = request.headers.get("x-forwarded-for");
+		if (forwarded) return forwarded.split(",")[0].trim();
+		return request.headers.get("x-real-ip") ?? "lokal";
+	} catch {
+		return "lokal";
+	}
+}
+
+/** Which login form to show; password mode wins when a hash is configured. */
+export const getDashboardLoginMode = createServerFn({ method: "GET" }).handler(
+	async (): Promise<{ mode: DashboardLoginMode; identity: string }> => {
+		if (process.env.DASHBOARD_PASSWORD_HASH) {
+			return { mode: "password", identity: identity() };
+		}
+
+		const canMagicLink = Boolean(
+			process.env.SUPABASE_URL &&
+				process.env.SUPABASE_PUBLISHABLE_KEY &&
+				parseDashboardAllowlist(process.env.DASHBOARD_EMAILS).length > 0,
+		);
+
+		return { mode: canMagicLink ? "magic-link" : "none", identity: identity() };
+	},
+);
 
 /** Public Supabase Auth config for the browser; `null` means not configured. */
 export const getDashboardAuthConfig = createServerFn({ method: "GET" }).handler(
@@ -55,6 +100,11 @@ export const getDashboardUser = createServerFn({ method: "GET" }).handler(
 
 		const session = verifyDashboardSession(getCookie(DASHBOARD_COOKIE), secret);
 		if (!session) return null;
+
+		// Password mode has no per-user email; the signed cookie is the identity.
+		if (process.env.DASHBOARD_PASSWORD_HASH) {
+			return { email: session.email };
+		}
 
 		// Re-check the allowlist on every read so removing an email in the env
 		// invalidates an already-issued cookie.
@@ -154,3 +204,62 @@ export const signOutDashboard = createServerFn({ method: "POST" }).handler(
 		return { ok: true };
 	},
 );
+
+/**
+ * Password login.
+ *
+ * Shares the same signed cookie as the magic-link path, so everything downstream
+ * (guard, allowlist re-check, sign out) is unchanged. Attempts are throttled per
+ * IP in memory: enough to stop guessing against a single container.
+ */
+export const createDashboardPasswordSession = createServerFn({ method: "POST" })
+	.inputValidator((data: { password: string }) => ({
+		password: String(data?.password ?? ""),
+	}))
+	.handler(async ({ data }): Promise<CreateResult> => {
+		const secret = sessionSecret();
+		if (!secret) {
+			return {
+				ok: false,
+				error: "DASHBOARD_SESSION_SECRET belum diset di server.",
+			};
+		}
+
+		const hash = process.env.DASHBOARD_PASSWORD_HASH;
+		if (!hash) {
+			return { ok: false, error: "Login password belum diaktifkan di server." };
+		}
+
+		const key = clientKey();
+		const now = Date.now();
+		const limit = checkRateLimit(attempts.get(key), now, LOGIN_LIMIT);
+		if (!limit.allowed) {
+			const minutes = Math.ceil(limit.retryAfterMs / 60_000);
+			return {
+				ok: false,
+				error: `Terlalu banyak percobaan. Coba lagi dalam ${minutes} menit.`,
+			};
+		}
+
+		if (!verifyDashboardPassword(data.password, hash)) {
+			attempts.set(key, recordAttempt(attempts.get(key), now, LOGIN_WINDOW_MS));
+			return { ok: false, error: "Password salah." };
+		}
+
+		attempts.delete(key);
+
+		const email = identity();
+		setCookie(
+			DASHBOARD_COOKIE,
+			signDashboardSession({ email, exp: now + SESSION_TTL_MS }, secret),
+			{
+				httpOnly: true,
+				sameSite: "lax",
+				secure: process.env.NODE_ENV === "production",
+				path: "/",
+				maxAge: SESSION_TTL_MS / 1000,
+			},
+		);
+
+		return { ok: true, email };
+	});

@@ -56,18 +56,29 @@ multi-bahasa.
 
 ## Setup manual (di luar kode)
 
-1. Supabase → Authentication → URL Configuration: tambah
-   `https://anaslabs.my.id/dashboard/auth` dan
-   `http://localhost:3000/dashboard/auth`.
-2. `.env` (lokal) & `~/anaslabs/.env` (VPS): `SUPABASE_PUBLISHABLE_KEY`,
-   `DASHBOARD_EMAILS` (2 email, dipisah koma), `DASHBOARD_SESSION_SECRET`.
+1. **Login password (cara utama)**
+   ```bash
+   node scripts/dashboard-password.mjs "password-panjang-anda"
+   ```
+   Tempel baris `DASHBOARD_PASSWORD_HASH=…` ke `.env` lokal dan `~/anaslabs/.env`,
+   tambahkan `DASHBOARD_IDENTITY=…` bila ingin nama tampil, lalu **restart server**.
+2. **Login magic link (opsional)**: Supabase → Authentication → URL Configuration,
+   tambahkan `https://anaslabs.my.id/dashboard/auth` dan
+   `http://localhost:3000/dashboard/auth`, lalu isi `DASHBOARD_EMAILS`.
+   Kena kuota email free (±2/jam), jadi tidak dipakai sebagai jalur utama.
 3. Jalankan migrasi `supabase/migrations/0002_guests.sql` di SQL Editor (Task 2).
 
-**Catatan arsitektur:** URL + publishable key Supabase **tidak** memakai variabel
-`VITE_*`. Image dibangun di GitHub Actions yang tidak punya `.env`, sehingga nilai
-build-time akan kosong di produksi. Keduanya dibaca di server lalu dikirim ke
-browser lewat `getDashboardAuthConfig`; publishable key memang publik dan tidak
-bisa melewati RLS.
+**Catatan arsitektur:**
+- URL + publishable key Supabase **tidak** memakai variabel `VITE_*`. Image
+  dibangun di GitHub Actions yang tidak punya `.env`, sehingga nilai build-time
+  akan kosong di produksi. Keduanya dibaca di server lalu dikirim ke browser
+  lewat `getDashboardAuthConfig`.
+- Hash password **wajib** memakai pemisah `:` (bukan `$`): Vite mengekspansi `$`
+  di nilai `.env` (dotenv-expand), sehingga hash `$`-separated tiba di server
+  dalam keadaan rusak — pernah kejadian dan membuat verifikasi selalu gagal.
+- Sesi: cookie `dash_session` httpOnly + `secure` (mengikuti NODE_ENV), bertanda
+  tangan HMAC, 7 hari. Password dan magic link berbagi cookie yang sama.
+- Rate limit login: 5 percobaan / 10 menit per IP, disimpan di memori proses.
 
 ## Task 1 — Auth & shell dashboard
 
@@ -75,14 +86,18 @@ Deliverable: login magic link → cookie sesi → halaman `/dashboard` yang
 terlindungi.
 
 - [x] `src/lib/dashboard-session.ts` — tanda tangan/verifikasi cookie (HMAC,
-      7 hari) + 8 unit test.
-- [x] `src/lib/dashboard-auth.ts` — `getDashboardAuthConfig`,
-      `createDashboardSession`, `getDashboardUser`, `signOutDashboard`.
+      7 hari) + unit test.
+- [x] `src/lib/dashboard-password.ts` + `scripts/dashboard-password.mjs` — login
+      password (scrypt), pemisah `:`, unit test.
+- [x] `src/lib/rate-limit.ts` — 5 percobaan / 10 menit, unit test.
+- [x] `src/lib/dashboard-auth.ts` — `getDashboardLoginMode`,
+      `createDashboardPasswordSession`, `createDashboardSession` (magic link),
+      `getDashboardUser`, `signOutDashboard`.
 - [x] `src/lib/supabase-browser.ts` — client dibuat dari config runtime.
 - [x] Route `/dashboard` (guard), `/dashboard/login`, `/dashboard/auth`.
-- [x] Verifikasi CDP: tanpa sesi → `/dashboard/login`; cookie palsu → tetap
-      redirect; `/dashboard/auth` tanpa token → pesan "Tautan tidak valid";
-      halaman login mendeteksi config (tanpa peringatan setup).
+- [x] Verifikasi CDP: password salah → "Password salah."; password benar →
+      `/dashboard` dengan cookie httpOnly+secure yang bertahan setelah reload;
+      "Keluar" → kembali ke login. Tanpa sesi → redirect; cookie palsu → redirect.
 
 ## Task berikutnya (dibuat setelah Task 1 selesai)
 
