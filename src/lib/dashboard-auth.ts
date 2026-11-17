@@ -2,30 +2,23 @@ import { createServerFn } from "@tanstack/react-start";
 import {
 	deleteCookie,
 	getCookie,
-	getRequest,
 	setCookie,
 } from "@tanstack/react-start/server";
-import { verifyDashboardPassword } from "./dashboard-password";
 import {
 	DASHBOARD_COOKIE,
-	isAllowedDashboardEmail,
-	parseDashboardAllowlist,
 	SESSION_TTL_MS,
 	signDashboardSession,
 	verifyDashboardSession,
 } from "./dashboard-session";
-import {
-	checkRateLimit,
-	type RateLimitState,
-	recordAttempt,
-} from "./rate-limit";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 /**
- * Dashboard auth server functions.
+ * Dashboard auth.
  *
- * The browser signs in with Supabase (magic link) and hands the resulting access
- * token over exactly once; from then on the session is our own signed httpOnly
- * cookie, so no Supabase token lives in JavaScript for the rest of the visit.
+ * Credentials live in Supabase Auth (email + password, managed from the Supabase
+ * dashboard) and access is gated by the `dashboard_users` table. Nothing about
+ * the login is stored in the environment, so a stale process or dotenv
+ * interpolation cannot break it.
  */
 
 export interface DashboardUser {
@@ -37,43 +30,42 @@ export interface DashboardAuthConfigPublic {
 	publishableKey: string;
 }
 
-export type DashboardLoginMode = "password" | "magic-link" | "none";
+export type DashboardLoginMode = "supabase" | "none";
 
-const LOGIN_LIMIT = 5;
-const LOGIN_WINDOW_MS = 10 * 60 * 1000;
-const attempts = new Map<string, RateLimitState>();
+type CreateResult = { ok: true; email: string } | { ok: false; error: string };
 
-function identity(): string {
-	return process.env.DASHBOARD_IDENTITY?.trim() || "Admin";
+type AllowCheck = "allowed" | "denied" | "missing";
+
+function sessionSecret(): string | null {
+	const secret = process.env.DASHBOARD_SESSION_SECRET;
+	return secret && secret.length >= 16 ? secret : null;
 }
 
-function clientKey(): string {
-	try {
-		const request = getRequest();
-		const forwarded = request.headers.get("x-forwarded-for");
-		if (forwarded) return forwarded.split(",")[0].trim();
-		return request.headers.get("x-real-ip") ?? "lokal";
-	} catch {
-		return "lokal";
+/**
+ * Email must exist in `dashboard_users`; the table is the access list.
+ *
+ * `missing` is reported separately from `denied` so an un-run migration shows up
+ * as a setup problem instead of looking like a rejected account.
+ */
+async function checkAllowedEmail(email: string): Promise<AllowCheck> {
+	const supabase = getSupabaseAdmin();
+	const { data, error } = await supabase
+		.from("dashboard_users")
+		.select("email")
+		.eq("email", email)
+		.maybeSingle();
+
+	if (error) {
+		if (error.code === "PGRST205") return "missing";
+		console.error("[dashboard] gagal membaca dashboard_users:", error.message);
+		return "denied";
 	}
+
+	return data ? "allowed" : "denied";
 }
 
-/** Which login form to show; password mode wins when a hash is configured. */
-export const getDashboardLoginMode = createServerFn({ method: "GET" }).handler(
-	async (): Promise<{ mode: DashboardLoginMode; identity: string }> => {
-		if (process.env.DASHBOARD_PASSWORD_HASH) {
-			return { mode: "password", identity: identity() };
-		}
-
-		const canMagicLink = Boolean(
-			process.env.SUPABASE_URL &&
-				process.env.SUPABASE_PUBLISHABLE_KEY &&
-				parseDashboardAllowlist(process.env.DASHBOARD_EMAILS).length > 0,
-		);
-
-		return { mode: canMagicLink ? "magic-link" : "none", identity: identity() };
-	},
-);
+const MISSING_TABLE_PESAN =
+	"Tabel dashboard_users belum ada. Jalankan supabase/migrations/0002_dashboard_users.sql di SQL Editor, lalu coba lagi.";
 
 /** Public Supabase Auth config for the browser; `null` means not configured. */
 export const getDashboardAuthConfig = createServerFn({ method: "GET" }).handler(
@@ -86,12 +78,18 @@ export const getDashboardAuthConfig = createServerFn({ method: "GET" }).handler(
 	},
 );
 
-type CreateResult = { ok: true; email: string } | { ok: false; error: string };
+export const getDashboardLoginMode = createServerFn({ method: "GET" }).handler(
+	async (): Promise<{ mode: DashboardLoginMode }> => {
+		const configured = Boolean(
+			process.env.SUPABASE_URL &&
+				process.env.SUPABASE_PUBLISHABLE_KEY &&
+				process.env.SUPABASE_SECRET_KEY &&
+				sessionSecret(),
+		);
 
-function sessionSecret(): string | null {
-	const secret = process.env.DASHBOARD_SESSION_SECRET;
-	return secret && secret.length >= 16 ? secret : null;
-}
+		return { mode: configured ? "supabase" : "none" };
+	},
+);
 
 export const getDashboardUser = createServerFn({ method: "GET" }).handler(
 	async (): Promise<DashboardUser | null> => {
@@ -101,21 +99,17 @@ export const getDashboardUser = createServerFn({ method: "GET" }).handler(
 		const session = verifyDashboardSession(getCookie(DASHBOARD_COOKIE), secret);
 		if (!session) return null;
 
-		// Password mode has no per-user email; the signed cookie is the identity.
-		if (process.env.DASHBOARD_PASSWORD_HASH) {
-			return { email: session.email };
-		}
-
-		// Re-check the allowlist on every read so removing an email in the env
-		// invalidates an already-issued cookie.
-		if (!isAllowedDashboardEmail(session.email, process.env.DASHBOARD_EMAILS)) {
-			return null;
-		}
+		// Re-check the access list on every read so removing a row revokes access.
+		if ((await checkAllowedEmail(session.email)) !== "allowed") return null;
 
 		return { email: session.email };
 	},
 );
 
+/**
+ * Exchanges a Supabase Auth access token (obtained by `signInWithPassword` in the
+ * browser) for our own signed httpOnly cookie.
+ */
 export const createDashboardSession = createServerFn({ method: "POST" })
 	.inputValidator((data: { accessToken: string }) => ({
 		accessToken: String(data?.accessToken ?? ""),
@@ -140,7 +134,6 @@ export const createDashboardSession = createServerFn({ method: "POST" })
 
 		let email: string | undefined;
 		try {
-			// Verify the token against Supabase itself; never trust a client payload.
 			const response = await fetch(`${url}/auth/v1/user`, {
 				headers: {
 					apikey: adminKey,
@@ -162,24 +155,14 @@ export const createDashboardSession = createServerFn({ method: "POST" })
 		if (!email) {
 			return { ok: false, error: "Akun ini tidak punya alamat email." };
 		}
-
-		const allowlist = parseDashboardAllowlist(process.env.DASHBOARD_EMAILS);
-		if (!allowlist.includes(email)) {
-			// Log both sides so a mismatch (typo, different address) and a server that
-			// never loaded the env are distinguishable in one glance.
-			console.error(
-				"[dashboard] email ditolak:",
-				email,
-				"| entri allowlist:",
-				allowlist.length,
-			);
-
+		const allowed = await checkAllowedEmail(email);
+		if (allowed === "missing") {
+			return { ok: false, error: MISSING_TABLE_PESAN };
+		}
+		if (allowed !== "allowed") {
 			return {
 				ok: false,
-				error:
-					allowlist.length === 0
-						? "Server belum membaca DASHBOARD_EMAILS. Restart server setelah mengubah .env, lalu coba lagi."
-						: `Email ${email} tidak punya akses. Daftar akses berisi ${allowlist.length} email.`,
+				error: `Email ${email} tidak terdaftar di dashboard_users.`,
 			};
 		}
 
@@ -204,62 +187,3 @@ export const signOutDashboard = createServerFn({ method: "POST" }).handler(
 		return { ok: true };
 	},
 );
-
-/**
- * Password login.
- *
- * Shares the same signed cookie as the magic-link path, so everything downstream
- * (guard, allowlist re-check, sign out) is unchanged. Attempts are throttled per
- * IP in memory: enough to stop guessing against a single container.
- */
-export const createDashboardPasswordSession = createServerFn({ method: "POST" })
-	.inputValidator((data: { password: string }) => ({
-		password: String(data?.password ?? ""),
-	}))
-	.handler(async ({ data }): Promise<CreateResult> => {
-		const secret = sessionSecret();
-		if (!secret) {
-			return {
-				ok: false,
-				error: "DASHBOARD_SESSION_SECRET belum diset di server.",
-			};
-		}
-
-		const hash = process.env.DASHBOARD_PASSWORD_HASH;
-		if (!hash) {
-			return { ok: false, error: "Login password belum diaktifkan di server." };
-		}
-
-		const key = clientKey();
-		const now = Date.now();
-		const limit = checkRateLimit(attempts.get(key), now, LOGIN_LIMIT);
-		if (!limit.allowed) {
-			const minutes = Math.ceil(limit.retryAfterMs / 60_000);
-			return {
-				ok: false,
-				error: `Terlalu banyak percobaan. Coba lagi dalam ${minutes} menit.`,
-			};
-		}
-
-		if (!verifyDashboardPassword(data.password, hash)) {
-			attempts.set(key, recordAttempt(attempts.get(key), now, LOGIN_WINDOW_MS));
-			return { ok: false, error: "Password salah." };
-		}
-
-		attempts.delete(key);
-
-		const email = identity();
-		setCookie(
-			DASHBOARD_COOKIE,
-			signDashboardSession({ email, exp: now + SESSION_TTL_MS }, secret),
-			{
-				httpOnly: true,
-				sameSite: "lax",
-				secure: process.env.NODE_ENV === "production",
-				path: "/",
-				maxAge: SESSION_TTL_MS / 1000,
-			},
-		);
-
-		return { ok: true, email };
-	});

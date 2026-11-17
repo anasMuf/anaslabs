@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-	isAllowedDashboardEmail,
-	parseDashboardAllowlist,
 	SESSION_TTL_MS,
 	signDashboardSession,
 	verifyDashboardSession,
@@ -58,29 +56,5 @@ describe("dashboard session", () => {
 		expect(verifyDashboardSession("", SECRET, now)).toBeNull();
 		expect(verifyDashboardSession("tanpa-titik", SECRET, now)).toBeNull();
 		expect(verifyDashboardSession("a.", SECRET, now)).toBeNull();
-	});
-});
-
-describe("isAllowedDashboardEmail", () => {
-	it("matches case-insensitively against the list", () => {
-		const list = " Anas@Example.com , mila@example.com ";
-		expect(isAllowedDashboardEmail("anas@example.com", list)).toBe(true);
-		expect(isAllowedDashboardEmail("MILA@example.com", list)).toBe(true);
-	});
-
-	it("tolerates quoted values and trailing commas", () => {
-		const list = "\"anas@example.com\",'mila@example.com',";
-		expect(parseDashboardAllowlist(list)).toEqual([
-			"anas@example.com",
-			"mila@example.com",
-		]);
-	});
-
-	it("rejects outsiders and an unset list", () => {
-		expect(
-			isAllowedDashboardEmail("orang@example.com", "anas@example.com"),
-		).toBe(false);
-		expect(isAllowedDashboardEmail("anas@example.com", undefined)).toBe(false);
-		expect(isAllowedDashboardEmail("", "anas@example.com")).toBe(false);
 	});
 });

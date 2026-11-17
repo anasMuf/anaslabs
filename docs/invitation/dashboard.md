@@ -5,9 +5,11 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 
 ## Requirements (IMMUTABLE)
 
-- **Login**: Supabase Auth magic link (email), hanya email di `DASHBOARD_EMAILS`
-  yang boleh masuk. Setelah login, browser memakai **cookie httpOnly** milik
-  aplikasi, bukan token Supabase.
+- **Login**: Supabase Auth (email + password, akun dibuat di Supabase →
+  Authentication → Users). Akses dibatasi tabel `dashboard_users`; email di luar
+  tabel ditolak walaupun passwordnya benar. Setelah login, browser memakai
+  **cookie httpOnly** milik aplikasi, bukan token Supabase. Tidak ada kredensial
+  dashboard di `.env`.
 - **Data tamu**: sumber awal Google Sheets (per sheet = grup), diimpor ke tabel
   `guests` di Supabase. Upsert berdasarkan nomor telepon yang sudah dinormalisasi
   ke format `62…`. Slug tamu = nama + 4 karakter acak (`budi-santoso-a1b2`).
@@ -24,8 +26,8 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 ## Success Criteria
 
 - [ ] `/dashboard` tanpa sesi → redirect ke `/dashboard/login`.
-- [ ] Login magic link menghasilkan cookie `dash_session` (httpOnly, 7 hari) dan
-      email di luar allowlist ditolak dengan pesan jelas.
+- [ ] Login email + password menghasilkan cookie `dash_session` (httpOnly, 7
+      hari) dan email di luar `dashboard_users` ditolak dengan pesan jelas.
 - [ ] Cookie dipalsukan/kedaluwarsa → semua halaman dashboard redirect lagi.
 - [ ] Tamu hasil impor punya slug unik dan bisa dibuka di `/invitation/:slug`.
 - [ ] `invitation_opened_at` terisi tepat sekali per tamu.
@@ -56,48 +58,53 @@ multi-bahasa.
 
 ## Setup manual (di luar kode)
 
-1. **Login password (cara utama)**
-   ```bash
-   node scripts/dashboard-password.mjs "password-panjang-anda"
+1. **Tabel akses**: jalankan `supabase/migrations/0002_dashboard_users.sql` di
+   SQL Editor, lalu isi email Anda berdua:
+   ```sql
+   insert into public.dashboard_users (email) values
+     ('nama1@gmail.com'),
+     ('nama2@gmail.com')
+   on conflict (email) do nothing;
    ```
-   Tempel baris `DASHBOARD_PASSWORD_HASH=…` ke `.env` lokal dan `~/anaslabs/.env`,
-   tambahkan `DASHBOARD_IDENTITY=…` bila ingin nama tampil, lalu **restart server**.
-2. **Login magic link (opsional)**: Supabase → Authentication → URL Configuration,
-   tambahkan `https://anaslabs.my.id/dashboard/auth` dan
-   `http://localhost:3000/dashboard/auth`, lalu isi `DASHBOARD_EMAILS`.
-   Kena kuota email free (±2/jam), jadi tidak dipakai sebagai jalur utama.
-3. Jalankan migrasi `supabase/migrations/0002_guests.sql` di SQL Editor (Task 2).
+2. **Akun login**: Supabase → Authentication → Users → *Add user*, isi email yang
+   sama dengan langkah 1 dan password (minimal 8 karakter). Centang
+   *Auto Confirm User* agar tidak perlu klik email konfirmasi.
+3. **Env server**: pastikan `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
+   `SUPABASE_PUBLISHABLE_KEY`, `DASHBOARD_SESSION_SECRET` (≥16 karakter) ada di
+   `.env` lokal dan `~/anaslabs/.env`, lalu **restart server**.
+4. Jalankan migrasi `supabase/migrations/0003_guests.sql` di SQL Editor (Task 2).
 
 **Catatan arsitektur:**
 - URL + publishable key Supabase **tidak** memakai variabel `VITE_*`. Image
   dibangun di GitHub Actions yang tidak punya `.env`, sehingga nilai build-time
   akan kosong di produksi. Keduanya dibaca di server lalu dikirim ke browser
   lewat `getDashboardAuthConfig`.
-- Hash password **wajib** memakai pemisah `:` (bukan `$`): Vite mengekspansi `$`
-  di nilai `.env` (dotenv-expand), sehingga hash `$`-separated tiba di server
-  dalam keadaan rusak — pernah kejadian dan membuat verifikasi selalu gagal.
 - Sesi: cookie `dash_session` httpOnly + `secure` (mengikuti NODE_ENV), bertanda
-  tangan HMAC, 7 hari. Password dan magic link berbagi cookie yang sama.
-- Rate limit login: 5 percobaan / 10 menit per IP, disimpan di memori proses.
+  tangan HMAC, 7 hari. Browser memakai sesi Supabase sekali saja (untuk
+  `signInWithPassword`), lalu langsung `signOut` sehingga access token tidak
+  tersimpan sebagai sesi aplikasi.
+- `getDashboardUser` mengecek ulang `dashboard_users` setiap request: hapus satu
+  baris = akses dicabut seketika, tanpa restart.
+- Tidak ada secret login di `.env`, jadi proses lama/stale tidak bisa membuat
+  login gagal seperti pada pendekatan hash password sebelumnya.
 
 ## Task 1 — Auth & shell dashboard
 
-Deliverable: login magic link → cookie sesi → halaman `/dashboard` yang
+Deliverable: login email + password → cookie sesi → halaman `/dashboard` yang
 terlindungi.
 
 - [x] `src/lib/dashboard-session.ts` — tanda tangan/verifikasi cookie (HMAC,
       7 hari) + unit test.
-- [x] `src/lib/dashboard-password.ts` + `scripts/dashboard-password.mjs` — login
-      password (scrypt), pemisah `:`, unit test.
-- [x] `src/lib/rate-limit.ts` — 5 percobaan / 10 menit, unit test.
-- [x] `src/lib/dashboard-auth.ts` — `getDashboardLoginMode`,
-      `createDashboardPasswordSession`, `createDashboardSession` (magic link),
-      `getDashboardUser`, `signOutDashboard`.
+- [x] `src/lib/dashboard-auth.ts` — `getDashboardAuthConfig`,
+      `getDashboardLoginMode`, `createDashboardSession` (verifikasi token Supabase
+      + cek `dashboard_users`), `getDashboardUser`, `signOutDashboard`.
+- [x] `supabase/migrations/0002_dashboard_users.sql` — tabel allowlist akses.
 - [x] `src/lib/supabase-browser.ts` — client dibuat dari config runtime.
 - [x] Route `/dashboard` (guard), `/dashboard/login`, `/dashboard/auth`.
-- [x] Verifikasi CDP: password salah → "Password salah."; password benar →
-      `/dashboard` dengan cookie httpOnly+secure yang bertahan setelah reload;
-      "Keluar" → kembali ke login. Tanpa sesi → redirect; cookie palsu → redirect.
+- [x] Verifikasi CDP: password salah → "Email atau password salah."; email di
+      luar `dashboard_users` → ditolak; kredensial benar → `/dashboard` dengan
+      cookie httpOnly yang bertahan setelah reload; "Keluar" → kembali ke login.
+      Tanpa sesi → redirect; cookie palsu → redirect.
 
 ## Task berikutnya (dibuat setelah Task 1 selesai)
 
