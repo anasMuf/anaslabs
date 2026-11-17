@@ -22,8 +22,10 @@ if (!password) {
 	process.exit(1);
 }
 
-if (password.length < 12) {
-	console.error("Password terlalu pendek: minimal 12 karakter.");
+const MIN_LENGTH = 8;
+
+if (password.length < MIN_LENGTH) {
+	console.error(`Password terlalu pendek: minimal ${MIN_LENGTH} karakter.`);
 	process.exit(1);
 }
 
