@@ -173,8 +173,13 @@ src/components/invitation/
   ui/{Ornament,SectionHeading,CopyButton,MapsButton,BankLogo,Reveal}.tsx
   ui/InkLine.tsx                # garis tangan dari Figma (357:2215/357:2218), reusable
   ui/ink-line-paths.ts          # data path kedua varian garis (generated dari ekspor Figma)
+  ui/RichText.tsx               # render penekanan `**teks**` jadi <strong>
   audio/{InvitationAudio,MusicButton}.tsx
   photobooth/{PhotoboothPage,PhotoboothCapture,PhotoboothPreview}.tsx
+
+src/lib/
+  rich-text.ts                  # parser `**teks**` (dipakai RichText, ada unit test)
+  invitation.ts                 # helper format tanggal & label
 
 src/lib/photobooth/
   types.ts                     # kontrak layout & settings
@@ -445,7 +450,7 @@ diganti ke `--color-inv-muted` (4.85:1).
 | 1 | Cover (`384:431`) | Ornamen simpul, eyebrow "UNDANGAN PERNIKAHAN", nama "Anas & Mila" (64 px Playfair, `&` maroon), tanggal "19 - 20 Desember 2026" dengan garis kiri-kanan (`357:2215`/`357:2218`: stroke 2 px `#34362E`, ±75 px, konten di tengah layar), "Kepada, <Nama>" dari slug, "Scroll Down" di dasar layar, CTA buka undangan |
 | 2 | Couple (`384:430`) | Heading + intro, profil mempelai pria (label, nama, orang tua), gambar buket, profil mempelai wanita, ornamen penutup |
 | 3 | Event (`384:429`) | Heading + intro, kartu Akad Nikah (tanggal, jadwal 08:00 & 14:00, lokasi, tombol Petunjuk Arah), ornamen, kartu Unduh Mantu (tanggal, waktu, lokasi, Petunjuk Arah) |
-| 4 | Story (`384:2942`) | Heading + intro, timeline 3 babak dengan judul display `Awal Pertemuan`/`Tumbuh Bersama`/`Lembaran Baru` 27 px dan paragraf cerita, garis & marker vertikal, ornamen. `date`/`title` milestone opsional |
+| 4 | Story (`384:2942`) | Heading + intro, timeline 3 babak dengan judul display `Awal Pertemuan`/`Tumbuh Bersama`/`Lembaran Baru` 27 px dan paragraf cerita (frasa kunci di babak ketiga ditebalkan lewat `**...**`), garis & marker vertikal, ornamen. `date`/`title` milestone opsional |
 | 5 | Photobooth (`384:428`) + layar (`384:2550/2589/2631/2760/2817/2787`) | Heading "Potret Hari Ini, Kenangan Abadi", kamera vintage, strip foto dekoratif, tombol "Buka Photobooth" → layar capture gelap (grid 1/2/4, timer off/3s/5s, ganti kamera, galeri) → kartu hasil putih dengan 3 baris teks (lihat 5.5) |
 | 6 | Gift (`384:2909`) | Heading + intro, dua blok transfer bank (metode, nama bank, nomor + Salin, atas nama), divider ornamen, ucapan terima kasih, ornamen |
 | 7 | Closing (`384:427`) | Heading + intro, ornamen, pesan penutup, label & nama pemilik undangan, ornamen |

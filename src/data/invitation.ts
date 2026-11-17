@@ -152,7 +152,7 @@ export const invitation = {
 		},
 		{
 			title: "Lembaran Baru",
-			body: "Orang bilang, apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang. Dan benar, di pertengahan tahun ini, kita dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kita memilih untuk benar-benar bertumbuh bersama.",
+			body: "Orang bilang, **apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang**. Dan benar, di pertengahan tahun ini, kita dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kita memilih untuk benar-benar bertumbuh bersama.",
 		},
 	] as InvitationMilestone[],
 	gifts: [

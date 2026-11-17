@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { invitation } from "#/data/invitation";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
+import RichText from "../ui/RichText";
 import SectionHeading from "../ui/SectionHeading";
 
 /** Story section (Figma 384:2942): editorial timeline of three milestones. */
@@ -35,7 +36,7 @@ export default function Story() {
 								) : null}
 								{milestone.body ? (
 									<p className="text-[13px] font-body leading-[1.7] text-inv-muted">
-										{milestone.body}
+										<RichText text={milestone.body} />
 									</p>
 								) : null}
 							</li>
