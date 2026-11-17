@@ -492,6 +492,18 @@ tombol tutup berukuran 36 px dan target sentuh lain ≥ 44 px.
   mengirim `access-control-allow-origin: *`, terverifikasi) dan menyimpannya di
   cache per URL; bila decode gagal, waveform jatuh ke bar minimum dan audio tetap
   bisa diputar.
+- **Mode admin**: buka `/invitation/$slug/wall?admin=<WALL_ADMIN_TOKEN>`. Token
+diverifikasi lewat server function (`verifyWallAdminToken`, SHA-256 +
+`timingSafeEqual`), lalu dipindah ke `sessionStorage` dan **parameter URL
+dibersihkan** (`replace: true`) supaya tidak tertinggal di address bar/riwayat.
+Saat aktif muncul banner "Mode admin" + tombol "Keluar" dan tombol hapus pada
+tiap kartu, yang membuka dialog konfirmasi ("Hapus kartu ini?"). Hapus = row +
+file foto/thumb/audio, lalu `router.invalidate()` menyegarkan daftar tanpa reload.
+Token salah/absen → UI admin tidak dirender sama sekali.
+- **Verifikasi CDP mode admin**: token salah → tanpa banner/tombol dan URL bersih;
+token benar → banner + tombol hapus per kartu, URL bersih, token tersimpan di
+sessionStorage; hapus 1 kartu → kartu dan filenya hilang, daftar tersegarkan;
+reload → mode admin tetap; "Keluar" → banner dan tombol hilang.
 - **Verifikasi CDP**: 390×844 → 2 kolom, 4/4 thumbnail termuat, tanpa overflow
 horizontal; 768×1024 → 3 kolom; dialog terbuka dengan fokus pada tombol tutup,
 `Escape` menutup dan mengembalikan scroll body.

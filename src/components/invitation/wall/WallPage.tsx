@@ -1,9 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { invitation } from "#/data/invitation";
 import { useLockZoom } from "#/lib/use-lock-zoom";
-import type { WallCard } from "#/lib/wall";
+import { verifyWallAdminToken, type WallCard } from "#/lib/wall";
 import Ornament from "../ui/Ornament";
+import WallDeleteDialog from "./WallDeleteDialog";
 import WallDialog from "./WallDialog";
 import WallTile from "./WallTile";
 
@@ -12,6 +13,8 @@ interface WallPageProps {
 	cards: WallCard[];
 	/** True when the loader could not reach Supabase; guests get a retry notice. */
 	failed?: boolean;
+	/** `?admin=<token>` from the URL; verified on the server before any UI shows. */
+	adminParam?: string;
 }
 
 /**
@@ -24,11 +27,16 @@ export default function WallPage({
 	slug,
 	cards,
 	failed = false,
+	adminParam,
 }: WallPageProps) {
 	useLockZoom();
 	const { sections } = invitation;
 	const copy = sections.wall;
+	const navigate = useNavigate();
+	const router = useRouter();
 	const [active, setActive] = useState<WallCard | null>(null);
+	const [pendingDelete, setPendingDelete] = useState<WallCard | null>(null);
+	const [adminToken, setAdminToken] = useState<string | null>(null);
 	const [newCardId] = useState<string | null>(() => {
 		if (typeof window === "undefined") return null;
 		const id = window.sessionStorage.getItem("wall:new-card");
@@ -42,6 +50,49 @@ export default function WallPage({
 			.getElementById(`wall-card-${newCardId}`)
 			?.scrollIntoView({ block: "center", behavior: "smooth" });
 	}, [newCardId]);
+
+	// Admin mode: the token is verified server-side, then kept in sessionStorage
+	// and stripped from the URL so it does not linger in the address bar or
+	// history. Without a valid token nothing is rendered.
+	useEffect(() => {
+		const candidate =
+			adminParam || window.sessionStorage.getItem("wall:admin-token");
+		if (!candidate) return;
+
+		let cancelled = false;
+
+		void verifyWallAdminToken({ data: { token: candidate } })
+			.then((result) => {
+				if (cancelled) return;
+				if (result.ok) {
+					window.sessionStorage.setItem("wall:admin-token", candidate);
+					setAdminToken(candidate);
+				} else {
+					window.sessionStorage.removeItem("wall:admin-token");
+					setAdminToken(null);
+				}
+			})
+			.catch(() => undefined)
+			.finally(() => {
+				if (!cancelled && adminParam) {
+					void navigate({
+						to: "/invitation/$slug/wall",
+						params: { slug },
+						search: {},
+						replace: true,
+					});
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [adminParam, navigate, slug]);
+
+	const exitAdmin = () => {
+		window.sessionStorage.removeItem("wall:admin-token");
+		setAdminToken(null);
+	};
 
 	return (
 		<main className="min-h-dvh bg-inv-bg font-body text-inv-ink">
@@ -106,6 +157,21 @@ export default function WallPage({
 					{copy.cta}
 				</Link>
 
+				{adminToken ? (
+					<div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-inv-accent/30 bg-inv-card px-4 py-2.5">
+						<p className="text-[11px] leading-[1.6] text-inv-muted">
+							Mode admin · ketuk ikon hapus pada kartu yang ingin dibuang.
+						</p>
+						<button
+							type="button"
+							onClick={exitAdmin}
+							className="shrink-0 whitespace-nowrap font-body text-[11px] text-inv-accent underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+						>
+							Keluar
+						</button>
+					</div>
+				) : null}
+
 				{failed ? (
 					<output className="mt-6 block rounded-2xl border border-inv-accent/30 bg-inv-card px-4 py-3 text-center">
 						<p className="text-[12px] leading-[1.6] text-inv-muted">
@@ -127,13 +193,37 @@ export default function WallPage({
 							<li
 								key={card.id}
 								id={`wall-card-${card.id}`}
-								className="break-inside-avoid"
+								className="relative break-inside-avoid"
 							>
 								<WallTile
 									card={card}
 									onOpen={setActive}
 									highlight={card.id === newCardId}
 								/>
+
+								{adminToken ? (
+									<button
+										type="button"
+										onClick={() => setPendingDelete(card)}
+										aria-label={`Hapus kartu ${card.guestName}`}
+										className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-inv-bg/90 text-inv-accent shadow-[0_2px_8px_rgba(52,54,46,0.2)] backdrop-blur transition-colors hover:bg-inv-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+									>
+										<svg
+											width="15"
+											height="15"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+											focusable="false"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="1.7"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13" />
+										</svg>
+									</button>
+								) : null}
 							</li>
 						))}
 					</ul>
@@ -155,6 +245,18 @@ export default function WallPage({
 
 			{active ? (
 				<WallDialog card={active} onClose={() => setActive(null)} />
+			) : null}
+
+			{adminToken && pendingDelete ? (
+				<WallDeleteDialog
+					card={pendingDelete}
+					token={adminToken}
+					onClose={() => setPendingDelete(null)}
+					onDeleted={() => {
+						setPendingDelete(null);
+						void router.invalidate();
+					}}
+				/>
 			) : null}
 		</main>
 	);

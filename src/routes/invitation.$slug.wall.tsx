@@ -4,6 +4,10 @@ import { invitation } from "#/data/invitation";
 import { listWallCards } from "#/lib/wall";
 
 export const Route = createFileRoute("/invitation/$slug/wall")({
+	validateSearch: (search: Record<string, unknown>): { admin?: string } =>
+		typeof search.admin === "string" && search.admin.length > 0
+			? { admin: search.admin }
+			: {},
 	loader: async () => {
 		try {
 			return { cards: await listWallCards({ data: {} }), failed: false };
@@ -29,6 +33,9 @@ export const Route = createFileRoute("/invitation/$slug/wall")({
 function WallRoute() {
 	const { cards, failed } = Route.useLoaderData();
 	const { slug } = Route.useParams();
+	const { admin } = Route.useSearch();
 
-	return <WallPage slug={slug} cards={cards} failed={failed} />;
+	return (
+		<WallPage slug={slug} cards={cards} failed={failed} adminParam={admin} />
+	);
 }

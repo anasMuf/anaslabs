@@ -255,6 +255,17 @@ function tokensMatch(given: string, expected: string): boolean {
 	return timingSafeEqual(a, b);
 }
 
+/** Lets the wall decide whether to show the admin controls. */
+export const verifyWallAdminToken = createServerFn({ method: "POST" })
+	.inputValidator((data: { token: string }) => ({
+		token: String(data?.token ?? ""),
+	}))
+	.handler(async ({ data }): Promise<{ ok: boolean }> => {
+		const expected = process.env.WALL_ADMIN_TOKEN;
+		if (!expected || !data.token) return { ok: false };
+		return { ok: tokensMatch(data.token, expected) };
+	});
+
 export const deleteWallCard = createServerFn({ method: "POST" })
 	.inputValidator((data: { id: string; token: string }) => data)
 	.handler(async ({ data }): Promise<DeleteResult> => {
