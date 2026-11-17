@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useToast } from "#/components/invitation/ui/Toast";
 import { formatVoiceDuration } from "#/lib/invitation";
 import type { WallImages } from "#/lib/photobooth/wall-export";
 import { useVoiceRecorder, VOICE_MAX_MS } from "#/lib/use-voice-recorder";
@@ -33,10 +34,10 @@ export default function PhotoboothMessage({
 	onBack,
 }: PhotoboothMessageProps) {
 	const navigate = useNavigate();
+	const toast = useToast();
 	const voice = useVoiceRecorder(VOICE_MAX_MS);
 	const [message, setMessage] = useState("");
 	const [sending, setSending] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const trimmed = message.trim();
 	const canSend = (trimmed.length > 0 || Boolean(voice.blob)) && !sending;
@@ -46,7 +47,6 @@ export default function PhotoboothMessage({
 		if (!canSend) return;
 
 		setSending(true);
-		setError(null);
 
 		try {
 			const audio = voice.blob ? await blobToDataUrl(voice.blob) : undefined;
@@ -62,7 +62,7 @@ export default function PhotoboothMessage({
 			});
 
 			if (!result.ok) {
-				setError(result.error);
+				toast({ message: result.error });
 				return;
 			}
 
@@ -74,7 +74,9 @@ export default function PhotoboothMessage({
 				replace: true,
 			});
 		} catch {
-			setError("Gagal mengirim kartu. Periksa koneksi lalu coba lagi.");
+			toast({
+				message: "Gagal mengirim kartu. Periksa koneksi lalu coba lagi.",
+			});
 		} finally {
 			setSending(false);
 		}
@@ -262,15 +264,6 @@ export default function PhotoboothMessage({
 			</main>
 
 			<footer className="px-6 pb-8 pt-2">
-				{error ? (
-					<p
-						role="alert"
-						className="mb-2 rounded-2xl border border-inv-accent/30 bg-inv-card px-4 py-3 text-center font-body text-[11px] leading-relaxed text-inv-accent"
-					>
-						{error}
-					</p>
-				) : null}
-
 				<button
 					type="button"
 					onClick={() => void handleSend()}

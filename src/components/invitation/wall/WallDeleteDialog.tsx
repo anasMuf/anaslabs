@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useToast } from "#/components/invitation/ui/Toast";
 import { deleteWallCard, type WallCard } from "#/lib/wall";
 
 interface WallDeleteDialogProps {
@@ -17,8 +18,8 @@ export default function WallDeleteDialog({
 	onDeleted,
 }: WallDeleteDialogProps) {
 	const cancelRef = useRef<HTMLButtonElement | null>(null);
+	const toast = useToast();
 	const [busy, setBusy] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		cancelRef.current?.focus();
@@ -32,17 +33,18 @@ export default function WallDeleteDialog({
 
 	async function handleDelete() {
 		setBusy(true);
-		setError(null);
 
 		try {
 			const result = await deleteWallCard({ data: { id: card.id, token } });
 			if (!result.ok) {
-				setError(result.error);
+				toast({ message: result.error });
 				return;
 			}
 			onDeleted();
 		} catch {
-			setError("Gagal menghapus kartu. Periksa koneksi lalu coba lagi.");
+			toast({
+				message: "Gagal menghapus kartu. Periksa koneksi lalu coba lagi.",
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -91,15 +93,6 @@ export default function WallDeleteDialog({
 						Batal
 					</button>
 				</div>
-
-				{error ? (
-					<p
-						role="alert"
-						className="mt-3 font-body text-[11px] leading-relaxed text-inv-accent"
-					>
-						{error}
-					</p>
-				) : null}
 			</div>
 		</div>
 	);

@@ -4,6 +4,7 @@ import {
 	notFound,
 	Outlet,
 } from "@tanstack/react-router";
+import { ToastProvider } from "#/components/invitation/ui/Toast";
 import { invitation } from "#/data/invitation";
 import { getGuest } from "#/lib/guest";
 import { formatCoverDateRange } from "#/lib/invitation";
@@ -52,9 +53,18 @@ export const Route = createFileRoute("/invitation/$slug")({
 	notFoundComponent: InvitationNotFound,
 });
 
-/** Shared guest lookup for the invitation page and its photobooth tab. */
+/**
+ * Shared guest lookup for the invitation page and its photobooth tab.
+ *
+ * The toast provider sits above both routes so a failure reported in the
+ * photobooth (e.g. a rejected card) stays visible after the redirect to the wall.
+ */
 function InvitationLayout() {
-	return <Outlet />;
+	return (
+		<ToastProvider>
+			<Outlet />
+		</ToastProvider>
+	);
 }
 
 function InvitationNotFound() {
