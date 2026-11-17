@@ -17,6 +17,7 @@ import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
 import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
 import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
+import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as InvitationSlugIndexRouteImport } from './routes/invitation.$slug.index'
 import { Route as SiteProjectsIndexRouteImport } from './routes/_site.projects.index'
@@ -65,6 +66,11 @@ const DashboardAuthRoute = DashboardAuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteAboutRoute = SiteAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
   '/about': typeof SiteAboutRoute
+  '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
   '/about': typeof SiteAboutRoute
+  '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/': typeof SiteIndexRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
   '/_site/about': typeof SiteAboutRoute
+  '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/rss.xml'
     | '/about'
+    | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/login'
     | '/invitation/$slug'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
   to:
     | '/rss.xml'
     | '/about'
+    | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/login'
     | '/'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/rss.xml'
     | '/_site/about'
+    | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/login'
     | '/invitation/$slug'
@@ -215,6 +227,7 @@ export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   RssDotxmlRoute: typeof RssDotxmlRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   InvitationSlugRoute: typeof InvitationSlugRouteWithChildren
 }
 
@@ -275,6 +288,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/auth'
       preLoaderRoute: typeof DashboardAuthRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_site/about': {
       id: '/_site/about'
@@ -391,6 +411,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   RssDotxmlRoute: RssDotxmlRoute,
+  ApiHealthRoute: ApiHealthRoute,
   InvitationSlugRoute: InvitationSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
