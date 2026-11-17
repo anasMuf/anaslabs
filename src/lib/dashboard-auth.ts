@@ -1,16 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-	deleteCookie,
-	getCookie,
-	setCookie,
-} from "@tanstack/react-start/server";
+import { deleteCookie, setCookie } from "@tanstack/react-start/server";
 import {
 	DASHBOARD_COOKIE,
 	SESSION_TTL_MS,
 	signDashboardSession,
-	verifyDashboardSession,
 } from "./dashboard-session";
-import { getSupabaseAdmin } from "./supabase-admin";
+import {
+	checkAllowedEmail,
+	type DashboardUser,
+	readDashboardUser,
+	sessionSecret,
+} from "./dashboard-session-server";
 
 /**
  * Dashboard auth.
@@ -19,11 +19,13 @@ import { getSupabaseAdmin } from "./supabase-admin";
  * dashboard) and access is gated by the `dashboard_users` table. Nothing about
  * the login is stored in the environment, so a stale process or dotenv
  * interpolation cannot break it.
+ *
+ * Session reading lives in `dashboard-session-server.ts` so other server code can
+ * share the guard (the server-function bundler only exposes server functions
+ * from a module).
  */
 
-export interface DashboardUser {
-	email: string;
-}
+export type { DashboardUser };
 
 export interface DashboardAuthConfigPublic {
 	url: string;
@@ -33,36 +35,6 @@ export interface DashboardAuthConfigPublic {
 export type DashboardLoginMode = "supabase" | "none";
 
 type CreateResult = { ok: true; email: string } | { ok: false; error: string };
-
-type AllowCheck = "allowed" | "denied" | "missing";
-
-function sessionSecret(): string | null {
-	const secret = process.env.DASHBOARD_SESSION_SECRET;
-	return secret && secret.length >= 16 ? secret : null;
-}
-
-/**
- * Email must exist in `dashboard_users`; the table is the access list.
- *
- * `missing` is reported separately from `denied` so an un-run migration shows up
- * as a setup problem instead of looking like a rejected account.
- */
-async function checkAllowedEmail(email: string): Promise<AllowCheck> {
-	const supabase = getSupabaseAdmin();
-	const { data, error } = await supabase
-		.from("dashboard_users")
-		.select("email")
-		.eq("email", email)
-		.maybeSingle();
-
-	if (error) {
-		if (error.code === "PGRST205") return "missing";
-		console.error("[dashboard] gagal membaca dashboard_users:", error.message);
-		return "denied";
-	}
-
-	return data ? "allowed" : "denied";
-}
 
 const MISSING_TABLE_PESAN =
 	"Tabel dashboard_users belum ada. Jalankan supabase/migrations/0002_dashboard_users.sql di SQL Editor, lalu coba lagi.";
@@ -92,18 +64,7 @@ export const getDashboardLoginMode = createServerFn({ method: "GET" }).handler(
 );
 
 export const getDashboardUser = createServerFn({ method: "GET" }).handler(
-	async (): Promise<DashboardUser | null> => {
-		const secret = sessionSecret();
-		if (!secret) return null;
-
-		const session = verifyDashboardSession(getCookie(DASHBOARD_COOKIE), secret);
-		if (!session) return null;
-
-		// Re-check the access list on every read so removing a row revokes access.
-		if ((await checkAllowedEmail(session.email)) !== "allowed") return null;
-
-		return { email: session.email };
-	},
+	readDashboardUser,
 );
 
 /**

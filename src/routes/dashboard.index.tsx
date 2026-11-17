@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { signOutDashboard } from "#/lib/dashboard-auth";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -27,19 +27,34 @@ function DashboardOverview() {
 				</p>
 			</div>
 
-			<div className="rounded-3xl border border-inv-rule bg-inv-card px-5 py-5">
+			<Link
+				to="/dashboard/tamu"
+				className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+			>
+				<div>
+					<p className="font-display text-[18px] leading-tight">Daftar Tamu</p>
+					<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
+						Impor dari Google Sheets, salin link undangan, dan pantau siapa yang
+						sudah membuka.
+					</p>
+				</div>
+				<span
+					aria-hidden="true"
+					className="mt-1 font-body text-[14px] text-inv-muted"
+				>
+					→
+				</span>
+			</Link>
+
+			<div className="rounded-3xl border border-inv-rule bg-inv-card px-5 py-4">
 				<p className="font-body text-[10px] font-semibold tracking-[0.16em] text-inv-accent">
-					TAHAP BERIKUTNYA
+					MENYUSUL
 				</p>
-				<ul className="mt-3 flex flex-col gap-2 font-body text-[12px] leading-[1.7] text-inv-muted">
-					<li>· Impor data tamu dari Google Sheets</li>
-					<li>· Daftar tamu + status sudah membuka undangan</li>
-					<li>· Kelola kartu photo wall dari sini</li>
+				<ul className="mt-2 flex flex-col gap-1.5 font-body text-[11px] leading-[1.7] text-inv-muted">
+					<li>· Kelola kartu photo wall dari dashboard</li>
+					<li>· Blast WhatsApp lewat Wablas</li>
+					<li>· Editor konten undangan</li>
 				</ul>
-				<p className="mt-3 font-body text-[11px] leading-relaxed text-inv-muted">
-					Blast WhatsApp dan editor konten menyusul setelah tiga hal di atas
-					selesai.
-				</p>
 			</div>
 
 			<button

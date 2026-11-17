@@ -10,9 +10,19 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
   tabel ditolak walaupun passwordnya benar. Setelah login, browser memakai
   **cookie httpOnly** milik aplikasi, bukan token Supabase. Tidak ada kredensial
   dashboard di `.env`.
-- **Data tamu**: sumber awal Google Sheets (per sheet = grup), diimpor ke tabel
-  `guests` di Supabase. Upsert berdasarkan nomor telepon yang sudah dinormalisasi
-  ke format `62…`. Slug tamu = nama + 4 karakter acak (`budi-santoso-a1b2`).
+- **Data tamu**: sumber awal Google Sheets (satu sheet per mempelai: `anas`,
+  `mila`; kolom `KETERANGAN` = grup). Impor **tempel-salin** dari dashboard:
+  blok baris sheet, tempel, pratinjau, terapkan. Kolom dikenali dari judulnya
+  (`NAMA`, `KETERANGAN`, `FISIK/DIGITAL`, `STATUS PENGIRIMAN`, opsional `NO HP`),
+  bukan dari urutannya.
+- **Slug tamu**: nama saja (`cak-abid`), tanpa karakter acak; nama kembar diberi
+  akhiran `-2`, `-3`. Slug **permanen**: impor ulang tidak pernah mengubahnya.
+  Konsekuensi yang diterima: link bisa dienumerasi, jadi halaman undangan tidak
+  boleh menampilkan nomor HP atau grup.
+- **Tamu `fisik`** tetap punya baris (untuk status cetak) tetapi link-nya tidak
+  dibagikan.
+- **Nomor HP** belum ada di sheet; kolomnya sudah disiapkan (`guests.phone`,
+  dinormalisasi ke `62…`) untuk blast nanti.
 - **Pelacakan buka undangan**: saat tamu membuka `/invitation/:slug`,
   `guests.invitation_opened_at` diisi sekali (hanya jika masih null).
 - **Wall**: kartu foto/ucapan dikelola dari dashboard (lihat + hapus, termasuk
@@ -29,7 +39,9 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 - [ ] Login email + password menghasilkan cookie `dash_session` (httpOnly, 7
       hari) dan email di luar `dashboard_users` ditolak dengan pesan jelas.
 - [ ] Cookie dipalsukan/kedaluwarsa → semua halaman dashboard redirect lagi.
-- [ ] Tamu hasil impor punya slug unik dan bisa dibuka di `/invitation/:slug`.
+- [ ] Tamu hasil impor punya slug unik (nama, akhiran `-2` bila kembar) dan bisa
+      dibuka di `/invitation/:slug`; nama hilang dari sheet diarsipkan, bukan
+      dihapus, sehingga link lama tetap hidup.
 - [ ] `invitation_opened_at` terisi tepat sekali per tamu.
 - [ ] Hapus kartu wall dari dashboard menghapus row + file Storage.
 - [ ] `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` hijau.
@@ -38,8 +50,17 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 
 - ❌ **Token Supabase disimpan di localStorage untuk sesi aplikasi** (alasan:
   XSS dapat mencurinya; kita pakai cookie httpOnly yang ditandatangani HMAC).
-- ❌ **Token admin di URL untuk dashboard** (alasan: masuk history/referrer,
-  dan dashboard memuat nomor telepon tamu).
+- ❌ **Token admin di URL untuk dashboard** (alasan: masuk history/referrer, dan
+  dashboard memuat nomor telepon tamu). Mode `?admin=` hanya untuk wall sebagai
+  cadangan.
+- ❌ **Mengubah slug tamu saat impor ulang** (alasan: link yang sudah beredar
+  akan mati; identitas tamu adalah slug, bukan nama di sheet).
+- ❌ **Menghapus baris tamu yang hilang dari sheet** (alasan: link lama harus tetap
+  hidup; pakai `archived_at`).
+- ❌ **Menampilkan nomor HP atau grup di halaman undangan** (alasan: slug hanya
+  nama sehingga mudah ditebak/dienumerasi; nama tampil saja sudah cukup).
+- ❌ **Kredensial dashboard di `.env`** (alasan: sumber kebenaran adalah Supabase
+  Auth + tabel `dashboard_users`, bukan environment).
 - ❌ **Service role key di bundle browser** (alasan: bypass RLS; hanya server).
 - ❌ **Menyimpan nomor telepon apa adanya** (alasan: Wablas butuh `62…`; nomor
   tidak konsisten membuat upsert gagal dan blast dobel).
@@ -106,9 +127,29 @@ terlindungi.
       cookie httpOnly yang bertahan setelah reload; "Keluar" → kembali ke login.
       Tanpa sesi → redirect; cookie palsu → redirect.
 
-## Task berikutnya (dibuat setelah Task 1 selesai)
+## Task 2 — Tamu & impor sheet
 
-- Task 2: migrasi `guests` + impor Sheets + daftar/edit/hapus tamu.
-- Task 3: pelacakan `invitation_opened_at` dari halaman undangan.
+Deliverable: impor tempel-salin → daftar tamu → link undangan → pelacakan buka.
+
+- [x] `supabase/migrations/0003_guests.sql` — tabel `guests`, RLS aktif tanpa
+      policy, indeks `(source_sheet, name_key)` dan `invitation_opened_at`.
+- [x] `src/lib/guest-import.ts` — parser TSV/CSV (header-driven), `slugifyGuestName`,
+      `guestNameKey`, `normalizeGuestPhone`, `planGuestImport` (create / update /
+      restore / archive / unchanged) + 21 unit test.
+- [x] `src/lib/guests.ts` — `listGuests`, `importGuests` (pratinjau & terapkan,
+      upsert per 200 baris), `setGuestSent`, `markGuestOpened`; semua dijaga
+      `readDashboardUser`.
+- [x] `src/lib/guest-lookup.ts` — slug → nama untuk halaman undangan dan wall,
+      dengan fallback ke `data/invitation-guests.ts` (slug lama & `/test`).
+- [x] `src/routes/dashboard.tamu.tsx` — panel impor (pilih sheet, tempel,
+      pratinjau, terapkan), ringkasan status, pencarian, salin link (hanya
+      digital), tandai terkirim.
+- [x] `markGuestOpened` dipanggil dari `/invitation/$slug` (sekali saja).
+- [ ] Verifikasi E2E setelah migrasi 0003 dijalankan (impor data asli, buka link,
+      cek `invitation_opened_at`).
+
+## Task berikutnya
+
+- Task 3: edit/hapus tamu dari dashboard (ganti nama/grup/nomor tanpa mengubah slug).
 - Task 4: tab Wall (lihat + hapus) memakai `listWallCards`/`deleteWallCard`.
-- Nanti: blast Wablas (`wa_sends` sudah disiapkan), editor konten.
+- Nanti: blast Wablas (`wa_sends`), editor konten.

@@ -1,4 +1,5 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import { useEffect } from "react";
 import InvitationAudio from "#/components/invitation/audio/InvitationAudio";
 import Cover from "#/components/invitation/Cover";
 import Closing from "#/components/invitation/sections/Closing";
@@ -8,6 +9,7 @@ import Gift from "#/components/invitation/sections/Gift";
 import Photobooth from "#/components/invitation/sections/Photobooth";
 import Story from "#/components/invitation/sections/Story";
 import { invitation } from "#/data/invitation";
+import { markGuestOpened } from "#/lib/guests";
 import { useLockZoom } from "#/lib/use-lock-zoom";
 
 const parentRoute = getRouteApi("/invitation/$slug");
@@ -21,6 +23,12 @@ function InvitationPage() {
 	const { slug } = parentRoute.useParams();
 
 	useLockZoom();
+
+	// First open only; the server function ignores later visits. Fire and forget,
+	// so a tracking failure can never hold up the invitation itself.
+	useEffect(() => {
+		void markGuestOpened({ data: { slug } }).catch(() => undefined);
+	}, [slug]);
 
 	return (
 		<main className="invite-scroller h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth motion-reduce:scroll-auto no-scrollbar touch-pan-y bg-inv-bg font-body text-inv-ink">
