@@ -7,6 +7,7 @@ import {
 import {
 	DASHBOARD_COOKIE,
 	isAllowedDashboardEmail,
+	parseDashboardAllowlist,
 	SESSION_TTL_MS,
 	signDashboardSession,
 	verifyDashboardSession,
@@ -112,9 +113,17 @@ export const createDashboardSession = createServerFn({ method: "POST" })
 			return { ok: false, error: "Akun ini tidak punya alamat email." };
 		}
 		if (!isAllowedDashboardEmail(email, process.env.DASHBOARD_EMAILS)) {
+			// Log both sides so a mismatch (typo, different address, stale env) is
+			// visible in the server output instead of a silent rejection.
+			console.error(
+				"[dashboard] email ditolak:",
+				email,
+				"| entri allowlist:",
+				parseDashboardAllowlist(process.env.DASHBOARD_EMAILS).length,
+			);
 			return {
 				ok: false,
-				error: "Email ini tidak punya akses ke dashboard.",
+				error: `Email ${email} tidak punya akses ke dashboard.`,
 			};
 		}
 

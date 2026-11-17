@@ -74,18 +74,31 @@ export function verifyDashboardSession(
 	}
 }
 
+/** Splits `DASHBOARD_EMAILS` into lowercase emails, tolerating quotes and spaces. */
+export function parseDashboardAllowlist(
+	allowlist: string | undefined,
+): string[] {
+	if (!allowlist) return [];
+
+	return allowlist
+		.split(",")
+		.map((entry) =>
+			entry
+				.trim()
+				.replace(/^["']|["']$/g, "")
+				.trim()
+				.toLowerCase(),
+		)
+		.filter(Boolean);
+}
+
 /** Only `DASHBOARD_EMAILS` may open the dashboard. Empty list locks everyone out. */
 export function isAllowedDashboardEmail(
 	email: string,
 	allowlist: string | undefined,
 ): boolean {
-	if (!allowlist) return false;
 	const wanted = email.trim().toLowerCase();
 	if (!wanted) return false;
 
-	return allowlist
-		.split(",")
-		.map((entry) => entry.trim().toLowerCase())
-		.filter(Boolean)
-		.includes(wanted);
+	return parseDashboardAllowlist(allowlist).includes(wanted);
 }

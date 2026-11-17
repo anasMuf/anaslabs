@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	isAllowedDashboardEmail,
+	parseDashboardAllowlist,
 	SESSION_TTL_MS,
 	signDashboardSession,
 	verifyDashboardSession,
@@ -65,6 +66,14 @@ describe("isAllowedDashboardEmail", () => {
 		const list = " Anas@Example.com , mila@example.com ";
 		expect(isAllowedDashboardEmail("anas@example.com", list)).toBe(true);
 		expect(isAllowedDashboardEmail("MILA@example.com", list)).toBe(true);
+	});
+
+	it("tolerates quoted values and trailing commas", () => {
+		const list = "\"anas@example.com\",'mila@example.com',";
+		expect(parseDashboardAllowlist(list)).toEqual([
+			"anas@example.com",
+			"mila@example.com",
+		]);
 	});
 
 	it("rejects outsiders and an unset list", () => {
