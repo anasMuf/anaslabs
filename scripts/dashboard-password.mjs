@@ -8,7 +8,12 @@
 //
 // Password tidak pernah disimpan oleh skrip ini.
 
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import {
+	createHash,
+	randomBytes,
+	scryptSync,
+	timingSafeEqual,
+} from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const N = 16384;
@@ -58,6 +63,7 @@ function describe(stored) {
 		separator: stored.includes(":") ? ":" : "$",
 		parts: parts.length,
 		prefix: parts[0],
+		fingerprint: createHash("sha256").update(stored).digest("hex").slice(0, 10),
 		looksValid: parts.length === 6 && parts[0] === "scrypt",
 	};
 }
@@ -71,6 +77,9 @@ if (verifyMode) {
 
 	const info = describe(value);
 	console.log("hash di .env:", info);
+	console.log(
+		"  bandingkan dengan GET /api/health → passwordHashFingerprint (harus sama)",
+	);
 
 	if (!info.looksValid) {
 		console.error(

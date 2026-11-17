@@ -1,4 +1,9 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import {
+	createHash,
+	randomBytes,
+	scryptSync,
+	timingSafeEqual,
+} from "node:crypto";
 
 /**
  * Password hashing for the dashboard login.
@@ -74,4 +79,16 @@ export function verifyDashboardPassword(
 
 	const actual = derive(password, Buffer.from(rawSalt, "base64"), params);
 	return timingSafeEqual(actual, expected);
+}
+
+/**
+ * Short, non-reversible fingerprint of the stored hash.
+ *
+ * Lets us answer "is the server using the same hash as my `.env`?" without
+ * exposing the hash or the password: a stale process shows a different
+ * fingerprint even though the length matches.
+ */
+export function fingerprintDashboardHash(stored: string | undefined): string {
+	if (!stored) return "none";
+	return createHash("sha256").update(stored).digest("hex").slice(0, 10);
 }
