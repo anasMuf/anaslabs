@@ -112,18 +112,24 @@ export const createDashboardSession = createServerFn({ method: "POST" })
 		if (!email) {
 			return { ok: false, error: "Akun ini tidak punya alamat email." };
 		}
-		if (!isAllowedDashboardEmail(email, process.env.DASHBOARD_EMAILS)) {
-			// Log both sides so a mismatch (typo, different address, stale env) is
-			// visible in the server output instead of a silent rejection.
+
+		const allowlist = parseDashboardAllowlist(process.env.DASHBOARD_EMAILS);
+		if (!allowlist.includes(email)) {
+			// Log both sides so a mismatch (typo, different address) and a server that
+			// never loaded the env are distinguishable in one glance.
 			console.error(
 				"[dashboard] email ditolak:",
 				email,
 				"| entri allowlist:",
-				parseDashboardAllowlist(process.env.DASHBOARD_EMAILS).length,
+				allowlist.length,
 			);
+
 			return {
 				ok: false,
-				error: `Email ${email} tidak punya akses ke dashboard.`,
+				error:
+					allowlist.length === 0
+						? "Server belum membaca DASHBOARD_EMAILS. Restart server setelah mengubah .env, lalu coba lagi."
+						: `Email ${email} tidak punya akses. Daftar akses berisi ${allowlist.length} email.`,
 			};
 		}
 
