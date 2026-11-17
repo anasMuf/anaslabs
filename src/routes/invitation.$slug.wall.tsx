@@ -4,7 +4,16 @@ import { invitation } from "#/data/invitation";
 import { listWallCards } from "#/lib/wall";
 
 export const Route = createFileRoute("/invitation/$slug/wall")({
-	loader: async () => ({ cards: await listWallCards({ data: {} }) }),
+	loader: async () => {
+		try {
+			return { cards: await listWallCards({ data: {} }), failed: false };
+		} catch (error) {
+			// A missing env or a Supabase hiccup must not blank the page for guests:
+			// log the real cause for the owner and let the UI show a retry notice.
+			console.error("[wall] gagal memuat kartu:", error);
+			return { cards: [], failed: true };
+		}
+	},
 	head: () => {
 		const names = `${invitation.cover.firstNames} & ${invitation.cover.secondNames}`;
 		return {
@@ -18,8 +27,8 @@ export const Route = createFileRoute("/invitation/$slug/wall")({
 });
 
 function WallRoute() {
-	const { cards } = Route.useLoaderData();
+	const { cards, failed } = Route.useLoaderData();
 	const { slug } = Route.useParams();
 
-	return <WallPage slug={slug} cards={cards} />;
+	return <WallPage slug={slug} cards={cards} failed={failed} />;
 }

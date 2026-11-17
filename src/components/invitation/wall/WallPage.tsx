@@ -10,6 +10,8 @@ import WallTile from "./WallTile";
 interface WallPageProps {
 	slug: string;
 	cards: WallCard[];
+	/** True when the loader could not reach Supabase; guests get a retry notice. */
+	failed?: boolean;
 }
 
 /**
@@ -18,7 +20,11 @@ interface WallPageProps {
  * Guests see every published card here, and only get to the camera through the
  * primary action, so the wall reads as a guestbook rather than a tool screen.
  */
-export default function WallPage({ slug, cards }: WallPageProps) {
+export default function WallPage({
+	slug,
+	cards,
+	failed = false,
+}: WallPageProps) {
 	useLockZoom();
 	const { sections } = invitation;
 	const copy = sections.wall;
@@ -87,6 +93,21 @@ export default function WallPage({ slug, cards }: WallPageProps) {
 					{copy.cta}
 				</Link>
 
+				{failed ? (
+					<output className="mt-6 block rounded-2xl border border-inv-accent/30 bg-inv-card px-4 py-3 text-center">
+						<p className="text-[12px] leading-[1.6] text-inv-muted">
+							Wall belum bisa dimuat. Periksa koneksi lalu muat ulang halaman.
+						</p>
+						<button
+							type="button"
+							onClick={() => window.location.reload()}
+							className="mt-2 inline-flex min-h-[44px] items-center rounded-full border border-inv-ink/30 px-4 text-[12px] text-inv-ink transition-colors hover:bg-inv-ink hover:text-inv-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+						>
+							Muat ulang
+						</button>
+					</output>
+				) : null}
+
 				{cards.length ? (
 					<ul className="mt-8 columns-2 gap-3 sm:columns-3 [&>li]:mb-3">
 						{cards.map((card) => (
@@ -95,7 +116,7 @@ export default function WallPage({ slug, cards }: WallPageProps) {
 							</li>
 						))}
 					</ul>
-				) : (
+				) : failed ? null : (
 					<div className="mt-10 flex flex-col items-center gap-4 rounded-3xl border border-dashed border-inv-rule px-6 py-12 text-center">
 						<p className="max-w-[260px] text-[12px] leading-[1.7] text-inv-muted">
 							{copy.empty}
