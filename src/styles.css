@@ -126,6 +126,28 @@ pre code {
 	}
 }
 
+/* Toast stack: slides up from the bottom edge without moving page content. */
+.toast-enter {
+	animation: toastIn 180ms ease-out;
+}
+
+@keyframes toastIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.toast-enter {
+		animation: none;
+	}
+}
+
 /* Scroll reveal (invitation sections). Without JS, or when the visitor asks
    for reduced motion, the content stays fully visible. */
 .reveal {

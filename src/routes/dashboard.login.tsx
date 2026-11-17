@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useToast } from "#/components/invitation/ui/Toast";
 import {
 	createDashboardSession,
 	type DashboardLoginMode,
@@ -19,14 +20,16 @@ export const Route = createFileRoute("/dashboard/login")({
  * The Supabase session is used once to mint our own httpOnly cookie and then
  * dropped, so no access token lingers in browser storage. Credentials live in
  * Supabase (Authentication → Users); access is gated by `dashboard_users`.
+ *
+ * Failures are reported as toasts so the form never reflows mid-submit.
  */
 function DashboardLogin() {
 	const navigate = useNavigate();
+	const toast = useToast();
 	const [mode, setMode] = useState<DashboardLoginMode | "loading">("loading");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [busy, setBusy] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		void getDashboardLoginMode()
@@ -36,13 +39,12 @@ function DashboardLogin() {
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError(null);
 		setBusy(true);
 
 		try {
 			const config = await getDashboardAuthConfig();
 			if (!config) {
-				setError("Supabase Auth belum dikonfigurasi di server.");
+				toast({ message: "Supabase Auth belum dikonfigurasi di server." });
 				return;
 			}
 
@@ -54,17 +56,18 @@ function DashboardLogin() {
 				});
 
 			if (signInError) {
-				setError(
-					signInError.message === "Invalid login credentials"
-						? "Email atau password salah."
-						: signInError.message,
-				);
+				toast({
+					message:
+						signInError.message === "Invalid login credentials"
+							? "Email atau password salah."
+							: signInError.message,
+				});
 				return;
 			}
 
 			const accessToken = data.session?.access_token;
 			if (!accessToken) {
-				setError("Supabase tidak mengembalikan sesi. Coba lagi.");
+				toast({ message: "Supabase tidak mengembalikan sesi. Coba lagi." });
 				return;
 			}
 
@@ -72,13 +75,13 @@ function DashboardLogin() {
 			await supabase.auth.signOut();
 
 			if (!result.ok) {
-				setError(result.error);
+				toast({ message: result.error });
 				return;
 			}
 
 			await navigate({ to: "/dashboard", replace: true });
 		} catch {
-			setError("Gagal masuk. Periksa koneksi lalu coba lagi.");
+			toast({ message: "Gagal masuk. Periksa koneksi lalu coba lagi." });
 		} finally {
 			setBusy(false);
 		}
@@ -140,18 +143,10 @@ function DashboardLogin() {
 						className={inputClass}
 					/>
 
-					{error ? (
-						<p
-							role="alert"
-							className="rounded-2xl border border-inv-accent/30 bg-inv-card px-4 py-3 font-body text-[11px] leading-relaxed text-inv-accent"
-						>
-							{error}
-						</p>
-					) : null}
-
 					<button
 						type="submit"
 						disabled={busy}
+						aria-busy={busy}
 						className="mt-1 flex items-center justify-center rounded-full bg-inv-accent px-5 py-3.5 font-body text-[12px] font-semibold tracking-[0.08em] text-inv-bg transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 					>
 						{busy ? "Memeriksa…" : "Masuk"}
