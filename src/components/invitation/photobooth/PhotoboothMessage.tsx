@@ -5,6 +5,8 @@ import type { WallImages } from "#/lib/photobooth/wall-export";
 import { useVoiceRecorder, VOICE_MAX_MS } from "#/lib/use-voice-recorder";
 import { publishWallCard } from "#/lib/wall";
 import { WALL_MESSAGE_MAX } from "#/lib/wall-validation";
+import VoiceMeter from "./VoiceMeter";
+import VoicePlayer from "./VoicePlayer";
 
 interface PhotoboothMessageProps {
 	slug: string;
@@ -152,63 +154,102 @@ export default function PhotoboothMessage({
 							Browser ini belum mendukung perekaman suara.
 						</p>
 					) : voice.status === "idle" || voice.status === "requesting" ? (
-						<button
-							type="button"
-							onClick={() => void voice.start()}
-							disabled={voice.status === "requesting" || sending}
-							className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-inv-ink/25 px-4 font-body text-[12px] transition-colors hover:bg-inv-ink/5 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-						>
-							<svg
-								width="15"
-								height="15"
-								viewBox="0 0 24 24"
-								aria-hidden="true"
-								focusable="false"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="1.7"
-								strokeLinecap="round"
-							>
-								<rect x="9" y="3" width="6" height="11" rx="3" />
-								<path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-							</svg>
-							{voice.status === "requesting" ? "Meminta izin…" : "Rekam ucapan"}
-						</button>
-					) : voice.status === "recording" ? (
 						<div className="mt-2 flex items-center gap-3">
-							<span
-								aria-hidden="true"
-								className="h-2.5 w-2.5 animate-pulse rounded-full bg-inv-accent"
-							/>
-							<span className="font-body text-[12px] tabular-nums text-inv-ink">
-								Merekam… {elapsed}
-							</span>
+							<button
+								type="button"
+								onClick={() => void voice.start()}
+								disabled={voice.status === "requesting" || sending}
+								aria-label={
+									voice.status === "requesting"
+										? "Meminta izin mikrofon"
+										: "Rekam ucapan"
+								}
+								className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-inv-accent text-inv-bg shadow-[0_6px_18px_rgba(123,36,56,0.25)] transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									aria-hidden="true"
+									focusable="false"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.7"
+									strokeLinecap="round"
+								>
+									<rect x="9" y="3" width="6" height="11" rx="3" />
+									<path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+								</svg>
+							</button>
+							<p className="font-body text-[11px] leading-[1.6] text-inv-muted">
+								{voice.status === "requesting"
+									? "Menunggu izin mikrofon…"
+									: "Rekam sampai 60 detik. Suara ini akan muncul di wall."}
+							</p>
+						</div>
+					) : voice.status === "recording" ? (
+						<div className="mt-2 rounded-3xl border border-inv-accent/25 bg-inv-card px-4 py-3">
+							<div className="flex items-center justify-between gap-3">
+								<span className="flex items-center gap-2 font-body text-[11px] font-semibold tracking-[0.1em] text-inv-accent">
+									<span
+										aria-hidden="true"
+										className="h-2 w-2 animate-pulse rounded-full bg-inv-accent"
+									/>
+									MEREKAM
+								</span>
+								<span className="font-body text-[12px] tabular-nums text-inv-ink">
+									{elapsed} / 1:00
+								</span>
+							</div>
+
+							<VoiceMeter analyser={voice.analyser} />
+
 							<button
 								type="button"
 								onClick={voice.stop}
-								className="inline-flex min-h-[44px] items-center rounded-full bg-inv-ink px-4 font-body text-[12px] text-inv-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+								className="flex w-full items-center justify-center gap-2 rounded-full bg-inv-ink px-4 py-3 font-body text-[12px] text-inv-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 							>
+								<svg
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									aria-hidden="true"
+									fill="currentColor"
+								>
+									<rect x="6" y="6" width="12" height="12" rx="1.5" />
+								</svg>
 								Selesai
 							</button>
 						</div>
 					) : (
 						<div className="mt-2">
 							{voice.previewUrl ? (
-								/* biome-ignore lint/a11y/useMediaCaption: rekaman tamu, tidak ada transkrip */
-								<audio
+								<VoicePlayer
+									key={voice.previewUrl}
 									src={voice.previewUrl}
-									controls
-									className="w-full"
-									aria-label="Pratinjau ucapan suara"
+									peaks={voice.peaks}
+									durationMs={voice.durationMs}
 								/>
 							) : null}
-							<button
-								type="button"
-								onClick={voice.reset}
-								className="mt-1 inline-flex min-h-[44px] items-center px-1 font-body text-[11px] text-inv-muted underline-offset-2 hover:text-inv-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-							>
-								Hapus rekaman
-							</button>
+
+							<div className="mt-1 flex items-center gap-4">
+								<button
+									type="button"
+									onClick={() => void voice.start()}
+									disabled={sending}
+									className="inline-flex min-h-[44px] items-center px-1 font-body text-[11px] text-inv-muted underline-offset-2 hover:text-inv-ink hover:underline disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+								>
+									Rekam ulang
+								</button>
+								<button
+									type="button"
+									onClick={voice.reset}
+									disabled={sending}
+									className="inline-flex min-h-[44px] items-center px-1 font-body text-[11px] text-inv-muted underline-offset-2 hover:text-inv-ink hover:underline disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+								>
+									Hapus rekaman
+								</button>
+							</div>
 						</div>
 					)}
 

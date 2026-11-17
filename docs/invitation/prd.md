@@ -253,8 +253,19 @@ membuka layar ucapan.
 - Teks maks 280 karakter dengan penghitung; opsional bila ada rekaman suara.
 - Rekaman suara opsional lewat `MediaRecorder` (`src/lib/use-voice-recorder.ts`):
   maks 60 detik dengan auto-stop, mime dinormalisasi ke `audio/webm`/`audio/mp4`
-  (Safari hanya mp4) agar lolos allowlist server, pratinjau `<audio>`, tombol
-  hapus, dan pesan jelas bila mikrofon ditolak atau browser tidak mendukung.
+  (Safari hanya mp4) agar lolos allowlist server, dan pesan jelas bila mikrofon
+  ditolak atau browser tidak mendukung.
+- **UI rekaman custom**, tanpa kontrol `<audio>` bawaan:
+  - `VoiceMeter.tsx` menggambar **spectrum live** di canvas (44 bar, RMS dari
+    `AnalyserNode`, riwayat bergulir dengan fade) lewat `requestAnimationFrame`,
+    bukan state React, supaya tidak re-render form 60x/detik.
+  - `VoicePlayer.tsx` menampilkan tombol putar/jeda bundar + **waveform statis**
+    (44 peak dari `decodeAudioData`, dinormalisasi di `src/lib/audio-peaks.ts`)
+    yang sekaligus jadi seek bar (`role="slider"`, panah kiri/kanan ±5 detik,
+    Space/Enter untuk play/pause). Pemutaran tetap memakai elemen `<audio>`
+    tersembunyi agar perilaku pause/ended mengikuti browser, bukan implementasi
+    ulang Web Audio.
+  - Bila decode gagal, waveform jatuh ke bar minimum seragam; pemutaran tetap jalan.
 - Setelah sukses: id kartu disimpan di `sessionStorage`, lalu navigasi ke wall;
   kartu tersebut diberi ring highlight dan di-scroll ke tengah.
 - Back browser di layar ini kembali ke kartu hasil, bukan keluar dari tab.
