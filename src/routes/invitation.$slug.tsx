@@ -5,9 +5,8 @@ import {
 	Outlet,
 } from "@tanstack/react-router";
 import { ToastProvider } from "#/components/invitation/ui/Toast";
-import { invitation } from "#/data/invitation";
 import { getGuest } from "#/lib/guest";
-import { formatCoverDateRange } from "#/lib/invitation";
+import { getInvitationView } from "#/lib/invitation-view";
 import { SITE_URL } from "#/lib/site";
 
 export const Route = createFileRoute("/invitation/$slug")({
@@ -16,15 +15,11 @@ export const Route = createFileRoute("/invitation/$slug")({
 		if (!guest) throw notFound();
 		return guest;
 	},
-	head: () => {
-		const names = `${invitation.cover.firstNames} & ${invitation.cover.secondNames}`;
+	head: ({ loaderData }) => {
+		const view = getInvitationView(loaderData?.side ?? null);
+		const names = `${view.firstNames} & ${view.secondNames}`;
 		const title = `${names} — Undangan Pernikahan`;
-		const description = `Undangan pernikahan ${
-			invitation.couple.groom.fullName
-		} dan ${invitation.couple.bride.fullName}, ${formatCoverDateRange(
-			invitation.cover.startDate,
-			invitation.cover.endDate,
-		)}.`;
+		const description = `Undangan pernikahan ${view.fullNamePair}, ${view.coverDateLabel}.`;
 		const ogImage = `${SITE_URL}/invitation/og.jpg`;
 
 		return {

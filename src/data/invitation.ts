@@ -47,7 +47,15 @@ export interface InvitationGiftAccount {
 	/** e.g. "Transfer Bank" */
 	method: string;
 	bankName: string;
-	accountNumber: string;
+	/**
+	 * Whose side this account belongs to: groom (anas) or bride (mila). The
+	 * dashboard personalises the section so each guest only sees their side.
+	 */
+	side: "groom" | "bride";
+	/**
+	 * Deliberately absent: the number lives server-side (`lib/gift-accounts.ts`)
+	 * and is fetched only when a guest opens the card.
+	 */
 	accountHolder: string;
 }
 
@@ -151,31 +159,40 @@ export const invitation = {
 			},
 		},
 	] satisfies InvitationEvent[],
+	/**
+	 * Guests are tied to a sheet (`anas` = groom's side, `mila` = bride's side).
+	 * Each side sees only the celebration it is invited to, and the cover date
+	 * follows that event. `null` side (unknown slug) keeps both events.
+	 */
+	sides: {
+		groom: { eventIds: ["unduh-mantu"] },
+		bride: { eventIds: ["akad-resepsi"] },
+	},
 	story: [
 		{
 			title: "Awal Pertemuan",
-			body: "Di penghujung tahun lalu, kita dipertemukan. Berawal dari obrolan kecil yang pelan-pelan menyisakan rasa. Kita sempat mengira itu sudah cukup untuk memulai sesuatu. Nyatanya tidak. Tanpa banyak penjelasan, percakapan itu mereda, dan berhenti begitu saja.",
+			body: "Di penghujung tahun lalu, kami dipertemukan. Berawal dari obrolan kecil yang pelan-pelan menyisakan rasa. kami sempat mengira itu sudah cukup untuk memulai sesuatu. Nyatanya tidak. Tanpa banyak penjelasan, percakapan itu mereda, dan berhenti begitu saja.",
 		},
 		{
 			title: "Tumbuh Bersama",
-			body: "Dengan dada yang lapang sekaligus berat, kita memilih jalan masing-masing. Tak ada lagi kabar, tak ada lagi tanya. Tujuh bulan pertama di tahun ini adalah badai yang menguji. Sampai di satu titik, kami berhenti melawan keadaan dan memilih berdamai, menjadikannya pelajaran untuk melangkah.",
+			body: "Dengan dada yang lapang sekaligus berat, kami memilih jalan masing-masing. Tak ada lagi kabar, tak ada lagi tanya. Tujuh bulan pertama di tahun ini adalah badai yang menguji. Sampai di satu titik, kami berhenti melawan keadaan dan memilih berdamai, menjadikannya pelajaran untuk melangkah.",
 		},
 		{
 			title: "Lembaran Baru",
-			body: "Orang bilang, **apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang**. Dan benar, di pertengahan tahun ini, kita dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kita memilih untuk benar-benar bertumbuh bersama.",
+			body: "Orang bilang, **apa yang memang ditakdirkan untuk kita akan selalu tahu jalan pulang**. Dan benar, di pertengahan tahun ini, kami dipertemukan kembali. Membawa serta rasa yang sempat tertunda. Kali ini, berbekal luka yang telah redah, kami memilih untuk benar-benar bertumbuh bersama.",
 		},
 	] as InvitationMilestone[],
 	gifts: [
 		{
 			method: "Transfer Bank",
 			bankName: "BCA",
-			accountNumber: "0500576880",
+			side: "groom",
 			accountHolder: "M ANAS MUFTI AKBAR",
 		},
 		{
 			method: "Transfer Bank",
 			bankName: "BSI",
-			accountNumber: "7262729588",
+			side: "bride",
 			accountHolder: "FAJRIYATUL KAMILA",
 		},
 	] satisfies InvitationGiftAccount[],

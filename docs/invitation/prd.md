@@ -44,6 +44,7 @@ sepenuhnya di perangkat tamu.
 | R10 | Tipografi & warna mengikuti Figma: Playfair Display (display) + Montserrat (body), palette `#F5F2EC / #34362E / #7B2438 / #706960 / #D6C4BC / #FFFCF7`. |
 | R11 | Tidak menambah backend, database, autentikasi, maupun layanan pihak ketiga untuk data tamu. Pipeline deploy yang ada tidak berubah. |
 | R12 | Route undangan `noindex` (privasi) dan tetap bisa dibuka lewat link langsung. |
+| R13 | **Personalisasi per sisi tamu**: tamu dari sheet `anas` (sisi mempelai pria) melihat "Anas & Mila" + **20 Desember 2026** (Unduh Mantu) beserta urutan Mempelai Pria → Wanita; tamu sheet `mila` melihat "Mila & Anas" + **19 Desember 2026** (Akad & Resepsi) dengan urutan Mempelai Wanita → Pria. Section **Tanda Kasih** menampilkan kedua rekening tetapi mengurutkan rekening sisi tamu lebih dulu. Berlaku di cover, `<title>`/OG, section Mempelai, section Hari Bahagia, Tanda Kasih, footer Story, dan Closing. Tanpa sisi (slug fallback) → tampilan default saat ini ("Anas & Mila", 19–20 Desember, kedua acara, kedua rekening). |
 
 ## 3. Success Criteria
 
@@ -53,6 +54,7 @@ sepenuhnya di perangkat tamu.
 - [ ] Photobooth dapat menyelesaikan sesi 1, 2, dan 4 foto dan mengunduh JPEG dengan komposisi (foto + teks + frame) sesuai layout data.
 - [ ] Tombol Salin menyalin nomor rekening (`clipboard` + fallback) dan memberi umpan balik visual.
 - [ ] Musik tidak error saat autoplay diblokir; tombol mute berfungsi dan tidak muncul sebelum gate dibuka.
+- [ ] Tamu sheet Anas melihat "Anas & Mila" + 20 Desember + Unduh Mantu; tamu sheet Mila melihat "Mila & Anas" + 19 Desember + Akad & Resepsi; tanpa sisi → default (kedua acara, 19–20 Desember).
 - [ ] `pnpm test`, `pnpm lint`, dan `pnpm build` lulus.
 - [ ] Hasil `pnpm build` tetap bisa dijalankan dengan `vite preview` seperti deploy sekarang.
 
@@ -523,6 +525,28 @@ reload → mode admin tetap; "Keluar" → banner dan tombol hilang.
 - **Verifikasi CDP**: 390×844 → 2 kolom, 4/4 thumbnail termuat, tanpa overflow
 horizontal; 768×1024 → 3 kolom; dialog terbuka dengan fokus pada tombol tutup,
 `Escape` menutup dan mengembalikan scroll body.
+
+### 5.12 Personalisasi sisi tamu
+
+- `guests.source_sheet` → `side`: `anas` = groom, `mila` = bride. `getGuest`
+  mengirim `{ name, side }` ke browser; nomor HP dan grup tetap tidak pernah
+  dikirim.
+- `src/lib/invitation-personalization.ts` (pure, unit tested) mengatur urutan
+  nama (`firstNames`/`secondNames`, `namesLabel`, `fullNamePair`), urutan profil
+  di section Mempelai, daftar `events` yang tampil, label tanggal cover, dan
+  intro Hari Bahagia.
+- `src/data/invitation.ts` menyimpan pemetaan `sides` → `eventIds`:
+  `groom` → `unduh-mantu` (20 Des), `bride` → `akad-resepsi` (19 Des). Jika id
+  tidak ditemukan, helper kembali ke kedua acara + rentang tanggal (defensif).
+- `src/lib/invitation-view.ts` mengikat data + aturan; dipakai halaman utama
+  (cover, section, `<title>`/OG) dan judul route anak (photobooth, wall).
+- **Tanda Kasih**: setiap `gifts[]` punya `side` (`groom`/`bride`). Kedua
+  rekening selalu tampil, tetapi rekening milik sisi tamu diurutkan lebih dulu
+  (groom → BCA dulu, bride → BSI dulu); tanpa sisi → urutan data (BCA, BSI).
+  Nomor rekening tetap hanya dikirim setelah kartu dibuka, tidak ikut bundle
+  client.
+- Tanpa sisi (slug fallback seperti `/invitation/test`) → perilaku lama. Alt
+  text photobooth sengaja tetap default karena tidak tampil di layar.
 
 ---
 

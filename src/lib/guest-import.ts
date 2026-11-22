@@ -22,6 +22,8 @@ export const GUEST_NAME_MAX = 80;
 export const GUEST_IMPORT_MAX_ROWS = 1200;
 /** Rows kept by the preview payload (counts always cover everything). */
 export const GUEST_PREVIEW_SAMPLE = 12;
+/** Page size for the dashboard guest table (infinite scroll). */
+export const GUEST_PAGE_SIZE = 40;
 
 export type GuestParseIssue = "empty" | "no-header" | "too-many";
 
@@ -31,6 +33,9 @@ export interface ParsedGuestRow {
 	name: string;
 	nameKey: string;
 	groupName: string | null;
+	address: string | null;
+	/** Kolom DIUNDANG, mis. "Sekalian"; "-" berarti kosong. */
+	invited: string | null;
 	delivery: GuestDelivery;
 	sent: boolean;
 	phone: string | null;
@@ -48,6 +53,8 @@ export interface GuestTableParse {
 const HEADER_PATTERNS = {
 	name: /^(nama|nama tamu|name)$/i,
 	group: /(keterangan|grup|golongan|group|kategori)/i,
+	address: /^(alamat|address|domisili|kota)/i,
+	invited: /^(diundang|undangan|invited)$/i,
 	delivery: /(fisik|digital)/i,
 	sent: /(status|terkirim|pengiriman)/i,
 	phone: /(no\.?\s*hp|nomor|telp|telepon|whatsapp|\bwa\b|\bhp\b)/i,
@@ -60,6 +67,17 @@ const SENT_VALUES = /^(true|1|yes|ya|y|v|✓|✔|sudah|sent|terkirim|check)$/i;
 /** Collapses whitespace and trims; keeps the original casing for display. */
 function cleanCell(value: string | undefined): string {
 	return (value ?? "").replace(/\s+/g, " ").trim();
+}
+
+/** Groups are matched case-insensitively; an empty cell is its own group. */
+function guestGroupKey(value: string | null): string {
+	return cleanCell(value ?? "").toLowerCase();
+}
+
+/** Sheet cells use "-" for empty; store it as NULL so the UI can say "tanpa …". */
+function cleanNote(value: string | undefined): string | null {
+	const note = cleanCell(value);
+	return !note || note === "-" || note === "—" ? null : note;
 }
 
 /** Splits one line, honouring quoted CSV cells (`"a,b"` and `""` escapes). */
@@ -222,6 +240,12 @@ export function parseGuestTable(input: string): GuestTableParse {
 	const seen = new Set<string>();
 	let skipped = 0;
 	let duplicates = 0;
+	const groupIndex = columns.get("group");
+	const addressIndex = columns.get("address");
+	const invitedIndex = columns.get("invited");
+	const deliveryIndex = columns.get("delivery");
+	const sentIndex = columns.get("sent");
+	const phoneIndex = columns.get("phone");
 
 	for (let index = headerIndex + 1; index < cellsByLine.length; index += 1) {
 		if (rows.length >= GUEST_IMPORT_MAX_ROWS) {
@@ -249,25 +273,33 @@ export function parseGuestTable(input: string): GuestTableParse {
 			continue;
 		}
 
-		if (seen.has(nameKey)) {
+		const groupName =
+			groupIndex === undefined
+				? null
+				: cleanCell(cells[groupIndex]).slice(0, 60) || null;
+
+		// Nama boleh kembar dalam satu sheet selama grupnya berbeda (mis. dua
+		// "Wildan" dari Afindo dan Unhasy), jadi identitas baris = nama + grup.
+		const identity = `${nameKey}\u0000${guestGroupKey(groupName)}`;
+		if (seen.has(identity)) {
 			duplicates += 1;
 			continue;
 		}
-		seen.add(nameKey);
-
-		const groupIndex = columns.get("group");
-		const deliveryIndex = columns.get("delivery");
-		const sentIndex = columns.get("sent");
-		const phoneIndex = columns.get("phone");
+		seen.add(identity);
 
 		rows.push({
 			rowNumber: index + 1,
 			name,
 			nameKey,
-			groupName:
-				groupIndex === undefined
+			groupName,
+			address:
+				addressIndex === undefined
 					? null
-					: cleanCell(cells[groupIndex]).slice(0, 60) || null,
+					: (cleanNote(cells[addressIndex])?.slice(0, 120) ?? null),
+			invited:
+				invitedIndex === undefined
+					? null
+					: (cleanNote(cells[invitedIndex])?.slice(0, 60) ?? null),
 			delivery: parseDelivery(
 				deliveryIndex === undefined ? "" : cells[deliveryIndex],
 			),
@@ -288,6 +320,8 @@ export interface ExistingGuest {
 	nameKey: string;
 	source: GuestSource;
 	groupName: string | null;
+	address: string | null;
+	invited: string | null;
 	delivery: GuestDelivery;
 	phone: string | null;
 	sentAt: string | null;
@@ -300,6 +334,8 @@ export interface GuestCreate {
 	nameKey: string;
 	source: GuestSource;
 	groupName: string | null;
+	address: string | null;
+	invited: string | null;
 	delivery: GuestDelivery;
 	phone: string | null;
 	sentAt: string | null;
@@ -307,13 +343,22 @@ export interface GuestCreate {
 
 export interface GuestChange {
 	id: string;
+	/**
+	 * Carried along so the update can be sent as an upsert: Postgres builds the
+	 * INSERT tuple (and checks NOT NULL) before resolving the `id` conflict, so
+	 * `slug`/`source_sheet` must be present even though they never change.
+	 */
+	slug: string;
+	source: GuestSource;
 	name: string;
 	nameKey: string;
 	groupName: string | null;
+	address: string | null;
+	invited: string | null;
 	delivery: GuestDelivery;
 	phone: string | null;
 	sentAt: string | null;
-	/** Human labels of what differs: nama, grup, tipe, nomor, status. */
+	/** Human labels of what differs: nama, grup, alamat, undangan, tipe, nomor, status. */
 	changes: string[];
 }
 
@@ -330,6 +375,9 @@ function diffGuest(existing: ExistingGuest, row: ParsedGuestRow): string[] {
 	if (existing.name !== row.name) changes.push("nama");
 	if ((existing.groupName ?? "") !== (row.groupName ?? ""))
 		changes.push("grup");
+	if ((existing.address ?? "") !== (row.address ?? "")) changes.push("alamat");
+	if ((existing.invited ?? "") !== (row.invited ?? ""))
+		changes.push("undangan");
 	if (existing.delivery !== row.delivery) changes.push("tipe");
 	if ((existing.phone ?? "") !== (row.phone ?? "")) changes.push("nomor");
 	if (Boolean(existing.sentAt) !== row.sent) changes.push("status");
@@ -343,9 +391,11 @@ function sentAtFor(row: ParsedGuestRow, previous: string | null, now: string) {
 
 /**
  * Works out what an import would change. Existing guests are matched by
- * `source + nameKey` and keep their slug forever; only new names get a slug,
- * taken from the set of slugs already in use (including ones added earlier in
- * the same import, so two sources can never collide).
+ * `source + nameKey + group`, so two guests with the same name in different
+ * groups (the two "Wildan" rows) both survive. Each existing row can only be
+ * matched once per import. Slugs never change; only new names get one, taken
+ * from the set of slugs already in use (including ones added earlier in the
+ * same import, so two sources can never collide).
  */
 export function planGuestImport(
 	rows: ParsedGuestRow[],
@@ -354,21 +404,50 @@ export function planGuestImport(
 	now: string = new Date().toISOString(),
 ): GuestImportPlan {
 	const taken = new Set(existing.map((guest) => guest.slug));
-	const byNameKey = new Map(
-		existing
-			.filter((guest) => guest.source === source)
-			.map((guest) => [guest.nameKey, guest]),
-	);
+	const byNameKey = new Map<string, ExistingGuest[]>();
+	for (const guest of existing) {
+		if (guest.source !== source) continue;
+		const list = byNameKey.get(guest.nameKey);
+		if (list) list.push(guest);
+		else byNameKey.set(guest.nameKey, [guest]);
+	}
+
+	const used = new Set<string>();
+	const matches = new Map<number, ExistingGuest>();
+	const freeCandidates = (row: ParsedGuestRow) =>
+		(byNameKey.get(row.nameKey) ?? []).filter((guest) => !used.has(guest.id));
+
+	// First pass: pair rows whose group matches an existing guest exactly, so a
+	// same-named newcomer cannot steal the row that already belongs to someone
+	// else in another group.
+	rows.forEach((row, index) => {
+		const groupKey = guestGroupKey(row.groupName);
+		const match = freeCandidates(row).find(
+			(guest) => guestGroupKey(guest.groupName) === groupKey,
+		);
+		if (!match) return;
+		used.add(match.id);
+		matches.set(index, match);
+	});
+
+	// Second pass: everything still unmatched (e.g. a renamed group) takes an
+	// active same-named row first, then whatever is left.
+	rows.forEach((row, index) => {
+		if (matches.has(index)) return;
+		const candidates = freeCandidates(row);
+		if (!candidates.length) return;
+		const match = candidates.find((guest) => !guest.archived) ?? candidates[0];
+		used.add(match.id);
+		matches.set(index, match);
+	});
 
 	const create: GuestCreate[] = [];
 	const update: GuestChange[] = [];
 	const restore: GuestChange[] = [];
-	const present = new Set<string>();
 	let unchanged = 0;
 
-	for (const row of rows) {
-		present.add(row.nameKey);
-		const match = byNameKey.get(row.nameKey);
+	rows.forEach((row, index) => {
+		const match = matches.get(index);
 
 		if (!match) {
 			const slug = nextFreeSlug(slugifyGuestName(row.name), taken);
@@ -379,19 +458,25 @@ export function planGuestImport(
 				nameKey: row.nameKey,
 				source,
 				groupName: row.groupName,
+				address: row.address,
+				invited: row.invited,
 				delivery: row.delivery,
 				phone: row.phone,
 				sentAt: sentAtFor(row, null, now),
 			});
-			continue;
+			return;
 		}
 
 		const changes = diffGuest(match, row);
 		const entry: GuestChange = {
 			id: match.id,
+			slug: match.slug,
+			source: match.source,
 			name: row.name,
 			nameKey: row.nameKey,
 			groupName: row.groupName,
+			address: row.address,
+			invited: row.invited,
 			delivery: row.delivery,
 			phone: row.phone,
 			sentAt: sentAtFor(row, match.sentAt, now),
@@ -405,14 +490,12 @@ export function planGuestImport(
 		} else {
 			unchanged += 1;
 		}
-	}
+	});
 
 	const archive = existing
 		.filter(
 			(guest) =>
-				guest.source === source &&
-				!guest.archived &&
-				!present.has(guest.nameKey),
+				guest.source === source && !guest.archived && !used.has(guest.id),
 		)
 		.map((guest) => ({ id: guest.id, name: guest.name }));
 

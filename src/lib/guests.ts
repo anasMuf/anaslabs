@@ -2,11 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { readDashboardUser } from "./dashboard-session-server";
 import {
 	type ExistingGuest,
+	GUEST_NAME_MAX,
+	GUEST_PAGE_SIZE,
 	GUEST_PREVIEW_SAMPLE,
 	type GuestDelivery,
 	type GuestImportPlan,
 	type GuestParseIssue,
 	type GuestSource,
+	guestNameKey,
+	normalizeGuestPhone,
 	type ParsedGuestRow,
 	parseGuestTable,
 	planGuestImport,
@@ -22,10 +26,10 @@ import { getSupabaseAdmin } from "./supabase-admin";
  */
 
 const GUEST_COLUMNS =
-	"id, slug, name, name_key, source_sheet, group_name, delivery, phone, sent_at, invitation_opened_at, archived_at";
+	"id, slug, name, name_key, source_sheet, group_name, address, invited, delivery, phone, sent_at, invitation_opened_at, archived_at";
 
 const MIGRATION_HINT =
-	"Tabel guests belum ada. Jalankan supabase/migrations/0003_guests.sql di SQL Editor, lalu coba lagi.";
+	"Tabel guests belum lengkap. Jalankan supabase/migrations/0003_guests.sql lalu 0004_guest_details.sql di SQL Editor, kemudian coba lagi.";
 
 const PARSE_ERRORS: Record<Exclude<GuestParseIssue, "too-many">, string> = {
 	empty: "Tidak ada yang ditempel. Salin dulu baris tamu dari Google Sheets.",
@@ -40,6 +44,8 @@ export interface DashboardGuest {
 	slug: string;
 	name: string;
 	groupName: string | null;
+	address: string | null;
+	invited: string | null;
 	source: GuestSource;
 	delivery: GuestDelivery;
 	phone: string | null;
@@ -55,6 +61,8 @@ interface GuestRow {
 	name_key: string;
 	source_sheet: GuestSource;
 	group_name: string | null;
+	address: string | null;
+	invited: string | null;
 	delivery: GuestDelivery;
 	phone: string | null;
 	sent_at: string | null;
@@ -68,6 +76,8 @@ function toDashboardGuest(row: GuestRow): DashboardGuest {
 		slug: row.slug,
 		name: row.name,
 		groupName: row.group_name,
+		address: row.address,
+		invited: row.invited,
 		source: row.source_sheet,
 		delivery: row.delivery,
 		phone: row.phone,
@@ -85,6 +95,8 @@ function toExistingGuest(row: GuestRow): ExistingGuest {
 		nameKey: row.name_key,
 		source: row.source_sheet,
 		groupName: row.group_name,
+		address: row.address,
+		invited: row.invited,
 		delivery: row.delivery,
 		phone: row.phone,
 		sentAt: row.sent_at,
@@ -98,8 +110,9 @@ async function requireDashboardUser(): Promise<void> {
 		throw new Error("Sesi dashboard tidak valid. Silakan masuk ulang.");
 }
 
-function isMissingTable(error: { code?: string }): boolean {
-	return error.code === "PGRST205";
+function needsMigration(error: { code?: string }): boolean {
+	// PGRST205 = table not in schema cache; 42703 = column does not exist.
+	return error.code === "PGRST205" || error.code === "42703";
 }
 
 export interface GuestImportCounts {
@@ -162,22 +175,253 @@ function toPreview(
 	};
 }
 
-export const listGuests = createServerFn({ method: "GET" }).handler(
-	async (): Promise<DashboardGuest[]> => {
+export interface GuestPage {
+	rows: DashboardGuest[];
+	/** Active (non-archived) guests matching the query. */
+	total: number;
+}
+
+export interface GuestStats {
+	total: number;
+	digital: number;
+	fisik: number;
+	sent: number;
+	opened: number;
+	archived: number;
+}
+
+export type GuestSentFilter = "" | "sent" | "unsent";
+export type GuestOpenedFilter = "" | "opened" | "unopened";
+export type GuestSourceFilter = "" | GuestSource;
+export type GuestDeliveryFilter = "" | GuestDelivery;
+
+export interface GuestFilters {
+	source: GuestSourceFilter;
+	group: string;
+	address: string;
+	delivery: GuestDeliveryFilter;
+	sent: GuestSentFilter;
+	opened: GuestOpenedFilter;
+}
+
+export const EMPTY_GUEST_FILTERS: GuestFilters = {
+	source: "",
+	group: "",
+	address: "",
+	delivery: "",
+	sent: "",
+	opened: "",
+};
+
+export interface GuestFilterOptions {
+	all: GuestFilterSet;
+	anas: GuestFilterSet;
+	mila: GuestFilterSet;
+}
+
+export interface GuestFilterSet {
+	groups: string[];
+	addresses: string[];
+}
+
+export const GUEST_PAGE_MAX = 100;
+
+/**
+ * Strips the characters that would break PostgREST's `or=` filter syntax
+ * (commas/parentheses) or turn the search into a wildcard match (`%`, `*`).
+ */
+function searchTerm(query: string): string {
+	return query
+		.replace(/[%,()*]/g, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, 60);
+}
+
+/** One page of the guest table, active rows only, ordered by sheet then name. */
+export const listGuestsPage = createServerFn({ method: "GET" })
+	.inputValidator(
+		(data: {
+			offset?: number;
+			limit?: number;
+			query?: string;
+			source?: string;
+			group?: string;
+			address?: string;
+			delivery?: string;
+			sent?: string;
+			opened?: string;
+		}) => ({
+			offset: Math.max(0, Math.floor(Number(data?.offset) || 0)),
+			limit: Math.min(
+				GUEST_PAGE_MAX,
+				Math.max(1, Math.floor(Number(data?.limit) || GUEST_PAGE_SIZE)),
+			),
+			query: String(data?.query ?? "")
+				.slice(0, 80)
+				.trim(),
+			source:
+				data?.source === "mila" || data?.source === "anas" ? data.source : "",
+			group: String(data?.group ?? "").slice(0, 60),
+			address: String(data?.address ?? "").slice(0, 120),
+			delivery:
+				data?.delivery === "digital" || data?.delivery === "fisik"
+					? data.delivery
+					: "",
+			sent: data?.sent === "sent" || data?.sent === "unsent" ? data.sent : "",
+			opened:
+				data?.opened === "opened" || data?.opened === "unopened"
+					? data.opened
+					: "",
+		}),
+	)
+	.handler(async ({ data }): Promise<GuestPage> => {
 		await requireDashboardUser();
 
-		const supabase = getSupabaseAdmin();
-		const { data, error } = await supabase
-			.from("guests")
-			.select(GUEST_COLUMNS)
-			.order("source_sheet", { ascending: true })
-			.order("name_key", { ascending: true });
+		const term = searchTerm(data.query);
+		const pattern = `%${term}%`;
 
-		if (error) {
-			throw new Error(isMissingTable(error) ? MIGRATION_HINT : error.message);
+		const supabase = getSupabaseAdmin();
+		let request = supabase
+			.from("guests")
+			.select(GUEST_COLUMNS, { count: "exact" })
+			.is("archived_at", null);
+
+		if (data.source) request = request.eq("source_sheet", data.source);
+		if (data.group) request = request.eq("group_name", data.group);
+		if (data.address) request = request.eq("address", data.address);
+		if (data.delivery) request = request.eq("delivery", data.delivery);
+
+		if (data.sent === "sent") request = request.not("sent_at", "is", null);
+		if (data.sent === "unsent") request = request.is("sent_at", null);
+
+		// "Dibuka" only exists for digital guests; physical invitations have no
+		// link to open, so they are excluded instead of counting as "belum buka".
+		if (data.opened) {
+			request = request.eq("delivery", "digital");
+			request =
+				data.opened === "opened"
+					? request.not("invitation_opened_at", "is", null)
+					: request.is("invitation_opened_at", null);
 		}
 
-		return (data as GuestRow[]).map(toDashboardGuest);
+		if (term) {
+			request = request.or(
+				[
+					`name.ilike.${pattern}`,
+					`group_name.ilike.${pattern}`,
+					`address.ilike.${pattern}`,
+					`invited.ilike.${pattern}`,
+					`slug.ilike.${pattern}`,
+					`phone.ilike.${pattern}`,
+				].join(","),
+			);
+		}
+
+		const {
+			data: rows,
+			count,
+			error,
+		} = await request
+			// `id` keeps pagination stable when two guests share a sorted name.
+			.order("source_sheet", { ascending: true })
+			.order("name_key", { ascending: true })
+			.order("id", { ascending: true })
+			.range(data.offset, data.offset + data.limit - 1);
+
+		if (error) {
+			throw new Error(needsMigration(error) ? MIGRATION_HINT : error.message);
+		}
+
+		return {
+			rows: (rows as GuestRow[]).map(toDashboardGuest),
+			total: count ?? 0,
+		};
+	});
+
+/** Distinct groups and addresses per sheet, for the dependent filter dropdowns. */
+export const getGuestFilterOptions = createServerFn({ method: "GET" }).handler(
+	async (): Promise<GuestFilterOptions> => {
+		await requireDashboardUser();
+		const supabase = getSupabaseAdmin();
+
+		const { data, error } = await supabase
+			.from("guests")
+			.select("source_sheet, group_name, address")
+			.is("archived_at", null);
+
+		if (error) {
+			throw new Error(needsMigration(error) ? MIGRATION_HINT : error.message);
+		}
+
+		const rows = data as Array<{
+			source_sheet: GuestSource;
+			group_name: string | null;
+			address: string | null;
+		}>;
+
+		const collect = (values: Array<string | null>) =>
+			Array.from(
+				new Set(values.filter((value): value is string => Boolean(value))),
+			).sort((a, b) => a.localeCompare(b));
+
+		const build = (subset: typeof rows): GuestFilterSet => ({
+			groups: collect(subset.map((row) => row.group_name)),
+			addresses: collect(subset.map((row) => row.address)),
+		});
+
+		return {
+			all: build(rows),
+			anas: build(rows.filter((row) => row.source_sheet === "anas")),
+			mila: build(rows.filter((row) => row.source_sheet === "mila")),
+		};
+	},
+);
+
+/** Headline counters; separate from the page so scrolling does not recount rows. */
+export const getGuestStats = createServerFn({ method: "GET" }).handler(
+	async (): Promise<GuestStats> => {
+		await requireDashboardUser();
+		const supabase = getSupabaseAdmin();
+
+		const active = () =>
+			supabase
+				.from("guests")
+				.select("id", { count: "exact", head: true })
+				.is("archived_at", null);
+
+		const [total, digital, fisik, sent, opened, archived] = await Promise.all([
+			active(),
+			active().eq("delivery", "digital"),
+			active().eq("delivery", "fisik"),
+			active().not("sent_at", "is", null),
+			// Only digital guests can open an invitation.
+			active()
+				.eq("delivery", "digital")
+				.not("invitation_opened_at", "is", null),
+			supabase
+				.from("guests")
+				.select("id", { count: "exact", head: true })
+				.not("archived_at", "is", null),
+		]);
+
+		const firstError = [total, digital, fisik, sent, opened, archived].find(
+			(result) => result.error,
+		)?.error;
+		if (firstError) {
+			throw new Error(
+				needsMigration(firstError) ? MIGRATION_HINT : firstError.message,
+			);
+		}
+
+		return {
+			total: total.count ?? 0,
+			digital: digital.count ?? 0,
+			fisik: fisik.count ?? 0,
+			sent: sent.count ?? 0,
+			opened: opened.count ?? 0,
+			archived: archived.count ?? 0,
+		};
 	},
 );
 
@@ -217,7 +461,7 @@ export const importGuests = createServerFn({ method: "POST" })
 		if (error) {
 			return {
 				ok: false,
-				error: isMissingTable(error) ? MIGRATION_HINT : error.message,
+				error: needsMigration(error) ? MIGRATION_HINT : error.message,
 			};
 		}
 
@@ -239,6 +483,8 @@ export const importGuests = createServerFn({ method: "POST" })
 						name_key: guest.nameKey,
 						source_sheet: guest.source,
 						group_name: guest.groupName,
+						address: guest.address,
+						invited: guest.invited,
 						delivery: guest.delivery,
 						phone: guest.phone,
 						sent_at: guest.sentAt,
@@ -256,9 +502,13 @@ export const importGuests = createServerFn({ method: "POST" })
 			const changedRows = [
 				...plan.update.map((entry) => ({
 					id: entry.id,
+					slug: entry.slug,
+					source_sheet: entry.source,
 					name: entry.name,
 					name_key: entry.nameKey,
 					group_name: entry.groupName,
+					address: entry.address,
+					invited: entry.invited,
 					delivery: entry.delivery,
 					phone: entry.phone,
 					sent_at: entry.sentAt,
@@ -266,9 +516,13 @@ export const importGuests = createServerFn({ method: "POST" })
 				})),
 				...plan.restore.map((entry) => ({
 					id: entry.id,
+					slug: entry.slug,
+					source_sheet: entry.source,
 					name: entry.name,
 					name_key: entry.nameKey,
 					group_name: entry.groupName,
+					address: entry.address,
+					invited: entry.invited,
 					delivery: entry.delivery,
 					phone: entry.phone,
 					sent_at: entry.sentAt,
@@ -321,6 +575,115 @@ export const setGuestSent = createServerFn({ method: "POST" })
 		const { error } = await supabase
 			.from("guests")
 			.update({ sent_at: data.sent ? now : null, updated_at: now })
+			.eq("id", data.id);
+
+		if (error) return { ok: false, error: error.message };
+		return { ok: true };
+	});
+
+function optionalText(value: unknown, max: number): string | null {
+	const text = String(value ?? "")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, max);
+	// The sheet uses "-" for empty; keep that meaning when editing by hand.
+	return !text || text === "-" || text === "—" ? null : text;
+}
+
+type GuestMutation =
+	| { ok: true; guest: DashboardGuest }
+	| { ok: false; error: string };
+
+/**
+ * Manual edit from the dashboard. `slug` is deliberately never written: it is
+ * the permanent identity of the invitation link. `name_key` follows the new
+ * name so the next sheet import still recognises this guest, and the unique
+ * `(source_sheet, name_key, group_name)` index reports a real collision.
+ */
+export const updateGuest = createServerFn({ method: "POST" })
+	.inputValidator(
+		(data: {
+			id?: string;
+			name?: string;
+			groupName?: string;
+			address?: string;
+			invited?: string;
+			delivery?: string;
+			phone?: string;
+		}) => ({
+			id: String(data?.id ?? "")
+				.trim()
+				.slice(0, 64),
+			name: String(data?.name ?? "")
+				.replace(/\s+/g, " ")
+				.trim()
+				.slice(0, GUEST_NAME_MAX),
+			groupName: optionalText(data?.groupName, 60),
+			address: optionalText(data?.address, 120),
+			invited: optionalText(data?.invited, 60),
+			delivery: data?.delivery === "fisik" ? "fisik" : "digital",
+			phone: String(data?.phone ?? ""),
+		}),
+	)
+	.handler(async ({ data }): Promise<GuestMutation> => {
+		await requireDashboardUser();
+		if (!data.id) return { ok: false, error: "Tamu tidak dikenal." };
+
+		const nameKey = guestNameKey(data.name);
+		if (!nameKey) return { ok: false, error: "Nama tamu tidak boleh kosong." };
+
+		const supabase = getSupabaseAdmin();
+		const { data: row, error } = await supabase
+			.from("guests")
+			.update({
+				name: data.name,
+				name_key: nameKey,
+				group_name: data.groupName,
+				address: data.address,
+				invited: data.invited,
+				delivery: data.delivery,
+				phone: normalizeGuestPhone(data.phone),
+				updated_at: new Date().toISOString(),
+			})
+			.eq("id", data.id)
+			.select(GUEST_COLUMNS)
+			.maybeSingle();
+
+		if (error) {
+			if (error.code === "23505")
+				return {
+					ok: false,
+					error:
+						"Nama dan grup itu sudah dipakai tamu lain di sheet yang sama. Ubah salah satunya.",
+				};
+			return {
+				ok: false,
+				error: needsMigration(error) ? MIGRATION_HINT : error.message,
+			};
+		}
+		if (!row) return { ok: false, error: "Tamu tidak ditemukan." };
+
+		return { ok: true, guest: toDashboardGuest(row as GuestRow) };
+	});
+
+/**
+ * "Hapus" from the dashboard is a soft archive: the row disappears from the
+ * active list and counts, but the slug keeps resolving so links that are
+ * already shared do not die. Importing the name again restores it.
+ */
+export const archiveGuest = createServerFn({ method: "POST" })
+	.inputValidator((data: { id?: string }) => ({
+		id: String(data?.id ?? "").slice(0, 64),
+	}))
+	.handler(async ({ data }): Promise<{ ok: boolean; error?: string }> => {
+		await requireDashboardUser();
+		if (!data.id) return { ok: false, error: "Tamu tidak dikenal." };
+
+		const now = new Date().toISOString();
+		const supabase = getSupabaseAdmin();
+		const { error } = await supabase
+			.from("guests")
+			.update({ archived_at: now, updated_at: now })
 			.eq("id", data.id);
 
 		if (error) return { ok: false, error: error.message };

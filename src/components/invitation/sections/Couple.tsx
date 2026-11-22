@@ -1,16 +1,16 @@
 import { invitation } from "#/data/invitation";
+import type { PersonView } from "#/lib/invitation-personalization";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
 
-interface PersonProps {
-	label: string;
-	fullName: string;
-	parents: string;
+interface CoupleProps {
+	/** Ordered for the guest's side; the labels stay with each person. */
+	people: PersonView[];
 }
 
-/** Couple section (Figma 384:430): groom, bouquet, bride. */
-export default function Couple() {
+/** Couple section (Figma 384:430): first person, bouquet, second person. */
+export default function Couple({ people }: CoupleProps) {
 	const { couple, sections } = invitation;
 
 	return (
@@ -25,7 +25,7 @@ export default function Couple() {
 				/>
 
 				<div className="mt-8 flex flex-col items-center">
-					<Person {...couple.groom} />
+					<Person {...people[0]} />
 
 					<img
 						src={couple.bouquet}
@@ -37,7 +37,7 @@ export default function Couple() {
 						className="mt-5 mb-6 h-auto w-[174px]"
 					/>
 
-					<Person {...couple.bride} />
+					<Person {...people[1]} />
 				</div>
 
 				<Ornament className="mt-8" />
@@ -46,7 +46,7 @@ export default function Couple() {
 	);
 }
 
-function Person({ label, fullName, parents }: PersonProps) {
+function Person({ label, fullName, parents }: PersonView) {
 	return (
 		<div className="flex flex-col items-center text-center">
 			<p className="text-[10px] font-body uppercase leading-[1.4] tracking-[0.18em] text-inv-accent">

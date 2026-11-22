@@ -4,8 +4,14 @@ import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
 
 /** Closing section (Figma 384:427). */
-export default function Closing() {
-	const { sections, closing, cover } = invitation;
+export default function Closing({
+	firstNames,
+	secondNames,
+}: {
+	firstNames: string;
+	secondNames: string;
+}) {
+	const { sections, closing } = invitation;
 
 	return (
 		<section
@@ -34,10 +40,10 @@ export default function Closing() {
 						{closing.label}
 					</p>
 					<p className="font-display text-[30px] leading-[1.3]">
-						<span className="block">{cover.firstNames}</span>
+						<span className="block">{firstNames}</span>
 						<span className="block">
 							<span className="italic text-inv-accent">&amp;</span>{" "}
-							{cover.secondNames}
+							{secondNames}
 						</span>
 					</p>
 				</div>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import WallPage from "#/components/invitation/wall/WallPage";
-import { invitation } from "#/data/invitation";
+import type { GuestSide } from "#/lib/invitation-personalization";
+import { getInvitationView } from "#/lib/invitation-view";
 import { listWallCards } from "#/lib/wall";
 
 export const Route = createFileRoute("/invitation/$slug/wall")({
@@ -18,8 +19,14 @@ export const Route = createFileRoute("/invitation/$slug/wall")({
 			return { cards: [], failed: true };
 		}
 	},
-	head: () => {
-		const names = `${invitation.cover.firstNames} & ${invitation.cover.secondNames}`;
+	head: ({ matches }) => {
+		const parent = matches.find(
+			(match) => (match.routeId as string) === "/invitation/$slug",
+		);
+		const side =
+			(parent?.loaderData as { side?: GuestSide } | undefined)?.side ?? null;
+		const view = getInvitationView(side);
+		const names = `${view.firstNames} & ${view.secondNames}`;
 		return {
 			meta: [
 				{ title: `Photo Wall — ${names}` },

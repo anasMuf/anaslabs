@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { InvitationGuest } from "#/data/invitation-guests";
-import { findGuestName } from "./guest-lookup";
+import { findGuest } from "./guest-lookup";
+import type { GuestSide } from "./invitation-personalization";
 
 /**
  * Server-side guest lookup for `/invitation/:slug`.
@@ -9,9 +9,15 @@ import { findGuestName } from "./guest-lookup";
  * hand-written slugs in `data/invitation-guests.ts` remain as a fallback so
  * `/invitation/test` and the original links keep working.
  *
- * Only the display name crosses to the browser: the table also holds phones and
- * groups, which must never be exposed on a name-only, guessable URL.
+ * Only the display name and the guest's side cross to the browser: the table
+ * also holds phones and groups, which must never be exposed on a name-only,
+ * guessable URL.
  */
+export interface InvitationGuestView {
+	name: string;
+	side: GuestSide | null;
+}
+
 export const getGuest = createServerFn({ method: "GET" })
 	.inputValidator((slug: string) =>
 		String(slug ?? "")
@@ -19,7 +25,6 @@ export const getGuest = createServerFn({ method: "GET" })
 			.toLowerCase()
 			.slice(0, 80),
 	)
-	.handler(async ({ data: slug }): Promise<InvitationGuest | null> => {
-		const name = await findGuestName(slug);
-		return name ? { name } : null;
+	.handler(async ({ data: slug }): Promise<InvitationGuestView | null> => {
+		return findGuest(slug);
 	});

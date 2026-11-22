@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
-import { findGuestName } from "./guest-lookup";
+import { findGuest } from "./guest-lookup";
 import { getSupabaseAdmin } from "./supabase-admin";
 import {
 	validateWallPublish,
@@ -142,8 +142,9 @@ async function pruneWall(supabase: ReturnType<typeof getSupabaseAdmin>) {
 export const publishWallCard = createServerFn({ method: "POST" })
 	.inputValidator((data: WallPublishInput) => data)
 	.handler(async ({ data }): Promise<PublishResult> => {
-		const guestName = await findGuestName(data.slug);
-		if (!guestName) return { ok: false, error: "Tautan undangan tidak valid." };
+		const guest = await findGuest(data.slug);
+		if (!guest) return { ok: false, error: "Tautan undangan tidak valid." };
+		const guestName = guest.name;
 
 		const validation = validateWallPublish(data);
 		if (!validation.ok) {

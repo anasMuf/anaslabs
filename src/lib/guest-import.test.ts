@@ -32,6 +32,8 @@ describe("parseGuestTable", () => {
 			name: "Miss Andin",
 			nameKey: "miss andin",
 			groupName: "Lainnya",
+			address: null,
+			invited: null,
 			delivery: "digital",
 			sent: false,
 			phone: null,
@@ -100,6 +102,38 @@ describe("parseGuestTable", () => {
 		const result = parseGuestTable("NAMA\tKETERANGAN\nwildan\tsetoyo");
 		expect(result.rows[0].delivery).toBe("digital");
 	});
+
+	it('reads ALAMAT and DIUNDANG, treating "-" as empty', () => {
+		const csv = [
+			"NO,NAMA,KETERANGAN,ALAMAT,DIUNDANG,FISIK/DIGITAL,STATUS PENGIRIMAN",
+			",Wildan,Afindo,JOMBANG,-,Digital,FALSE",
+			",Pak Arif,Natusi,MOJOKERTO,Sekalian,Digital,FALSE",
+		].join("\n");
+
+		const result = parseGuestTable(csv);
+
+		expect(result.rows[0].address).toBe("JOMBANG");
+		expect(result.rows[0].invited).toBeNull();
+		expect(result.rows[1].address).toBe("MOJOKERTO");
+		expect(result.rows[1].invited).toBe("Sekalian");
+	});
+
+	it("keeps guests with the same name when their groups differ", () => {
+		const csv = [
+			"NO,NAMA,KETERANGAN,ALAMAT,DIUNDANG,FISIK/DIGITAL,STATUS PENGIRIMAN",
+			",Wildan,Afindo,JOMBANG,-,Digital,FALSE",
+			",Wildan,Unhasy,MALANG,-,Digital,FALSE",
+		].join("\n");
+
+		const result = parseGuestTable(csv);
+
+		expect(result.rows).toHaveLength(2);
+		expect(result.duplicates).toBe(0);
+		expect(result.rows.map((row) => row.groupName)).toEqual([
+			"Afindo",
+			"Unhasy",
+		]);
+	});
 });
 
 describe("slugifyGuestName", () => {
@@ -162,6 +196,8 @@ describe("planGuestImport", () => {
 		nameKey: "cak abid",
 		source: "anas",
 		groupName: "pondok mq",
+		address: null,
+		invited: null,
 		delivery: "digital",
 		phone: null,
 		sentAt: null,
@@ -176,6 +212,8 @@ describe("planGuestImport", () => {
 		name: "cak abid",
 		nameKey: "cak abid",
 		groupName: "pondok mq",
+		address: null,
+		invited: null,
 		delivery: "digital" as const,
 		sent: false,
 		phone: null,
@@ -225,6 +263,9 @@ describe("planGuestImport", () => {
 		expect(plan.create).toHaveLength(0);
 		expect(plan.update).toHaveLength(1);
 		expect(plan.update[0].changes).toEqual(["nama"]);
+		// Carried for the upsert: Postgres checks NOT NULL before the id conflict.
+		expect(plan.update[0].slug).toBe("cak-abid");
+		expect(plan.update[0].source).toBe("anas");
 	});
 
 	it("reports nothing to do when the paste matches the database", () => {
@@ -309,6 +350,63 @@ describe("planGuestImport", () => {
 		// Different nameKey means a new guest; the old row is archived, not renamed.
 		expect(plan.create[0].slug).toBe("cak-abid-2");
 		expect(plan.archive).toHaveLength(1);
+	});
+
+	it("creates both guests when one sheet holds two people with the same name", () => {
+		const plan = planGuestImport(
+			[
+				row({ name: "Wildan", nameKey: "wildan", groupName: "Afindo" }),
+				row({ name: "Wildan", nameKey: "wildan", groupName: "Unhasy" }),
+			],
+			[],
+			"anas",
+			NOW,
+		);
+
+		expect(plan.create.map((guest) => guest.slug)).toEqual([
+			"wildan",
+			"wildan-2",
+		]);
+	});
+
+	it("matches same-named guests by group so each keeps its own slug", () => {
+		const afindo = existingGuest({
+			id: "guest-1",
+			slug: "wildan",
+			name: "Wildan",
+			nameKey: "wildan",
+			groupName: "Afindo",
+		});
+
+		const plan = planGuestImport(
+			[
+				row({ name: "Wildan", nameKey: "wildan", groupName: "Unhasy" }),
+				row({ name: "Wildan", nameKey: "wildan", groupName: "Afindo" }),
+			],
+			[afindo],
+			"anas",
+			NOW,
+		);
+
+		// Unhasy is new; Afindo matches the existing row (no slug change).
+		expect(plan.create.map((guest) => guest.slug)).toEqual(["wildan-2"]);
+		expect(plan.create[0].groupName).toBe("Unhasy");
+		expect(plan.update).toHaveLength(0);
+		expect(plan.archive).toHaveLength(0);
+		expect(plan.unchanged).toBe(1);
+	});
+
+	it("reports alamat and undangan changes from the new sheet columns", () => {
+		const plan = planGuestImport(
+			[row({ address: "JOMBANG", invited: "Sekalian" })],
+			[existingGuest({ address: "MALANG", invited: null })],
+			"anas",
+			NOW,
+		);
+
+		expect(plan.update[0].changes).toEqual(["alamat", "undangan"]);
+		expect(plan.update[0].address).toBe("JOMBANG");
+		expect(plan.update[0].invited).toBe("Sekalian");
 	});
 
 	it("keeps the first sent timestamp instead of resetting it", () => {

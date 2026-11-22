@@ -17,6 +17,7 @@ import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
 import { Route as DashboardTamuRouteImport } from './routes/dashboard.tamu'
 import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
+import { Route as DashboardImporRouteImport } from './routes/dashboard.impor'
 import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
@@ -65,6 +66,11 @@ const DashboardTamuRoute = DashboardTamuRouteImport.update({
 const DashboardLoginRoute = DashboardLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardImporRoute = DashboardImporRouteImport.update({
+  id: '/impor',
+  path: '/impor',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardAuthRoute = DashboardAuthRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/': typeof SiteIndexRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/_site/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/impor'
     | '/dashboard/login'
     | '/dashboard/tamu'
     | '/invitation/$slug'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/impor'
     | '/dashboard/login'
     | '/dashboard/tamu'
     | '/'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/_site/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/impor'
     | '/dashboard/login'
     | '/dashboard/tamu'
     | '/invitation/$slug'
@@ -299,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/dashboard/login'
       preLoaderRoute: typeof DashboardLoginRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/impor': {
+      id: '/dashboard/impor'
+      path: '/impor'
+      fullPath: '/dashboard/impor'
+      preLoaderRoute: typeof DashboardImporRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/auth': {
@@ -396,6 +415,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardAuthRoute: typeof DashboardAuthRoute
+  DashboardImporRoute: typeof DashboardImporRoute
   DashboardLoginRoute: typeof DashboardLoginRoute
   DashboardTamuRoute: typeof DashboardTamuRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -403,6 +423,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAuthRoute: DashboardAuthRoute,
+  DashboardImporRoute: DashboardImporRoute,
   DashboardLoginRoute: DashboardLoginRoute,
   DashboardTamuRoute: DashboardTamuRoute,
   DashboardIndexRoute: DashboardIndexRoute,

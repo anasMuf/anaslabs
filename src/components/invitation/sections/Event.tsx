@@ -7,9 +7,15 @@ import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
 
-/** Event section (Figma 384:429): Akad Nikah card, ornament, Unduh Mantu card. */
-export default function Event() {
-	const { events, sections } = invitation;
+/** Event section (Figma 384:429): the celebration(s) this guest is invited to. */
+export default function Event({
+	events,
+	intro,
+}: {
+	events: InvitationEvent[];
+	intro: string;
+}) {
+	const { sections } = invitation;
 
 	return (
 		<section
@@ -17,10 +23,7 @@ export default function Event() {
 			className="invite-section snap-start flex h-dvh flex-col overflow-y-auto no-scrollbar bg-inv-bg px-8 py-10 font-body text-inv-ink"
 		>
 			<Reveal className="mx-auto flex w-full max-w-[348px] flex-col items-center">
-				<SectionHeading
-					heading={sections.event.heading}
-					intro={sections.event.intro}
-				/>
+				<SectionHeading heading={sections.event.heading} intro={intro} />
 
 				<div className="mt-3 flex w-full flex-col">
 					{events.map((event, index) => (

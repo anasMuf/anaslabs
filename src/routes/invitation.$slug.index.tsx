@@ -10,6 +10,7 @@ import Photobooth from "#/components/invitation/sections/Photobooth";
 import Story from "#/components/invitation/sections/Story";
 import { invitation } from "#/data/invitation";
 import { markGuestOpened } from "#/lib/guests";
+import { getInvitationView } from "#/lib/invitation-view";
 import { useLockZoom } from "#/lib/use-lock-zoom";
 
 const parentRoute = getRouteApi("/invitation/$slug");
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/invitation/$slug/")({
 function InvitationPage() {
 	const guest = parentRoute.useLoaderData();
 	const { slug } = parentRoute.useParams();
+	const view = getInvitationView(guest.side);
 
 	useLockZoom();
 
@@ -32,13 +34,18 @@ function InvitationPage() {
 
 	return (
 		<main className="invite-scroller h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth motion-reduce:scroll-auto no-scrollbar touch-pan-y bg-inv-bg font-body text-inv-ink">
-			<Cover guestName={guest.name} />
-			<Couple />
-			<Event />
-			<Story />
+			<Cover
+				guestName={guest.name}
+				firstNames={view.firstNames}
+				secondNames={view.secondNames}
+				dateLabel={view.coverDateLabel}
+			/>
+			<Couple people={view.people} />
+			<Event events={view.events} intro={view.eventIntro} />
+			<Story namesLabel={view.namesLabel} />
 			<Photobooth slug={slug} />
-			<Gift />
-			<Closing />
+			<Gift gifts={view.gifts} />
+			<Closing firstNames={view.firstNames} secondNames={view.secondNames} />
 			<InvitationAudio url={invitation.music} />
 		</main>
 	);

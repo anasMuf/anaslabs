@@ -189,6 +189,20 @@ pre code {
 	}
 }
 
+/* Story cards (Swiper cards effect): the deck sits on the page like a stack of
+   printed chapter cards, so the shadow and hairline follow the palette. */
+.invite-story-card {
+	box-shadow:
+		0 0 0 1px var(--color-inv-rule),
+		0 20px 44px -26px rgba(52, 54, 46, 0.5);
+}
+
+.invite-story-swiper:focus-visible {
+	outline: 2px solid var(--color-inv-accent);
+	outline-offset: 8px;
+	border-radius: 26px;
+}
+
 /* Section scrollers use this to keep the snap experience clean. */
 .no-scrollbar::-webkit-scrollbar {
 	display: none;

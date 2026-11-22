@@ -31,6 +31,13 @@ const monthYearFormatter = new Intl.DateTimeFormat("id-ID", {
 	timeZone: "UTC",
 });
 
+const coverDateFormatter = new Intl.DateTimeFormat("id-ID", {
+	day: "numeric",
+	month: "long",
+	year: "numeric",
+	timeZone: "UTC",
+});
+
 function parseDate(iso: string): Date | null {
 	const match = DATE_ONLY.exec(iso.trim());
 	if (!match) return null;
@@ -59,6 +66,16 @@ export function formatEventDate(iso: string): string {
 	// The template (Figma 384:429) writes Sunday as "Ahad", while `id-ID`
 	// resolves it to "Minggu"; keep the design's wording.
 	return eventDateFormatter.format(date).replace(/^Minggu\b/, "Ahad");
+}
+
+/**
+ * "20 Desember 2026" for a single day, matching the compact cover line (no
+ * weekday, unlike `formatEventDate`). Empty string for an invalid date.
+ */
+export function formatCoverDate(iso: string): string {
+	const date = parseDate(iso);
+	if (!date) return "";
+	return coverDateFormatter.format(date);
 }
 
 /**

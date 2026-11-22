@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { resolveGuest } from "#/data/invitation-guests";
 import {
+	formatCoverDate,
 	formatCoverDateRange,
 	formatEventDate,
 	formatVoiceDuration,
@@ -44,6 +45,18 @@ describe("formatEventDate", () => {
 		expect(formatEventDate("2026-02-31")).toBe("");
 		expect(formatEventDate("19-12-2026")).toBe("");
 		expect(formatEventDate("")).toBe("");
+	});
+});
+
+describe("formatCoverDate", () => {
+	it("drops the weekday for the compact cover line", () => {
+		expect(formatCoverDate("2026-12-20")).toBe("20 Desember 2026");
+		expect(formatCoverDate("2026-12-19")).toBe("19 Desember 2026");
+	});
+
+	it("returns an empty string for invalid input", () => {
+		expect(formatCoverDate("2026-02-31")).toBe("");
+		expect(formatCoverDate("")).toBe("");
 	});
 });
 

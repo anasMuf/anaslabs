@@ -1,18 +1,25 @@
 import { invitation } from "#/data/invitation";
-import { formatCoverDateRange } from "#/lib/invitation";
 import InkLine from "./ui/InkLine";
 
 interface CoverProps {
 	guestName: string;
+	firstNames: string;
+	secondNames: string;
+	dateLabel: string;
 }
 
 /**
- * Cover section (Figma 384:431). The guest name is personalised per slug;
- * everything else comes from `src/data/invitation.ts`.
+ * Cover section (Figma 384:431). The guest name is personalised per slug; the
+ * couple order and date follow the guest's side (see
+ * `lib/invitation-personalization.ts`).
  */
-export default function Cover({ guestName }: CoverProps) {
+export default function Cover({
+	guestName,
+	firstNames,
+	secondNames,
+	dateLabel,
+}: CoverProps) {
 	const { cover } = invitation;
-	const dateLabel = formatCoverDateRange(cover.startDate, cover.endDate);
 
 	return (
 		<section className="invite-section snap-start relative flex h-dvh flex-col items-center overflow-y-auto no-scrollbar bg-inv-bg px-8 pt-[max(48px,10vh)] pb-[max(72px,12vh)] text-center text-inv-ink">
@@ -32,10 +39,9 @@ export default function Cover({ guestName }: CoverProps) {
 				</p>
 
 				<h1 className="mt-[clamp(36px,7vh,60px)] font-display text-[clamp(44px,16vw,64px)] font-normal leading-[1.18]">
-					<span className="block">{cover.firstNames}</span>
+					<span className="block">{firstNames}</span>
 					<span className="mt-1 block">
-						<span className="italic text-inv-accent">&amp;</span>{" "}
-						{cover.secondNames}
+						<span className="italic text-inv-accent">&amp;</span> {secondNames}
 					</span>
 				</h1>
 
