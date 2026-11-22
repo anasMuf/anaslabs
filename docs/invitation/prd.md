@@ -34,7 +34,7 @@ sepenuhnya di perangkat tamu.
 |----|-------------|
 | R1 | Route undangan: `/invitation/$slug` (mobile-first), dan `/invitation/$slug/photobooth`. |
 | R2 | Tampilan undangan **tanpa** Header, Footer, grid background, atau navigasi portfolio. |
-| R3 | Nama tamu pada cover diambil dari data tamu berdasarkan `slug`; slug tidak terdaftar → 404 (`notFound()`), bukan nama generik. |
+| R3 | Nama tamu pada cover diambil dari data tamu berdasarkan `slug`; slug tidak terdaftar → 404 (`notFound()`), bukan nama generik. Di bawah nama tampil caption grup, atau alamat bila grupnya "Lainnya", dihitung di server. |
 | R4 | Seluruh konten undangan berasal dari satu sumber data bertipe di `src/data/` — tidak ada string konten pernikahan di dalam komponen. |
 | R5 | Section sesuai Figma, berurutan: Cover → Couple → Event → Story → Photobooth → Gift → Closing. |
 | R6 | Event mendukung **lebih dari satu acara** (Akad Nikah + Unduh Mantu), masing-masing dengan tanggal, waktu, lokasi, dan tautan "Petunjuk Arah" ke Google Maps. |
@@ -529,8 +529,10 @@ horizontal; 768×1024 → 3 kolom; dialog terbuka dengan fokus pada tombol tutup
 ### 5.12 Personalisasi sisi tamu
 
 - `guests.source_sheet` → `side`: `anas` = groom, `mila` = bride. `getGuest`
-  mengirim `{ name, side }` ke browser; nomor HP dan grup tetap tidak pernah
-  dikirim.
+  mengirim `{ name, side }` ke browser. Cover juga mendapat satu string
+  `caption` hasil `guestCoverCaption()` (grup; atau alamat bila grupnya
+  "Lainnya"); kolom grup/alamat mentah tidak ikut dikirim. Nomor HP tetap
+  tidak pernah dikirim.
 - `src/lib/invitation-personalization.ts` (pure, unit tested) mengatur urutan
   nama (`firstNames`/`secondNames`, `namesLabel`, `fullNamePair`), urutan profil
   di section Mempelai, daftar `events` yang tampil, label tanggal cover, dan

@@ -22,7 +22,9 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 - **Slug tamu**: nama saja (`cak-abid`), tanpa karakter acak; nama kembar diberi
   akhiran `-2`, `-3`. Slug **permanen**: impor ulang tidak pernah mengubahnya.
   Konsekuensi yang diterima: link bisa dienumerasi, jadi halaman undangan tidak
-  boleh menampilkan nomor HP atau grup.
+  boleh menampilkan nomor HP. Caption grup/alamat di cover **diizinkan**
+  (keputusan pemilik): server mengirim satu string `caption` yang sudah diolah
+  (`Lainnya` → alamat), bukan kolom `group_name`/`address` mentah.
 - **Edit/hapus tamu**: edit mengubah nama/grup/alamat/DIUNDANG/tipe/HP tanpa
   menyentuh `slug`; "hapus" berarti **arsip** (`archived_at`) supaya link yang
   sudah beredar tetap hidup.
@@ -64,8 +66,10 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
   akan mati; identitas tamu adalah slug, bukan nama di sheet).
 - ❌ **Menghapus baris tamu yang hilang dari sheet** (alasan: link lama harus tetap
   hidup; pakai `archived_at`).
-- ❌ **Menampilkan nomor HP atau grup di halaman undangan** (alasan: slug hanya
-  nama sehingga mudah ditebak/dienumerasi; nama tampil saja sudah cukup).
+- ❌ **Menampilkan nomor HP atau kolom grup/alamat mentah di halaman undangan**
+  (alasan: slug hanya nama sehingga mudah ditebak/dienumerasi). Pengecualian
+  yang disetujui pemilik: caption grup/alamat di cover, dikirim sebagai satu
+  string `caption` hasil olahan server, bukan data mentah.
 - ❌ **Kredensial dashboard di `.env`** (alasan: sumber kebenaran adalah Supabase
   Auth + tabel `dashboard_users`, bukan environment).
 - ❌ **Service role key di bundle browser** (alasan: bypass RLS; hanya server).

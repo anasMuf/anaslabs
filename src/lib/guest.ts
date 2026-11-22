@@ -15,6 +15,8 @@ import type { GuestSide } from "./invitation-personalization";
  */
 export interface InvitationGuestView {
 	name: string;
+	/** Group/address line under the name on the cover (already resolved). */
+	caption: string | null;
 	side: GuestSide | null;
 }
 

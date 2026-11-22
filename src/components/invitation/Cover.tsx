@@ -3,6 +3,8 @@ import InkLine from "./ui/InkLine";
 
 interface CoverProps {
 	guestName: string;
+	/** Group, or address when the group is "Lainnya". */
+	caption: string | null;
 	firstNames: string;
 	secondNames: string;
 	dateLabel: string;
@@ -15,6 +17,7 @@ interface CoverProps {
  */
 export default function Cover({
 	guestName,
+	caption,
 	firstNames,
 	secondNames,
 	dateLabel,
@@ -57,6 +60,11 @@ export default function Cover({
 				<div className="mt-[clamp(36px,7vh,60px)]">
 					<p className="font-body text-[12px]">{cover.guestLabel}</p>
 					<p className="mt-1 font-body text-[16px] font-bold">{guestName}</p>
+					{caption ? (
+						<p className="mt-1 font-body text-[11px] leading-[1.5] text-inv-muted">
+							{caption}
+						</p>
+					) : null}
 				</div>
 			</div>
 

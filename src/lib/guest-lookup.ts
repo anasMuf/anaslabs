@@ -1,9 +1,16 @@
 import { resolveGuest } from "#/data/invitation-guests";
+import { guestCoverCaption } from "./guest-caption";
 import type { GuestSide } from "./invitation-personalization";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 export interface ResolvedGuest {
 	name: string;
+	/**
+	 * Group (or address when the group is "Lainnya") shown under the name on
+	 * the cover. Computed here so the raw group/address columns never reach the
+	 * browser.
+	 */
+	caption: string | null;
 	/**
 	 * Which side invited the guest. Derived from `source_sheet` (anas = groom,
 	 * mila = bride). This is safe to send to the browser; phone and group are not.
@@ -38,17 +45,21 @@ export async function findGuest(slug: string): Promise<ResolvedGuest | null> {
 		const supabase = getSupabaseAdmin();
 		const { data } = await supabase
 			.from("guests")
-			.select("name, source_sheet")
+			.select("name, source_sheet, group_name, address")
 			.eq("slug", key)
 			.maybeSingle();
 
 		if (data?.name) {
-			return { name: data.name, side: sideFromSource(data.source_sheet) };
+			return {
+				name: data.name,
+				caption: guestCoverCaption(data.group_name, data.address),
+				side: sideFromSource(data.source_sheet),
+			};
 		}
 	} catch {
 		// Fall through to the local map.
 	}
 
 	const fallback = resolveGuest(key);
-	return fallback ? { name: fallback.name, side: null } : null;
+	return fallback ? { name: fallback.name, caption: null, side: null } : null;
 }
