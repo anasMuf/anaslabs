@@ -174,7 +174,7 @@ export const invitation = {
 			body: "Di penghujung tahun lalu, kami dipertemukan. Berawal dari obrolan kecil yang pelan-pelan menyisakan rasa. kami sempat mengira itu sudah cukup untuk memulai sesuatu. Nyatanya tidak. Tanpa banyak penjelasan, percakapan itu mereda, dan berhenti begitu saja.",
 		},
 		{
-			title: "Tumbuh Bersama",
+			title: "Jeda & Pulih",
 			body: "Dengan dada yang lapang sekaligus berat, kami memilih jalan masing-masing. Tak ada lagi kabar, tak ada lagi tanya. Tujuh bulan pertama di tahun ini adalah badai yang menguji. Sampai di satu titik, kami berhenti melawan keadaan dan memilih berdamai, menjadikannya pelajaran untuk melangkah.",
 		},
 		{
