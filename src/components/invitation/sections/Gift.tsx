@@ -1,7 +1,10 @@
 import { Fragment, useEffect, useId, useRef, useState } from "react";
 import type { InvitationGiftAccount } from "#/data/invitation";
-import { invitation } from "#/data/invitation";
 import { getGiftAccountNumber } from "#/lib/gift";
+import {
+	useInvitationContent,
+	useInvitationPreview,
+} from "../InvitationContentProvider";
 import BankLogo from "../ui/BankLogo";
 import CopyButton from "../ui/CopyButton";
 import Ornament from "../ui/Ornament";
@@ -23,7 +26,7 @@ type RevealState = "idle" | "loading" | "ready" | "error";
  * itself after ten seconds without interaction.
  */
 export default function Gift({ gifts }: { gifts: InvitationGiftAccount[] }) {
-	const { sections, giftThanks } = invitation;
+	const { sections, giftThanks } = useInvitationContent();
 
 	return (
 		<section
@@ -61,6 +64,7 @@ function GiftAccount({
 	bankName,
 	accountHolder,
 }: InvitationGiftAccount) {
+	const preview = useInvitationPreview();
 	const backId = useId();
 	const cardRef = useRef<HTMLDivElement | null>(null);
 	const frontRef = useRef<HTMLButtonElement | null>(null);
@@ -91,6 +95,7 @@ function GiftAccount({
 
 	const reveal = () => {
 		setOpen(true);
+		if (preview) return;
 		if (state === "idle" || state === "error") void load();
 	};
 
@@ -149,6 +154,14 @@ function GiftAccount({
 			node.removeEventListener("keydown", handleKey);
 		};
 	}, [open]);
+
+	// In the preview there is no number to fetch, so flip back on a short timer
+	// instead of waiting for an interaction that never comes.
+	useEffect(() => {
+		if (!preview || !open) return;
+		const timer = window.setTimeout(() => setOpen(false), 5000);
+		return () => window.clearTimeout(timer);
+	}, [preview, open]);
 
 	// Drop the number from the DOM once the flip-back animation is over.
 	useEffect(() => {
@@ -210,7 +223,11 @@ function GiftAccount({
 						aria-live="polite"
 						className="mt-1.5 flex min-h-[26px] items-center justify-center"
 					>
-						{state === "ready" && accountNumber ? (
+						{preview ? (
+							<span className="text-[12px] font-body leading-[1.6] text-inv-muted">
+								Tidak ditampilkan di pratinjau
+							</span>
+						) : state === "ready" && accountNumber ? (
 							<span className="text-[15px] font-body leading-[1.6] tracking-[0.08em] text-inv-ink tabular-nums">
 								{accountNumber}
 							</span>
@@ -234,7 +251,7 @@ function GiftAccount({
 					</p>
 
 					<div className="mt-3 flex min-h-[26px] items-center justify-center">
-						{state === "ready" && accountNumber ? (
+						{preview ? null : state === "ready" && accountNumber ? (
 							<CopyButton value={accountNumber} />
 						) : state === "error" ? (
 							<button

@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
+import { readDashboardUser } from "./dashboard-session-server";
 import { findGuest } from "./guest-lookup";
 import { getSupabaseAdmin } from "./supabase-admin";
 import {
@@ -21,6 +22,8 @@ import {
 
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
 const BUCKET = "wall";
+const CARD_COLUMNS =
+	"id, guest_name, message, thumb_path, photo_path, audio_path, audio_duration_ms, created_at";
 
 export interface WallCard {
 	id: string;
@@ -93,9 +96,7 @@ export const listWallCards = createServerFn({ method: "GET" })
 		const supabase = getSupabaseAdmin();
 		const { data: rows, error } = await supabase
 			.from("wall_cards")
-			.select(
-				"id, guest_name, message, thumb_path, photo_path, audio_path, audio_duration_ms, created_at",
-			)
+			.select(CARD_COLUMNS)
 			.eq("status", "published")
 			.order("created_at", { ascending: false })
 			.limit(data.limit);
@@ -111,6 +112,75 @@ export const listWallCards = createServerFn({ method: "GET" })
 		const urls = await signPaths(supabase, paths);
 
 		return (rows as WallRow[]).map((row) => toCard(row, urls));
+	});
+
+export type WallCardsPage =
+	| {
+			ok: true;
+			rows: WallCard[];
+			total: number;
+			nextOffset: number | null;
+	  }
+	| { ok: false; error: string };
+
+/** Dashboard listing: guarded, paginated, and never dependent on the URL token. */
+export const listWallCardsPage = createServerFn({ method: "GET" })
+	.inputValidator((data: { offset?: number; limit?: number } | undefined) => ({
+		offset: Math.max(0, Math.floor(Number(data?.offset ?? 0)) || 0),
+		limit: Math.min(Math.max(Number(data?.limit ?? 24), 1), 60),
+	}))
+	.handler(async ({ data }): Promise<WallCardsPage> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk lagi.",
+			};
+		}
+
+		let supabase: ReturnType<typeof getSupabaseAdmin>;
+		try {
+			supabase = getSupabaseAdmin();
+		} catch (error) {
+			return {
+				ok: false,
+				error:
+					error instanceof Error
+						? error.message
+						: "Supabase belum dikonfigurasi.",
+			};
+		}
+
+		const {
+			data: rows,
+			count,
+			error,
+		} = await supabase
+			.from("wall_cards")
+			.select(CARD_COLUMNS, { count: "exact" })
+			.eq("status", "published")
+			.order("created_at", { ascending: false })
+			.range(data.offset, data.offset + data.limit - 1);
+
+		if (error) return { ok: false, error: error.message };
+
+		const cards = (rows as WallRow[] | null) ?? [];
+		const paths = cards.flatMap((row) =>
+			[row.thumb_path, row.photo_path, row.audio_path].filter(
+				(path): path is string => Boolean(path),
+			),
+		);
+		const urls = await signPaths(supabase, paths);
+		const total = count ?? cards.length;
+		const nextOffset =
+			data.offset + cards.length < total ? data.offset + cards.length : null;
+
+		return {
+			ok: true,
+			rows: cards.map((row) => toCard(row, urls)),
+			total,
+			nextOffset,
+		};
 	});
 
 /** Oldest cards beyond the cap are removed together with their files. */
@@ -277,27 +347,60 @@ export const deleteWallCard = createServerFn({ method: "POST" })
 			return { ok: false, error: "Token tidak valid." };
 		}
 
-		const supabase = getSupabaseAdmin();
-		const { data: row, error } = await supabase
-			.from("wall_cards")
-			.select("id, thumb_path, photo_path, audio_path")
-			.eq("id", data.id)
-			.maybeSingle();
-
-		if (error) return { ok: false, error: error.message };
-		if (!row) return { ok: false, error: "Kartu tidak ditemukan." };
-
-		const paths = [row.thumb_path, row.photo_path, row.audio_path].filter(
-			(path): path is string => Boolean(path),
-		);
-
-		if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
-
-		const { error: deleteError } = await supabase
-			.from("wall_cards")
-			.delete()
-			.eq("id", data.id);
-
-		if (deleteError) return { ok: false, error: deleteError.message };
-		return { ok: true };
+		return deleteCardById(data.id);
 	});
+
+/** Dashboard delete: guarded by the dashboard session instead of a URL token. */
+export const deleteWallCardAsDashboard = createServerFn({ method: "POST" })
+	.inputValidator((data: { id: string }) => ({ id: String(data?.id ?? "") }))
+	.handler(async ({ data }): Promise<DeleteResult> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk lagi.",
+			};
+		}
+		if (!data.id) return { ok: false, error: "Kartu tidak ditemukan." };
+
+		return deleteCardById(data.id);
+	});
+
+/** Shared by the token route and the dashboard: row + Storage files go together. */
+async function deleteCardById(id: string): Promise<DeleteResult> {
+	let supabase: ReturnType<typeof getSupabaseAdmin>;
+	try {
+		supabase = getSupabaseAdmin();
+	} catch (error) {
+		return {
+			ok: false,
+			error:
+				error instanceof Error
+					? error.message
+					: "Supabase belum dikonfigurasi.",
+		};
+	}
+
+	const { data: row, error } = await supabase
+		.from("wall_cards")
+		.select("id, thumb_path, photo_path, audio_path")
+		.eq("id", id)
+		.maybeSingle();
+
+	if (error) return { ok: false, error: error.message };
+	if (!row) return { ok: false, error: "Kartu tidak ditemukan." };
+
+	const paths = [row.thumb_path, row.photo_path, row.audio_path].filter(
+		(path): path is string => Boolean(path),
+	);
+
+	if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
+
+	const { error: deleteError } = await supabase
+		.from("wall_cards")
+		.delete()
+		.eq("id", id);
+
+	if (deleteError) return { ok: false, error: deleteError.message };
+	return { ok: true };
+}

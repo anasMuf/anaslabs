@@ -1,4 +1,4 @@
-import { invitation } from "#/data/invitation";
+import { useInvitationContent } from "./InvitationContentProvider";
 import InkLine from "./ui/InkLine";
 
 interface CoverProps {
@@ -22,7 +22,7 @@ export default function Cover({
 	secondNames,
 	dateLabel,
 }: CoverProps) {
-	const { cover } = invitation;
+	const { cover } = useInvitationContent();
 
 	return (
 		<section className="invite-section snap-start relative flex h-dvh flex-col items-center overflow-y-auto no-scrollbar bg-inv-bg px-8 pt-[max(48px,10vh)] pb-[max(72px,12vh)] text-center text-inv-ink">

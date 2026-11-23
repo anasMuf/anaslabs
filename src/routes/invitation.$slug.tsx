@@ -4,19 +4,28 @@ import {
 	notFound,
 	Outlet,
 } from "@tanstack/react-router";
+import { InvitationContentProvider } from "#/components/invitation/InvitationContentProvider";
 import { ToastProvider } from "#/components/invitation/ui/Toast";
 import { getGuest } from "#/lib/guest";
+import { getInvitationContent } from "#/lib/invitation-content";
+import { defaultContent } from "#/lib/invitation-content-default";
 import { getInvitationView } from "#/lib/invitation-view";
 import { SITE_URL } from "#/lib/site";
 
 export const Route = createFileRoute("/invitation/$slug")({
 	loader: async ({ params }) => {
-		const guest = await getGuest({ data: params.slug });
+		const [guest, content] = await Promise.all([
+			getGuest({ data: params.slug }),
+			getInvitationContent(),
+		]);
 		if (!guest) throw notFound();
-		return guest;
+		return { guest, content };
 	},
 	head: ({ loaderData }) => {
-		const view = getInvitationView(loaderData?.side ?? null);
+		const view = getInvitationView(
+			loaderData?.guest.side ?? null,
+			loaderData?.content ?? defaultContent,
+		);
 		const names = `${view.firstNames} & ${view.secondNames}`;
 		const title = `${names} — Undangan Pernikahan`;
 		const description = `Undangan pernikahan ${view.fullNamePair}, ${view.coverDateLabel}.`;
@@ -55,10 +64,14 @@ export const Route = createFileRoute("/invitation/$slug")({
  * photobooth (e.g. a rejected card) stays visible after the redirect to the wall.
  */
 function InvitationLayout() {
+	const { content } = Route.useLoaderData();
+
 	return (
-		<ToastProvider>
-			<Outlet />
-		</ToastProvider>
+		<InvitationContentProvider content={content}>
+			<ToastProvider>
+				<Outlet />
+			</ToastProvider>
+		</InvitationContentProvider>
 	);
 }
 

@@ -9,14 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UndanganPreviewRouteImport } from './routes/undangan-preview'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SiteRouteImport } from './routes/_site'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
+import { Route as DashboardWallRouteImport } from './routes/dashboard.wall'
 import { Route as DashboardTamuRouteImport } from './routes/dashboard.tamu'
 import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
+import { Route as DashboardKontenRouteImport } from './routes/dashboard.konten'
 import { Route as DashboardImporRouteImport } from './routes/dashboard.impor'
 import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
@@ -29,6 +32,11 @@ import { Route as InvitationSlugPhotoboothRouteImport } from './routes/invitatio
 import { Route as SiteProjectsSlugRouteImport } from './routes/_site.projects.$slug'
 import { Route as SiteBlogSlugRouteImport } from './routes/_site.blog.$slug'
 
+const UndanganPreviewRoute = UndanganPreviewRouteImport.update({
+  id: '/undangan-preview',
+  path: '/undangan-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RssDotxmlRoute = RssDotxmlRouteImport.update({
   id: '/rss.xml',
   path: '/rss.xml',
@@ -58,6 +66,11 @@ const InvitationSlugRoute = InvitationSlugRouteImport.update({
   path: '/invitation/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardWallRoute = DashboardWallRouteImport.update({
+  id: '/wall',
+  path: '/wall',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardTamuRoute = DashboardTamuRouteImport.update({
   id: '/tamu',
   path: '/tamu',
@@ -66,6 +79,11 @@ const DashboardTamuRoute = DashboardTamuRouteImport.update({
 const DashboardLoginRoute = DashboardLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardKontenRoute = DashboardKontenRouteImport.update({
+  id: '/konten',
+  path: '/konten',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardImporRoute = DashboardImporRouteImport.update({
@@ -129,12 +147,15 @@ export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
+  '/undangan-preview': typeof UndanganPreviewRoute
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/impor': typeof DashboardImporRoute
+  '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
+  '/dashboard/wall': typeof DashboardWallRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
@@ -147,12 +168,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
+  '/undangan-preview': typeof UndanganPreviewRoute
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/impor': typeof DashboardImporRoute
+  '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
+  '/dashboard/wall': typeof DashboardWallRoute
   '/': typeof SiteIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
@@ -168,12 +192,15 @@ export interface FileRoutesById {
   '/_site': typeof SiteRouteWithChildren
   '/dashboard': typeof DashboardRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
+  '/undangan-preview': typeof UndanganPreviewRoute
   '/_site/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
   '/dashboard/impor': typeof DashboardImporRoute
+  '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
+  '/dashboard/wall': typeof DashboardWallRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
   '/_site/': typeof SiteIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -191,12 +218,15 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/rss.xml'
+    | '/undangan-preview'
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/impor'
+    | '/dashboard/konten'
     | '/dashboard/login'
     | '/dashboard/tamu'
+    | '/dashboard/wall'
     | '/invitation/$slug'
     | '/dashboard/'
     | '/blog/$slug'
@@ -209,12 +239,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/rss.xml'
+    | '/undangan-preview'
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/impor'
+    | '/dashboard/konten'
     | '/dashboard/login'
     | '/dashboard/tamu'
+    | '/dashboard/wall'
     | '/'
     | '/dashboard'
     | '/blog/$slug'
@@ -229,12 +262,15 @@ export interface FileRouteTypes {
     | '/_site'
     | '/dashboard'
     | '/rss.xml'
+    | '/undangan-preview'
     | '/_site/about'
     | '/api/health'
     | '/dashboard/auth'
     | '/dashboard/impor'
+    | '/dashboard/konten'
     | '/dashboard/login'
     | '/dashboard/tamu'
+    | '/dashboard/wall'
     | '/invitation/$slug'
     | '/_site/'
     | '/dashboard/'
@@ -251,12 +287,20 @@ export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   RssDotxmlRoute: typeof RssDotxmlRoute
+  UndanganPreviewRoute: typeof UndanganPreviewRoute
   ApiHealthRoute: typeof ApiHealthRoute
   InvitationSlugRoute: typeof InvitationSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/undangan-preview': {
+      id: '/undangan-preview'
+      path: '/undangan-preview'
+      fullPath: '/undangan-preview'
+      preLoaderRoute: typeof UndanganPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rss.xml': {
       id: '/rss.xml'
       path: '/rss.xml'
@@ -299,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/wall': {
+      id: '/dashboard/wall'
+      path: '/wall'
+      fullPath: '/dashboard/wall'
+      preLoaderRoute: typeof DashboardWallRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/tamu': {
       id: '/dashboard/tamu'
       path: '/tamu'
@@ -311,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/dashboard/login'
       preLoaderRoute: typeof DashboardLoginRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/konten': {
+      id: '/dashboard/konten'
+      path: '/konten'
+      fullPath: '/dashboard/konten'
+      preLoaderRoute: typeof DashboardKontenRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/impor': {
@@ -416,16 +474,20 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 interface DashboardRouteChildren {
   DashboardAuthRoute: typeof DashboardAuthRoute
   DashboardImporRoute: typeof DashboardImporRoute
+  DashboardKontenRoute: typeof DashboardKontenRoute
   DashboardLoginRoute: typeof DashboardLoginRoute
   DashboardTamuRoute: typeof DashboardTamuRoute
+  DashboardWallRoute: typeof DashboardWallRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAuthRoute: DashboardAuthRoute,
   DashboardImporRoute: DashboardImporRoute,
+  DashboardKontenRoute: DashboardKontenRoute,
   DashboardLoginRoute: DashboardLoginRoute,
   DashboardTamuRoute: DashboardTamuRoute,
+  DashboardWallRoute: DashboardWallRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -453,6 +515,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   RssDotxmlRoute: RssDotxmlRoute,
+  UndanganPreviewRoute: UndanganPreviewRoute,
   ApiHealthRoute: ApiHealthRoute,
   InvitationSlugRoute: InvitationSlugRouteWithChildren,
 }

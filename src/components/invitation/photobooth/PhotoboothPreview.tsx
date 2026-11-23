@@ -1,6 +1,5 @@
 import { Download, RotateCcw, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { invitation } from "#/data/invitation";
 import {
 	downloadCanvas,
 	drawComposition,
@@ -9,6 +8,7 @@ import type {
 	PhotoboothGrid,
 	PhotoboothSettings,
 } from "#/lib/photobooth/types";
+import { useInvitationContent } from "../InvitationContentProvider";
 
 interface PhotoboothPreviewProps {
 	settings: PhotoboothSettings;
@@ -29,6 +29,7 @@ export default function PhotoboothPreview({
 	onRetake,
 	onPublish,
 }: PhotoboothPreviewProps) {
+	const { cover } = useInvitationContent();
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [saved, setSaved] = useState(false);
@@ -97,8 +98,7 @@ export default function PhotoboothPreview({
 	return (
 		<div className="flex min-h-dvh touch-pan-y flex-col bg-inv-bg text-inv-ink">
 			<h1 className="sr-only">
-				Hasil photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
-				{invitation.cover.secondNames}
+				Hasil photobooth pernikahan {cover.firstNames} &amp; {cover.secondNames}
 			</h1>
 
 			<main className="flex flex-1 items-center justify-center px-6 py-8">

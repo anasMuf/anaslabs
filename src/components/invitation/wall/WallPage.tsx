@@ -1,8 +1,12 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { invitation } from "#/data/invitation";
 import { useLockZoom } from "#/lib/use-lock-zoom";
-import { verifyWallAdminToken, type WallCard } from "#/lib/wall";
+import {
+	deleteWallCard,
+	verifyWallAdminToken,
+	type WallCard,
+} from "#/lib/wall";
+import { useInvitationContent } from "../InvitationContentProvider";
 import Ornament from "../ui/Ornament";
 import WallDeleteDialog from "./WallDeleteDialog";
 import WallDialog from "./WallDialog";
@@ -30,7 +34,7 @@ export default function WallPage({
 	adminParam,
 }: WallPageProps) {
 	useLockZoom();
-	const { sections } = invitation;
+	const { sections } = useInvitationContent();
 	const copy = sections.wall;
 	const navigate = useNavigate();
 	const router = useRouter();
@@ -250,7 +254,11 @@ export default function WallPage({
 			{adminToken && pendingDelete ? (
 				<WallDeleteDialog
 					card={pendingDelete}
-					token={adminToken}
+					deleteCard={(id) =>
+						deleteWallCard({
+							data: { id, token: adminToken ?? "" },
+						})
+					}
 					onClose={() => setPendingDelete(null)}
 					onDeleted={() => {
 						setPendingDelete(null);

@@ -1,6 +1,5 @@
 import { ArrowLeft, Camera, Images, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { invitation } from "#/data/invitation";
 import {
 	captureFrame,
 	captureImageFile,
@@ -12,6 +11,7 @@ import type {
 	PhotoboothTimer,
 } from "#/lib/photobooth/types";
 import { useCameraStream } from "#/lib/photobooth/use-camera-stream";
+import { useInvitationContent } from "../InvitationContentProvider";
 
 interface PhotoboothCaptureProps {
 	settings: PhotoboothSettings;
@@ -55,6 +55,7 @@ export default function PhotoboothCapture({
 	onComplete,
 	onBack,
 }: PhotoboothCaptureProps) {
+	const { cover } = useInvitationContent();
 	const { videoRef, mirrored, status, switchCamera } = useCameraStream(true);
 	const layout = settings.layouts[grid];
 	const slots = layout.slots;
@@ -209,8 +210,7 @@ export default function PhotoboothCapture({
 	return (
 		<div className="flex h-dvh touch-pan-y flex-col overflow-hidden bg-black text-white landscape:flex-row">
 			<h1 className="sr-only">
-				Photobooth pernikahan {invitation.cover.firstNames} &amp;{" "}
-				{invitation.cover.secondNames}
+				Photobooth pernikahan {cover.firstNames} &amp; {cover.secondNames}
 			</h1>
 			<div className="flex min-h-0 min-w-0 flex-1 flex-col">
 				<header className="flex shrink-0 items-center px-4 pt-3 pb-2">

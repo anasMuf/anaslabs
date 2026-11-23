@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { invitation } from "#/data/invitation";
 import { buildPhotoboothSettings } from "#/lib/photobooth/draw-composition";
 import { loadPhotoboothFonts } from "#/lib/photobooth/fonts";
 import type { PhotoboothGrid, PhotoboothTimer } from "#/lib/photobooth/types";
 import { buildWallImages, type WallImages } from "#/lib/photobooth/wall-export";
 import { useLockZoom } from "#/lib/use-lock-zoom";
+import { useInvitationContent } from "../InvitationContentProvider";
 import PhotoboothCapture from "./PhotoboothCapture";
 import PhotoboothMessage from "./PhotoboothMessage";
 import PhotoboothPreview from "./PhotoboothPreview";
@@ -21,9 +21,10 @@ interface PhotoboothPageProps {
  * composed card is drawn in a canvas and offered as a download.
  */
 export default function PhotoboothPage({ slug }: PhotoboothPageProps) {
+	const { photobooth } = useInvitationContent();
 	const settings = useMemo(
-		() => buildPhotoboothSettings(invitation.photobooth),
-		[],
+		() => buildPhotoboothSettings(photobooth),
+		[photobooth],
 	);
 	const navigate = useNavigate();
 

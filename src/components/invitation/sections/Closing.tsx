@@ -1,4 +1,4 @@
-import { invitation } from "#/data/invitation";
+import { useInvitationContent } from "../InvitationContentProvider";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
@@ -11,7 +11,7 @@ export default function Closing({
 	firstNames: string;
 	secondNames: string;
 }) {
-	const { sections, closing } = invitation;
+	const { sections, closing } = useInvitationContent();
 
 	return (
 		<section

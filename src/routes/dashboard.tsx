@@ -70,6 +70,12 @@ function DashboardLayout() {
 							Ringkasan
 						</Link>
 						<Link
+							to="/dashboard/konten"
+							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
+						>
+							Konten Undangan
+						</Link>
+						<Link
 							to="/dashboard/tamu"
 							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
 						>
@@ -80,6 +86,12 @@ function DashboardLayout() {
 							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
 						>
 							Impor Tamu
+						</Link>
+						<Link
+							to="/dashboard/wall"
+							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
+						>
+							Photo Wall
 						</Link>
 					</nav>
 				</header>

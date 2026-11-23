@@ -202,8 +202,12 @@ export const invitation = {
 		body: "Terima kasih telah berbagi kebahagiaan ini. Kasih, dukungan, dan doa Anda mengiringi langkah kami memulai hidup bersama.",
 		label: "Dengan Cinta",
 	},
-	/** Background music; set to a URL in `public/invitation/music/` when available. */
-	music: null as string | null,
+	/** Background music; disabled until the owner picks a file or YouTube link. */
+	music: {
+		enabled: false,
+		url: null,
+		title: null,
+	},
 	/** Photobooth card geometry (Figma 384:2760 / 384:2817 / 384:2787). */
 	photobooth: {
 		scale: 3,

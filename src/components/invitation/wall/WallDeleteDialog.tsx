@@ -1,21 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "#/components/invitation/ui/Toast";
-import { deleteWallCard, type WallCard } from "#/lib/wall";
+import type { WallCard } from "#/lib/wall";
 
 interface WallDeleteDialogProps {
 	card: WallCard;
-	token: string;
 	onClose: () => void;
 	/** Called after the card is gone so the list can be refreshed. */
 	onDeleted: () => void;
+	/** Session-guarded delete for the dashboard, token-guarded for the wall. */
+	deleteCard: (
+		id: string,
+	) => Promise<{ ok: true } | { ok: false; error: string }>;
 }
 
 /** Confirmation step for the admin delete, so a stray tap cannot remove a card. */
 export default function WallDeleteDialog({
 	card,
-	token,
 	onClose,
 	onDeleted,
+	deleteCard,
 }: WallDeleteDialogProps) {
 	const cancelRef = useRef<HTMLButtonElement | null>(null);
 	const toast = useToast();
@@ -35,7 +38,7 @@ export default function WallDeleteDialog({
 		setBusy(true);
 
 		try {
-			const result = await deleteWallCard({ data: { id: card.id, token } });
+			const result = await deleteCard(card.id);
 			if (!result.ok) {
 				toast({ message: result.error });
 				return;

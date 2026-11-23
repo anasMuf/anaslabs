@@ -1,13 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { invitation } from "#/data/invitation";
+import {
+	useInvitationContent,
+	useInvitationPreview,
+} from "../InvitationContentProvider";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
 
 /** Photobooth entry (Figma 384:428). Opens the standalone photobooth tab. */
 export default function Photobooth({ slug }: { slug: string }) {
-	const { sections } = invitation;
+	const { sections } = useInvitationContent();
+	const preview = useInvitationPreview();
 	const copy = sections.photobooth;
+	const ctaClass =
+		"mt-6 flex h-[52px] w-[232px] items-center justify-center rounded-full bg-inv-accent text-[12px] font-semibold tracking-[0.08em] text-inv-bg";
 
 	return (
 		<section
@@ -38,16 +44,26 @@ export default function Photobooth({ slug }: { slug: string }) {
 					/>
 				</div>
 
-				<Link
-					to="/invitation/$slug/wall"
-					params={{ slug }}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="mt-6 flex h-[52px] w-[232px] items-center justify-center rounded-full bg-inv-accent text-[12px] font-semibold tracking-[0.08em] text-inv-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-				>
-					{copy.cta}
-					<span className="sr-only"> (membuka tab baru)</span>
-				</Link>
+				{preview ? (
+					<span
+						aria-disabled="true"
+						className={`${ctaClass} opacity-70`}
+						title="Tautan nonaktif di pratinjau"
+					>
+						{copy.cta}
+					</span>
+				) : (
+					<Link
+						to="/invitation/$slug/wall"
+						params={{ slug }}
+						target="_blank"
+						rel="noopener noreferrer"
+						className={`${ctaClass} transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent`}
+					>
+						{copy.cta}
+						<span className="sr-only"> (membuka tab baru)</span>
+					</Link>
+				)}
 
 				<Ornament className="mt-6" />
 			</Reveal>

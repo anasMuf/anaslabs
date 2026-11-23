@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { A11y, EffectCards, Keyboard } from "swiper/modules";
 import { Swiper, type SwiperClass, SwiperSlide } from "swiper/react";
-import { invitation } from "#/data/invitation";
+import { useInvitationContent } from "../InvitationContentProvider";
 import InkLine from "../ui/InkLine";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
@@ -20,7 +20,7 @@ import "swiper/css/effect-cards";
  * gesture inside the slider.
  */
 export default function Story({ namesLabel }: { namesLabel: string }) {
-	const { sections, story } = invitation;
+	const { sections, story } = useInvitationContent();
 	const swiperRef = useRef<SwiperClass | null>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
 	// User-driven swipes still work; only the snap-in transition is dropped.

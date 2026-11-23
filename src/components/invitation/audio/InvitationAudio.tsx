@@ -1,98 +1,64 @@
-import { Volume2, VolumeX } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getAudioSource } from "./audio-source";
+import MusicController from "./MusicController";
+import UniversalAudioPlayer from "./UniversalAudioPlayer";
 
 interface InvitationAudioProps {
 	url?: string | null;
 }
 
 /**
- * Background music for the invitation.
+ * Wires the invitation's background music.
  *
- * Tries to autoplay on mount. Browsers block audio-with-sound autoplay until
- * the user has interacted with the page, so on failure we attach a one-shot
- * gesture listener (pointerdown/keydown) that starts playback on the very next
- * interaction. The floating button always provides a mute/unmute control.
+ * Playback starts on the guest's first interaction (browsers block sound
+ * autoplay), and the controller only appears after that gesture. Unknown URLs
+ * render nothing, so a bad paste can never leave a silent button on the page.
  */
 export default function InvitationAudio({ url }: InvitationAudioProps) {
-	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const [playing, setPlaying] = useState(false);
+	const source = useMemo(() => getAudioSource(url), [url]);
+	const [opened, setOpened] = useState(false);
+	const [playing, setPlaying] = useState(true);
 
 	useEffect(() => {
-		if (!url) return;
-		const audio = audioRef.current;
-		if (!audio) return;
+		if (source.type === "unknown") return;
 
-		let cancelled = false;
-
-		const tryPlay = async () => {
-			try {
-				await audio.play();
-				if (!cancelled) setPlaying(true);
-			} catch {
-				// Autoplay blocked — will be retried on the first user gesture.
-			}
+		let done = false;
+		const open = () => {
+			if (done) return;
+			done = true;
+			setOpened(true);
 		};
 
-		const handleFirstGesture = () => {
-			if (audio.paused) void tryPlay();
-		};
-
-		void tryPlay();
-
-		document.addEventListener("pointerdown", handleFirstGesture, {
-			once: true,
-		});
-		document.addEventListener("keydown", handleFirstGesture, { once: true });
+		const options: AddEventListenerOptions = { once: true, passive: true };
+		document.addEventListener("pointerdown", open, options);
+		document.addEventListener("keydown", open, options);
+		document.addEventListener("wheel", open, options);
+		document.addEventListener("touchstart", open, options);
 
 		return () => {
-			cancelled = true;
-			document.removeEventListener("pointerdown", handleFirstGesture);
-			document.removeEventListener("keydown", handleFirstGesture);
+			document.removeEventListener("pointerdown", open);
+			document.removeEventListener("keydown", open);
+			document.removeEventListener("wheel", open);
+			document.removeEventListener("touchstart", open);
 		};
-	}, [url]);
+	}, [source.type]);
 
-	if (!url) return null;
-
-	const handleToggle = async () => {
-		const audio = audioRef.current;
-		if (!audio) return;
-		if (playing) {
-			audio.pause();
-			setPlaying(false);
-			return;
-		}
-		try {
-			await audio.play();
-			setPlaying(true);
-		} catch {
-			// Playback can still be blocked; the next tap retries.
-		}
-	};
+	if (source.type === "unknown") return null;
 
 	return (
 		<>
-			{/* biome-ignore lint/a11y/useMediaCaption: background music loop, there is no speech to caption. */}
-			<audio
-				ref={audioRef}
-				src={url}
-				loop
-				preload="auto"
-				onPlay={() => setPlaying(true)}
-				onPause={() => setPlaying(false)}
+			<UniversalAudioPlayer
+				url={source.url}
+				enabled
+				isPlaying={playing}
+				isOpened={opened}
 			/>
-			<button
-				type="button"
-				onClick={() => void handleToggle()}
-				aria-label={playing ? "Matikan musik" : "Putar musik"}
-				aria-pressed={playing}
-				className="fixed right-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-40 flex h-11 w-11 items-center justify-center rounded-full bg-inv-accent text-inv-bg shadow-lg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-			>
-				{playing ? (
-					<Volume2 className="h-5 w-5" />
-				) : (
-					<VolumeX className="h-5 w-5" />
-				)}
-			</button>
+			{opened ? (
+				<MusicController
+					playing={playing}
+					onToggle={() => setPlaying((value) => !value)}
+				/>
+			) : null}
 		</>
 	);
 }

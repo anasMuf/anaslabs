@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import type { InvitationEvent } from "#/data/invitation";
-import { invitation } from "#/data/invitation";
 import { formatEventDate } from "#/lib/invitation";
+import { useInvitationContent } from "../InvitationContentProvider";
 import MapsButton from "../ui/MapsButton";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
@@ -15,7 +15,7 @@ export default function Event({
 	events: InvitationEvent[];
 	intro: string;
 }) {
-	const { sections } = invitation;
+	const { sections } = useInvitationContent();
 
 	return (
 		<section

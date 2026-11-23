@@ -1,5 +1,5 @@
-import { invitation } from "#/data/invitation";
 import type { PersonView } from "#/lib/invitation-personalization";
+import { useInvitationContent } from "../InvitationContentProvider";
 import Ornament from "../ui/Ornament";
 import Reveal from "../ui/Reveal";
 import SectionHeading from "../ui/SectionHeading";
@@ -11,7 +11,7 @@ interface CoupleProps {
 
 /** Couple section (Figma 384:430): first person, bouquet, second person. */
 export default function Couple({ people }: CoupleProps) {
-	const { couple, sections } = invitation;
+	const { couple, sections } = useInvitationContent();
 
 	return (
 		<section
