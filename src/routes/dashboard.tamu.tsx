@@ -104,8 +104,10 @@ function DashboardGuests() {
 	const [failure, setFailure] = useState<string | null>(error);
 	const [savingId, setSavingId] = useState<string | null>(null);
 	const [editing, setEditing] = useState<DashboardGuest | null>(null);
+	const [filtersOpen, setFiltersOpen] = useState(false);
 
 	const filtersActive = Object.values(filters).some(Boolean);
+	const activeFilterCount = Object.values(filters).filter(Boolean).length;
 	const activeOptions = options[filters.source || "all"];
 
 	// Refs mirror state for the IntersectionObserver callback, which must not be
@@ -305,18 +307,38 @@ function DashboardGuests() {
 					<p className="font-body text-[10px] font-semibold tracking-[0.16em] text-inv-accent">
 						FILTER
 					</p>
-					{filtersActive || search ? (
+					<div className="flex items-center gap-3">
+						{filtersActive || search ? (
+							<button
+								type="button"
+								onClick={resetFilters}
+								className="font-body text-[10.5px] text-inv-muted underline-offset-2 hover:text-inv-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+							>
+								Reset
+							</button>
+						) : null}
 						<button
 							type="button"
-							onClick={resetFilters}
-							className="font-body text-[10.5px] text-inv-muted underline-offset-2 hover:text-inv-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+							onClick={() => setFiltersOpen((open) => !open)}
+							aria-expanded={filtersOpen}
+							aria-controls="guest-filters"
+							className="rounded-full border border-inv-rule px-3 py-1 font-body text-[10.5px] text-inv-ink transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent lg:hidden"
 						>
-							Reset
+							{filtersOpen
+								? "Sembunyikan"
+								: activeFilterCount > 0
+									? `Tampilkan (${activeFilterCount})`
+									: "Tampilkan"}
 						</button>
-					) : null}
+					</div>
 				</div>
 
-				<div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+				<div
+					id="guest-filters"
+					className={`mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3 ${
+						filtersOpen ? "" : "hidden lg:grid"
+					}`}
+				>
 					<FilterField label="TAMU" htmlFor="filter-source">
 						<select
 							id="filter-source"
@@ -491,7 +513,10 @@ function DashboardGuests() {
 						</caption>
 						<thead className="sticky top-0 z-10 bg-inv-card">
 							<tr className="border-b border-inv-rule text-left font-body text-[10px] font-semibold uppercase tracking-[0.12em] text-inv-muted">
-								<th scope="col" className="px-4 py-2.5">
+								<th
+									scope="col"
+									className="sticky left-0 z-20 border-r border-inv-rule bg-inv-card px-4 py-2.5"
+								>
 									Nama
 								</th>
 								<th scope="col" className="px-4 py-2.5">
@@ -519,7 +544,7 @@ function DashboardGuests() {
 								>
 									<th
 										scope="row"
-										className="max-w-[220px] px-4 py-3 text-left font-semibold"
+										className="sticky left-0 z-[1] max-w-[220px] border-r border-inv-rule bg-inv-card px-4 py-3 text-left font-semibold"
 									>
 										<span className="block truncate">{guest.name}</span>
 										<span className="mt-0.5 block font-normal text-[10px] text-inv-muted">

@@ -94,6 +94,68 @@ describe("parseContent", () => {
 
 		expect(result.ok).toBe(false);
 	});
+
+	it("accepts up to five overlays per layout", () => {
+		const stored = edited();
+		stored.photobooth.layouts["1"].overlays = Array.from(
+			{ length: 5 },
+			(_, index) => ({
+				url: `https://example.com/${index}.png`,
+				x: 0,
+				y: 0,
+				width: 348,
+			}),
+		);
+
+		expect(parseContent(stored).ok).toBe(true);
+	});
+
+	it("rejects more than five overlays", () => {
+		const stored = edited();
+		stored.photobooth.layouts["1"].overlays = Array.from(
+			{ length: 6 },
+			(_, index) => ({
+				url: `https://example.com/${index}.png`,
+				x: 0,
+				y: 0,
+				width: 348,
+			}),
+		);
+
+		expect(parseContent(stored).ok).toBe(false);
+	});
+
+	it("migrates the legacy global frame into every layout", () => {
+		const stored = edited();
+		const legacy = {
+			url: "https://example.com/legacy.png",
+			x: 4,
+			y: 6,
+			width: 340,
+		};
+		stored.photobooth.frame = legacy;
+
+		const result = parseContent(stored);
+
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.content.photobooth.layouts["1"].overlays).toEqual([legacy]);
+		expect(result.content.photobooth.layouts["2"].overlays).toEqual([legacy]);
+		expect(result.content.photobooth.layouts["4"].overlays).toEqual([legacy]);
+		expect(result.content.photobooth.frame).toBeUndefined();
+	});
+
+	it("accepts a background image with negative offsets", () => {
+		const stored = edited();
+		stored.photobooth.backgroundImage = {
+			url: "https://example.com/bg.png",
+			x: -20,
+			y: -30,
+			width: 400,
+		};
+
+		expect(parseContent(stored).ok).toBe(true);
+	});
 });
 
 describe("mergeContent", () => {

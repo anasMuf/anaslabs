@@ -333,9 +333,13 @@ mengubah tampilan undangan.
 
 ### Task 5 — Photobooth admin (copy + preview)
 
-- [ ] `/dashboard/fotobooth`: copy kartu, `downloadName`, `scale`, preview
+- [x] `/dashboard/fotobooth`: copy kartu, `downloadName`, `scale`, preview
       canvas dengan placeholder, geometri read-only.
-- [ ] Validasi schema slot (1/2/4).
+- [x] Validasi schema slot (1/2/4) sudah berjalan di content-store.
+- [x] `useContentDraft` — hook simpan/concurrency bersama untuk halaman Konten
+      dan Fotobooth.
+- [x] Verifikasi: `/invitation/test/photobooth` `200`; dashboard tanpa sesi
+      `307`; dengan sesi `200` dan canvas pratinjau dirender.
 
 ### Task 6 — Frame editor (4C)
 
@@ -357,8 +361,9 @@ mengubah tampilan undangan.
 
 ## Setup manual
 
-1. Jalankan `supabase/migrations/0005_invitation_content.sql` dan
-   `0006_invitation_media.sql` di SQL Editor.
+1. Jalankan `supabase/migrations/0005_invitation_content.sql`,
+   `0006_invitation_media.sql`, `0007_invitation_frames.sql`, dan
+   `0008_invitation_frames_jpeg.sql` di SQL Editor.
 2. Pastikan env server tetap: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`,
    `SUPABASE_PUBLISHABLE_KEY`, `DASHBOARD_SESSION_SECRET`.
 3. Restart dev server setelah migrasi dan perubahan server function.

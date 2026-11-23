@@ -22,10 +22,10 @@ export const CARD_RADIUS = 10;
 export function buildPhotoboothSettings(
 	config: PhotoboothConfig,
 ): PhotoboothSettings {
-	const lines = (y: number): PhotoboothTextLine[] => [
+	const lines = (y: number, x: number): PhotoboothTextLine[] => [
 		{
 			value: config.card.eyebrow,
-			x: 60,
+			x,
 			y,
 			width: 228,
 			fontFamily: DISPLAY_FONT,
@@ -36,7 +36,7 @@ export function buildPhotoboothSettings(
 		},
 		{
 			value: config.card.names,
-			x: 60,
+			x,
 			y: y + 16,
 			width: 228,
 			fontFamily: DISPLAY_FONT,
@@ -46,7 +46,7 @@ export function buildPhotoboothSettings(
 		},
 		{
 			value: config.card.date,
-			x: 60,
+			x,
 			y: y + 41,
 			width: 228,
 			fontFamily: BODY_FONT,
@@ -61,16 +61,24 @@ export function buildPhotoboothSettings(
 		width,
 		height,
 		textY,
+		textX,
+		overlays,
 		slots,
 	}: PhotoboothConfig["layouts"][1]): PhotoboothLayout => ({
 		canvas: {
 			width,
 			height,
-			radius: CARD_RADIUS,
-			background: CARD_BACKGROUND,
+			radius: config.radius ?? CARD_RADIUS,
+			background: config.background ?? CARD_BACKGROUND,
 		},
 		slots: slots.map((slot) => ({ ...slot })),
-		text: lines(textY),
+		text: lines(textY, textX ?? 60),
+		backgroundImage: config.backgroundImage
+			? { ...config.backgroundImage }
+			: undefined,
+		overlays: (overlays ?? (config.frame ? [config.frame] : [])).map(
+			(overlay) => ({ ...overlay }),
+		),
 		scale: config.scale,
 	});
 
@@ -285,7 +293,11 @@ export function drawComposition(
 	target: HTMLCanvasElement,
 	layout: PhotoboothLayout,
 	photos: PhotoSource[],
-	options: { mirror?: boolean } = {},
+	options: {
+		mirror?: boolean;
+		backgroundImage?: HTMLImageElement | null;
+		overlayImages?: (HTMLImageElement | null)[];
+	} = {},
 ): void {
 	const { scale } = layout;
 	const width = Math.round(layout.canvas.width * scale);
@@ -306,10 +318,38 @@ export function drawComposition(
 	ctx.clip();
 	ctx.scale(scale, scale);
 
+	// Background image sits above the fallback colour but below every photo.
+	const background = layout.backgroundImage;
+	const backgroundImage = options.backgroundImage;
+	if (background && backgroundImage && backgroundImage.naturalWidth > 0) {
+		const backgroundHeight =
+			background.width *
+			(backgroundImage.naturalHeight / backgroundImage.naturalWidth);
+		ctx.drawImage(
+			backgroundImage,
+			background.x,
+			background.y,
+			background.width,
+			backgroundHeight,
+		);
+	}
+
 	layout.slots.forEach((slot, index) => {
 		const photo = photos[index];
 		if (!photo) return;
 		drawCover(ctx, photo, slot, options.mirror ?? false);
+	});
+
+	// Overlays sit above the photos but below the copy, so the card text stays
+	// readable even when a frame has decorations near the bottom edge. Array
+	// order is the stacking order.
+	layout.overlays.forEach((overlay, index) => {
+		const image = options.overlayImages?.[index];
+		if (!image || image.naturalWidth <= 0) return;
+
+		const overlayHeight =
+			overlay.width * (image.naturalHeight / image.naturalWidth);
+		ctx.drawImage(image, overlay.x, overlay.y, overlay.width, overlayHeight);
 	});
 
 	layout.text.forEach((line) => {

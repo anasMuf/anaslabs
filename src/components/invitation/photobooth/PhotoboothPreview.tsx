@@ -8,6 +8,10 @@ import type {
 	PhotoboothGrid,
 	PhotoboothSettings,
 } from "#/lib/photobooth/types";
+import {
+	useFrameImage,
+	useFrameImages,
+} from "#/lib/photobooth/use-frame-image";
 import { useInvitationContent } from "../InvitationContentProvider";
 
 interface PhotoboothPreviewProps {
@@ -35,12 +39,17 @@ export default function PhotoboothPreview({
 	const [saved, setSaved] = useState(false);
 	const revertTimer = useRef<number | null>(null);
 	const layout = settings.layouts[grid];
+	const backgroundImage = useFrameImage(layout.backgroundImage);
+	const overlayImages = useFrameImages(layout.overlays);
 
 	const redraw = useCallback(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		drawComposition(canvas, layout, photos);
-	}, [layout, photos]);
+		drawComposition(canvas, layout, photos, {
+			backgroundImage,
+			overlayImages,
+		});
+	}, [backgroundImage, layout, overlayImages, photos]);
 
 	useEffect(() => {
 		redraw();

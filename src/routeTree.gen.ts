@@ -21,6 +21,7 @@ import { Route as DashboardTamuRouteImport } from './routes/dashboard.tamu'
 import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
 import { Route as DashboardKontenRouteImport } from './routes/dashboard.konten'
 import { Route as DashboardImporRouteImport } from './routes/dashboard.impor'
+import { Route as DashboardFotoboothRouteImport } from './routes/dashboard.fotobooth'
 import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
@@ -91,6 +92,11 @@ const DashboardImporRoute = DashboardImporRouteImport.update({
   path: '/impor',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardFotoboothRoute = DashboardFotoboothRouteImport.update({
+  id: '/fotobooth',
+  path: '/fotobooth',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAuthRoute = DashboardAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/fotobooth': typeof DashboardFotoboothRoute
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/fotobooth': typeof DashboardFotoboothRoute
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/_site/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/fotobooth': typeof DashboardFotoboothRoute
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/fotobooth'
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/fotobooth'
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/_site/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/fotobooth'
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
@@ -378,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardImporRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/fotobooth': {
+      id: '/dashboard/fotobooth'
+      path: '/fotobooth'
+      fullPath: '/dashboard/fotobooth'
+      preLoaderRoute: typeof DashboardFotoboothRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/auth': {
       id: '/dashboard/auth'
       path: '/auth'
@@ -473,6 +492,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardAuthRoute: typeof DashboardAuthRoute
+  DashboardFotoboothRoute: typeof DashboardFotoboothRoute
   DashboardImporRoute: typeof DashboardImporRoute
   DashboardKontenRoute: typeof DashboardKontenRoute
   DashboardLoginRoute: typeof DashboardLoginRoute
@@ -483,6 +503,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAuthRoute: DashboardAuthRoute,
+  DashboardFotoboothRoute: DashboardFotoboothRoute,
   DashboardImporRoute: DashboardImporRoute,
   DashboardKontenRoute: DashboardKontenRoute,
   DashboardLoginRoute: DashboardLoginRoute,

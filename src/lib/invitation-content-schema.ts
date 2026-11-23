@@ -53,6 +53,10 @@ const httpUrl = z
 	.max(2048)
 	.refine(isHttpUrl, "URL harus diawali http:// atau https://.");
 
+const hexColor = z
+	.string()
+	.regex(/^#[0-9a-fA-F]{6}$/, "Warna harus format #RRGGBB.");
+
 const copySchema = z.object({
 	heading: text(200),
 	intro: text(1000),
@@ -110,16 +114,36 @@ const slotSchema = z.object({
 	h: positiveInt,
 });
 
+const frameSchema = z.object({
+	url: assetPath,
+	x: nonNegativeInt,
+	y: nonNegativeInt,
+	width: positiveInt,
+});
+
+/** Background allows negative offsets so the owner can pan a covered image. */
+const backgroundImageSchema = z.object({
+	url: assetPath,
+	x: z.number().int().min(-10000).max(10000),
+	y: z.number().int().min(-10000).max(10000),
+	width: positiveInt,
+});
+
 const cardLayoutSchema = z.object({
 	width: positiveInt,
 	height: positiveInt,
 	textY: nonNegativeInt,
+	textX: nonNegativeInt.optional(),
+	overlays: z.array(frameSchema).max(5).optional(),
 	slots: z.array(slotSchema).min(1).max(4),
 });
 
 const photoboothSchema = z.object({
 	scale: z.number().min(1).max(4),
 	downloadName: text(120),
+	background: hexColor.optional(),
+	radius: z.number().int().min(0).max(80).optional(),
+	backgroundImage: backgroundImageSchema.optional(),
 	card: z.object({
 		eyebrow: text(80),
 		names: text(160),
@@ -130,15 +154,8 @@ const photoboothSchema = z.object({
 		"2": cardLayoutSchema,
 		"4": cardLayoutSchema,
 	}),
-	/** Frame overlay is authored by the phase-B editor; optional for now. */
-	frame: z
-		.object({
-			url: assetPath,
-			x: nonNegativeInt,
-			y: nonNegativeInt,
-			width: positiveInt,
-		})
-		.optional(),
+	/** Legacy global overlay; migrated to `layouts[*].overlays` on read. */
+	frame: frameSchema.optional(),
 });
 
 const musicSchema = z
@@ -288,7 +305,23 @@ export type ContentParseResult =
 /** Merges with defaults, validates, and returns readable issue messages. */
 export function parseContent(input: unknown): ContentParseResult {
 	const result = invitationContentSchema.safeParse(mergeContent(input));
-	if (result.success) return { ok: true, content: result.data };
+	if (result.success) {
+		const content = result.data;
+
+		// One-time migration for documents saved with the old global frame: every
+		// layout without its own overlays inherits it, then the global field is
+		// dropped. New saves only carry `layouts[*].overlays`.
+		const legacyFrame = content.photobooth.frame;
+		if (legacyFrame) {
+			for (const key of ["1", "2", "4"] as const) {
+				const layout = content.photobooth.layouts[key];
+				if (!layout.overlays) layout.overlays = [{ ...legacyFrame }];
+			}
+			content.photobooth.frame = undefined;
+		}
+
+		return { ok: true, content };
+	}
 
 	const issues = result.error.issues.map(
 		(issue) => `${issue.path.join(".") || "konten"}: ${issue.message}`,

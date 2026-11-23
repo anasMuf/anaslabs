@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import ContentActionBar from "#/components/dashboard/content/ContentActionBar";
 import ContentEditor from "#/components/dashboard/content/ContentEditor";
-import { useToast } from "#/components/invitation/ui/Toast";
-import {
-	getInvitationContentForDashboard,
-	resetInvitationContent,
-	saveInvitationContent,
-} from "#/lib/invitation-content";
-import { defaultContent } from "#/lib/invitation-content-default";
+import EditorPreviewTabs, {
+	type EditorTab,
+} from "#/components/dashboard/content/EditorPreviewTabs";
+import { useContentDraft } from "#/components/dashboard/content/useContentDraft";
+import { getInvitationContentForDashboard } from "#/lib/invitation-content";
 import type { InvitationContent } from "#/lib/invitation-content-schema";
 import type { GuestSide } from "#/lib/invitation-personalization";
 
@@ -71,30 +70,27 @@ function ContentScreen({
 	missingTable: boolean;
 	invalidStored: boolean;
 }) {
-	const toast = useToast();
+	const {
+		content,
+		update: updateContent,
+		save,
+		resetAll,
+		dirty,
+		saving,
+		errorText,
+		baseUpdatedAt,
+		updatedBy,
+		status,
+	} = useContentDraft({
+		content: initialContent,
+		updatedAt: initialUpdatedAt,
+		updatedBy: initialUpdatedBy,
+		invalidStored,
+	});
 	const iframeRef = useRef<HTMLIFrameElement | null>(null);
-	const [content, setContent] = useState<InvitationContent>(initialContent);
-	const [baseUpdatedAt, setBaseUpdatedAt] = useState<string | null>(
-		initialUpdatedAt,
-	);
-	const [updatedBy, setUpdatedBy] = useState<string | null>(initialUpdatedBy);
-	const [dirty, setDirty] = useState(
-		invalidStored || initialUpdatedAt === null,
-	);
-	const [saving, setSaving] = useState(false);
-	const [errorText, setErrorText] = useState<string | null>(null);
 	const [side, setSide] = useState<GuestSide | null>("groom");
 	const [previewReady, setPreviewReady] = useState(false);
-
-	useEffect(() => {
-		if (!dirty) return;
-		const warn = (event: BeforeUnloadEvent) => {
-			event.preventDefault();
-			event.returnValue = "";
-		};
-		window.addEventListener("beforeunload", warn);
-		return () => window.removeEventListener("beforeunload", warn);
-	}, [dirty]);
+	const [tab, setTab] = useState<EditorTab>("editor");
 
 	useEffect(() => {
 		const handle = (event: MessageEvent) => {
@@ -125,117 +121,26 @@ function ContentScreen({
 		return () => window.clearTimeout(timer);
 	}, [content, side, previewReady]);
 
-	function updateContent(next: InvitationContent) {
-		setContent(next);
-		setDirty(true);
-		setErrorText(null);
-	}
-
-	async function handleSave() {
-		setSaving(true);
-		setErrorText(null);
-
-		try {
-			const result = await saveInvitationContent({
-				data: { content, baseUpdatedAt },
-			});
-
-			if (!result.ok) {
-				setErrorText(result.error);
-				toast({ message: result.error });
-				return;
-			}
-
-			setBaseUpdatedAt(result.updatedAt);
-			setUpdatedBy(null);
-			setDirty(false);
-			toast({
-				tone: "success",
-				message: "Konten disimpan dan langsung tayang di undangan.",
-			});
-		} catch {
-			const message = "Gagal menyimpan. Periksa koneksi lalu coba lagi.";
-			setErrorText(message);
-			toast({ message });
-		} finally {
-			setSaving(false);
-		}
-	}
-
 	async function handleReset() {
 		const confirmed = window.confirm(
 			"Kembalikan semua konten ke default? Perubahan yang belum disimpan akan hilang.",
 		);
 		if (!confirmed) return;
-
-		setSaving(true);
-		setErrorText(null);
-
-		try {
-			const result = await resetInvitationContent({
-				data: { baseUpdatedAt },
-			});
-
-			if (!result.ok) {
-				setErrorText(result.error);
-				toast({ message: result.error });
-				return;
-			}
-
-			setContent(structuredClone(defaultContent));
-			setBaseUpdatedAt(result.updatedAt);
-			setUpdatedBy(null);
-			setDirty(false);
-			toast({ tone: "success", message: "Konten dikembalikan ke default." });
-		} catch {
-			const message = "Gagal mereset konten.";
-			setErrorText(message);
-			toast({ message });
-		} finally {
-			setSaving(false);
-		}
+		await resetAll();
 	}
 
 	const canSave = dirty && !saving;
-	const status = dirty
-		? "Belum disimpan"
-		: baseUpdatedAt
-			? "Tersimpan"
-			: "Memakai default";
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-4 pb-[calc(96px+env(safe-area-inset-bottom))]">
 			<div className="rounded-3xl border border-inv-rule bg-inv-card px-5 py-4">
-				<div className="flex flex-wrap items-start justify-between gap-3">
-					<div>
-						<h1 className="font-display text-[26px] leading-tight">
-							Konten Undangan
-						</h1>
-						<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
-							{status}
-							{baseUpdatedAt ? ` · ${formatSavedAt(baseUpdatedAt)}` : ""}
-							{updatedBy ? ` · oleh ${updatedBy}` : ""}
-						</p>
-					</div>
-					<div className="flex flex-wrap gap-2">
-						<button
-							type="button"
-							onClick={() => void handleReset()}
-							disabled={saving}
-							className="rounded-full border border-inv-ink/25 px-4 py-2.5 font-body text-[11px] text-inv-ink transition-colors hover:bg-inv-ink/5 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-						>
-							Reset ke default
-						</button>
-						<button
-							type="button"
-							onClick={() => void handleSave()}
-							disabled={!canSave}
-							className="rounded-full bg-inv-accent px-4 py-2.5 font-body text-[11px] font-semibold text-inv-bg transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-						>
-							{saving ? "Menyimpan…" : "Simpan & tayangkan"}
-						</button>
-					</div>
-				</div>
+				<h1 className="font-display text-[26px] leading-tight">
+					Konten Undangan
+				</h1>
+				<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
+					Ubah teks, jadwal, dan cerita undangan. Pratinjau di kanan
+					menyesuaikan saat Anda mengetik.
+				</p>
 
 				{missingTable ? (
 					<p className="mt-3 rounded-2xl border border-inv-accent/30 bg-inv-bg px-3 py-2 font-body text-[10.5px] leading-[1.6] text-inv-accent">
@@ -260,10 +165,16 @@ function ContentScreen({
 				) : null}
 			</div>
 
-			<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start">
-				<ContentEditor value={content} onChange={updateContent} />
+			<EditorPreviewTabs value={tab} onChange={setTab} />
 
-				<aside className="lg:sticky lg:top-4">
+			<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start">
+				<div className={tab === "preview" ? "hidden lg:block" : undefined}>
+					<ContentEditor value={content} onChange={updateContent} />
+				</div>
+
+				<aside
+					className={`${tab === "editor" ? "hidden lg:block" : ""} lg:sticky lg:top-4`}
+				>
 					<div className="flex flex-wrap items-center justify-between gap-2">
 						<p className="font-body text-[10px] font-semibold tracking-[0.16em] text-inv-accent">
 							PRATINJAU LANGSUNG
@@ -302,15 +213,17 @@ function ContentScreen({
 					</p>
 				</aside>
 			</div>
+
+			<ContentActionBar
+				status={status}
+				savedAt={baseUpdatedAt}
+				updatedBy={updatedBy}
+				saving={saving}
+				canSave={canSave}
+				onReset={() => void handleReset()}
+				onSave={() => void save()}
+				resetLabel="Reset ke default"
+			/>
 		</div>
 	);
-}
-
-function formatSavedAt(iso: string): string {
-	const date = new Date(iso);
-	if (Number.isNaN(date.getTime())) return "";
-	return new Intl.DateTimeFormat("id-ID", {
-		dateStyle: "medium",
-		timeStyle: "short",
-	}).format(date);
 }

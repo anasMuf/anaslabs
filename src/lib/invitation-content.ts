@@ -7,8 +7,11 @@ import {
 	parseContent,
 } from "./invitation-content-schema";
 import {
+	FRAME_BUCKET,
+	frameObjectPath,
 	MUSIC_BUCKET,
 	musicObjectPath,
+	validateFrameUpload,
 	validateMusicUpload,
 } from "./invitation-upload";
 import { getSupabaseAdmin } from "./supabase-admin";
@@ -334,14 +337,70 @@ export const createMusicUploadUrl = createServerFn({ method: "POST" })
 			.createSignedUploadUrl(path);
 
 		if (error) {
-			const message = /bucket.*not found/i.test(error.message)
-				? "Bucket invitation-media belum ada. Jalankan supabase/migrations/0006_invitation_media.sql."
-				: error.message;
+			const message =
+				/bucket/i.test(error.message) || /does not exist/i.test(error.message)
+					? "Bucket invitation-media belum ada. Jalankan supabase/migrations/0006_invitation_media.sql."
+					: error.message;
 			return { ok: false, error: message };
 		}
 
 		const { data: urlData } = supabase.storage
 			.from(MUSIC_BUCKET)
+			.getPublicUrl(path);
+
+		return {
+			ok: true,
+			path: signed.path,
+			token: signed.token,
+			publicUrl: urlData.publicUrl,
+		};
+	});
+
+export type FrameUploadTarget = MusicUploadTarget;
+
+/** Signed upload URL for one transparent frame overlay. */
+export const createFrameUploadUrl = createServerFn({ method: "POST" })
+	.inputValidator((data: { mime?: string; size?: number } | undefined) => ({
+		mime: String(data?.mime ?? ""),
+		size: Number(data?.size ?? 0),
+	}))
+	.handler(async ({ data }): Promise<FrameUploadTarget> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk lagi.",
+			};
+		}
+
+		const validation = validateFrameUpload({
+			mime: data.mime,
+			size: data.size,
+		});
+		if (!validation.ok) return validation;
+
+		let supabase: ReturnType<typeof getSupabaseAdmin>;
+		try {
+			supabase = getSupabaseAdmin();
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+
+		const path = frameObjectPath(validation.ext, crypto.randomUUID());
+		const { data: signed, error } = await supabase.storage
+			.from(FRAME_BUCKET)
+			.createSignedUploadUrl(path);
+
+		if (error) {
+			const message =
+				/bucket/i.test(error.message) || /does not exist/i.test(error.message)
+					? "Bucket invitation-frames belum ada. Jalankan supabase/migrations/0007_invitation_frames.sql."
+					: error.message;
+			return { ok: false, error: message };
+		}
+
+		const { data: urlData } = supabase.storage
+			.from(FRAME_BUCKET)
 			.getPublicUrl(path);
 
 		return {

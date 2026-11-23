@@ -72,6 +72,69 @@ describe("buildPhotoboothSettings", () => {
 		layout.slots[0].x = 999;
 		expect(config.layouts[1].slots[0].x).toBe(26);
 	});
+
+	it("forwards background, radius, textX and per-layout overlays", () => {
+		const overlayA = {
+			url: "https://example.com/a.png",
+			x: 4,
+			y: 6,
+			width: 340,
+		};
+		const overlayB = {
+			url: "https://example.com/b.png",
+			x: 10,
+			y: 20,
+			width: 120,
+		};
+		const themed = buildPhotoboothSettings({
+			...config,
+			background: "#FFF7F0",
+			radius: 18,
+			layouts: {
+				...config.layouts,
+				1: {
+					...config.layouts[1],
+					textX: 40,
+					overlays: [overlayA, overlayB],
+				},
+				2: { ...config.layouts[2], overlays: [overlayA] },
+			},
+		});
+
+		expect(themed.layouts[1].canvas.background).toBe("#FFF7F0");
+		expect(themed.layouts[1].canvas.radius).toBe(18);
+		expect(themed.layouts[1].text[0].x).toBe(40);
+		expect(themed.layouts[1].overlays).toEqual([overlayA, overlayB]);
+		expect(themed.layouts[2].overlays).toEqual([overlayA]);
+		expect(themed.layouts[4].overlays).toEqual([]);
+	});
+
+	it("falls back to the legacy global frame for layouts without overlays", () => {
+		const legacy = {
+			url: "https://example.com/legacy.png",
+			x: 0,
+			y: 0,
+			width: 348,
+		};
+		const themed = buildPhotoboothSettings({ ...config, frame: legacy });
+
+		expect(themed.layouts[1].overlays).toEqual([legacy]);
+		expect(themed.layouts[4].overlays).toEqual([legacy]);
+	});
+
+	it("forwards the global background image to every layout", () => {
+		const backgroundImage = {
+			url: "https://example.com/bg.png",
+			x: -20,
+			y: -30,
+			width: 400,
+		};
+		const themed = buildPhotoboothSettings({ ...config, backgroundImage });
+
+		expect(themed.layouts[1].backgroundImage).toEqual(backgroundImage);
+		expect(themed.layouts[2].backgroundImage).toEqual(backgroundImage);
+		expect(themed.layouts[4].backgroundImage).toEqual(backgroundImage);
+	});
 });
 
 describe("coverRect", () => {

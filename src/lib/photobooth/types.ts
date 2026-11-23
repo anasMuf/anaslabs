@@ -34,6 +34,16 @@ export interface PhotoboothTextLine {
 	align?: "left" | "center" | "right";
 }
 
+export interface PhotoboothFrame {
+	/** Public URL of a transparent PNG/WebP overlay. */
+	url: string;
+	/** Top-left of the overlay, in Figma units. */
+	x: number;
+	y: number;
+	/** Drawn width; height follows the image aspect ratio. */
+	width: number;
+}
+
 export interface PhotoboothLayout {
 	canvas: {
 		width: number;
@@ -45,6 +55,10 @@ export interface PhotoboothLayout {
 	/** One slot per captured photo, in capture order. */
 	slots: PhotoboothSlot[];
 	text: PhotoboothTextLine[];
+	/** Global background image, drawn above the fallback colour, below photos. */
+	backgroundImage?: PhotoboothFrame;
+	/** Overlays drawn above the photos, below the text, in array order. */
+	overlays: PhotoboothFrame[];
 	/** Figma units → output pixels. 3 renders the 348-unit card at 1044 px. */
 	scale: number;
 }
@@ -61,12 +75,30 @@ export interface PhotoboothCardLayout {
 	height: number;
 	/** Top of the three text lines, in Figma units. */
 	textY: number;
+	/** Left of the text box; defaults to 60 (centred 228-unit box). */
+	textX?: number;
+	/** Per-layout overlays, up to 5; array order is the stacking order. */
+	overlays?: PhotoboothFrame[];
 	slots: readonly PhotoboothSlot[];
 }
 
 export interface PhotoboothConfig {
 	scale: number;
 	downloadName: string;
+	/** Card background, `#RRGGBB`; defaults to white. */
+	background?: string;
+	/** Corner radius in Figma units; defaults to 10. */
+	radius?: number;
+	/**
+	 * Global background image (x/y may be negative for panning). Drawn above the
+	 * fallback colour and below the photos; applies to every layout.
+	 */
+	backgroundImage?: PhotoboothFrame;
+	/**
+	 * Legacy global overlay (pre per-layout overlays). New content stores
+	 * `layouts[*].overlays`; the read path migrates this value once.
+	 */
+	frame?: PhotoboothFrame;
 	/** Card copy, drawn by `drawComposition`. */
 	card: {
 		eyebrow: string;

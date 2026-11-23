@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+	FRAME_MAX_BYTES,
+	frameObjectPath,
 	MUSIC_MAX_BYTES,
 	musicObjectPath,
+	validateFrameUpload,
 	validateMusicUpload,
 } from "./invitation-upload";
 
@@ -64,5 +67,46 @@ describe("musicObjectPath", () => {
 	it("rejects path traversal and bad extensions", () => {
 		expect(() => musicObjectPath("../mp3", "123e4567-e89b")).toThrow();
 		expect(() => musicObjectPath("mp3", "../../secret")).toThrow();
+	});
+});
+
+describe("validateFrameUpload", () => {
+	it("accepts PNG, WebP and JPEG", () => {
+		expect(
+			validateFrameUpload({ mime: "image/png", size: 1024 }),
+		).toMatchObject({ ok: true, ext: "png" });
+		expect(
+			validateFrameUpload({ mime: "image/webp", size: 1024 }),
+		).toMatchObject({ ok: true, ext: "webp" });
+		expect(
+			validateFrameUpload({ mime: "image/jpeg", size: 1024 }),
+		).toMatchObject({ ok: true, ext: "jpg" });
+	});
+
+	it("rejects other image types", () => {
+		expect(validateFrameUpload({ mime: "image/gif", size: 1024 }).ok).toBe(
+			false,
+		);
+	});
+
+	it("rejects files over the frame limit", () => {
+		expect(
+			validateFrameUpload({ mime: "image/png", size: FRAME_MAX_BYTES + 1 }).ok,
+		).toBe(false);
+	});
+});
+
+describe("frameObjectPath", () => {
+	it("builds a flat path under frames/", () => {
+		expect(frameObjectPath("png", "123e4567-e89b-12d3-a456-426614174000")).toBe(
+			"frames/123e4567-e89b-12d3-a456-426614174000.png",
+		);
+		expect(frameObjectPath("jpg", "123e4567-e89b-12d3-a456-426614174000")).toBe(
+			"frames/123e4567-e89b-12d3-a456-426614174000.jpg",
+		);
+	});
+
+	it("rejects traversal", () => {
+		expect(() => frameObjectPath("../png", "123e4567-e89b")).toThrow();
 	});
 });

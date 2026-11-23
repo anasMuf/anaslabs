@@ -212,6 +212,8 @@ export const invitation = {
 	photobooth: {
 		scale: 3,
 		downloadName: "anas-mila-photobooth",
+		background: "#FFFFFF",
+		radius: 10,
 		card: {
 			eyebrow: "THE WEDDING OF",
 			names: "Anas & Mila",
@@ -222,12 +224,14 @@ export const invitation = {
 				width: 348,
 				height: 530,
 				textY: 448,
+				textX: 60,
 				slots: [{ x: 26, y: 32, w: 296, h: 393 }],
 			},
 			2: {
 				width: 348,
 				height: 542,
 				textY: 454,
+				textX: 60,
 				slots: [
 					{ x: 26, y: 38, w: 296, h: 193 },
 					{ x: 26, y: 238, w: 296, h: 193 },
@@ -237,6 +241,7 @@ export const invitation = {
 				width: 348,
 				height: 535,
 				textY: 450,
+				textX: 60,
 				slots: [
 					{ x: 26, y: 35, w: 144, h: 192 },
 					{ x: 177, y: 35, w: 144, h: 192 },

@@ -9,6 +9,21 @@
 export const MUSIC_BUCKET = "invitation-media";
 export const MUSIC_MAX_BYTES = 15 * 1024 * 1024;
 
+export const FRAME_BUCKET = "invitation-frames";
+export const FRAME_MAX_BYTES = 2 * 1024 * 1024;
+
+export const FRAME_MIME_EXTENSIONS = {
+	"image/png": "png",
+	"image/webp": "webp",
+	"image/jpeg": "jpg",
+} as const;
+
+export type FrameMime = keyof typeof FRAME_MIME_EXTENSIONS;
+
+export type FrameUploadValidation =
+	| { ok: true; mime: FrameMime; ext: string; size: number }
+	| { ok: false; error: string };
+
 export const MUSIC_MIME_EXTENSIONS = {
 	"audio/mpeg": "mp3",
 	"audio/mp4": "m4a",
@@ -66,4 +81,44 @@ export function musicObjectPath(ext: string, id: string): string {
 	}
 
 	return `music/${id}.${safeExt}`;
+}
+
+export function validateFrameUpload(input: {
+	mime?: string | null;
+	size?: number | null;
+}): FrameUploadValidation {
+	const mime = (input.mime ?? "").trim().toLowerCase();
+	const ext = FRAME_MIME_EXTENSIONS[mime as FrameMime];
+
+	if (!ext) {
+		return { ok: false, error: "Frame harus berupa PNG, WebP, atau JPEG." };
+	}
+
+	const size = Number(input.size ?? 0);
+	if (!Number.isFinite(size) || size <= 0) {
+		return { ok: false, error: "Ukuran file frame tidak valid." };
+	}
+
+	if (size > FRAME_MAX_BYTES) {
+		return {
+			ok: false,
+			error: `Ukuran frame maksimal ${FRAME_MAX_BYTES / (1024 * 1024)} MB.`,
+		};
+	}
+
+	return { ok: true, mime: mime as FrameMime, ext, size };
+}
+
+/** `frames/<uuid>.<ext>` for the transparent overlay bucket. */
+export function frameObjectPath(ext: string, id: string): string {
+	const safeExt = ext.trim().toLowerCase();
+
+	if (!SAFE_EXT.test(safeExt)) {
+		throw new Error("Ekstensi frame tidak valid.");
+	}
+	if (!SAFE_ID.test(id)) {
+		throw new Error("ID file frame tidak valid.");
+	}
+
+	return `frames/${id}.${safeExt}`;
 }

@@ -88,6 +88,25 @@ function DashboardOverview() {
 				</Link>
 
 				<Link
+					to="/dashboard/fotobooth"
+					className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+				>
+					<div>
+						<p className="font-display text-[18px] leading-tight">Fotobooth</p>
+						<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
+							Ubah teks kartu, nama file, skala, dan lihat pratinjau semua
+							layout.
+						</p>
+					</div>
+					<span
+						aria-hidden="true"
+						className="mt-1 font-body text-[14px] text-inv-muted"
+					>
+						→
+					</span>
+				</Link>
+
+				<Link
 					to="/dashboard/wall"
 					className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 				>
