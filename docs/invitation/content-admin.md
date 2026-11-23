@@ -109,6 +109,18 @@ Asumsi yang disetujui secara default:
 - Tidak ada dependency baru jika fitur bisa dicapai dengan dependency yang ada
   (`zod`, `@supabase/supabase-js`, `lucide-react` sudah tersedia).
 
+### Responsif
+
+- Editor konten dan fotobooth memakai action bar **fixed** di bawah layar berisi
+  Reset dan Simpan; konten diberi padding bawah agar tidak tertutup.
+- Di bawah `lg`, editor dan pratinjau dipisah dengan tab `Editor | Pratinjau`;
+  kedua panel tetap ter-mount sehingga iframe/canvas tidak kehilangan state dan
+  tetap menerima update draft.
+- Navigasi dashboard bisa digeser horizontal di layar kecil (tanpa bottom tab
+  bar).
+- Daftar tamu: filter dilipat di balik tombol Tampilkan di bawah `lg`, dan kolom
+  **Nama** sticky di kiri saat tabel digeser horizontal.
+
 ## Success Criteria
 
 - [ ] Tanpa migrasi dijalankan, undangan tetap tampil normal memakai default.
@@ -130,6 +142,9 @@ Asumsi yang disetujui secara default:
 - [ ] Fase B: drag/resize slot tersimpan dan hasil unduhan mengikuti posisi baru.
 - [ ] `/dashboard/wall` menghapus kartu + file Storage; mode token lama tetap
       berfungsi.
+- [ ] Di viewport < 1024 px, editor dan pratinjau bisa ditukar lewat tab tanpa
+      kehilangan isi form atau state pratinjau, dan tombol Reset/Simpan selalu
+      terlihat.
 - [ ] `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` hijau.
 
 ## Anti-Patterns (FORBIDDEN)
