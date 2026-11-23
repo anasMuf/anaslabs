@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
 
+# Two pushes in quick succession used to start two deploys at once. Both ran
+# `docker compose up --force-recreate` on the same VPS, so one left a temporary
+# `<id>_anaslabs` container behind and the other failed with a name conflict
+# (and `:latest` could be overwritten by the older build). Queue them instead.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -84,17 +92,35 @@ jobs:
             docker image inspect ${IMAGE}:latest --format 'image digest: {{index .RepoDigests 0}}'
 
             cd ~/anaslabs
-            IMAGE=${IMAGE} docker compose up -d --force-recreate
+
+            # An interrupted/overlapping recreate leaves a container named
+            # `<id>_anaslabs`, which makes the next `up` fail with a name
+            # conflict. Remove those stale duplicates only; keep the live one so
+            # the recreate itself stays near zero-downtime.
+            for stale in $(docker ps -a --format '{{.Names}}' | grep '_anaslabs$' || true); do
+              echo "menghapus container sisa: ${stale}"
+              docker rm -f "${stale}"
+            done
+
+            IMAGE=${IMAGE} docker compose up -d --force-recreate --remove-orphans
 
             # Prove the container is the image we just pulled and that it answers.
             docker compose ps
+            ready=0
             for attempt in 1 2 3 4 5; do
               if curl -fsS http://localhost:3000/api/health; then
                 echo ""
+                ready=1
                 break
               fi
               echo "health belum siap (percobaan $attempt)"
               sleep 3
             done
+
+            if [ "$ready" -ne 1 ]; then
+              echo "health check gagal; log container terakhir:"
+              docker compose logs --tail=100
+              exit 1
+            fi
 
             docker image prune -f
