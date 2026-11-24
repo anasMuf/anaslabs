@@ -132,7 +132,6 @@ function DashboardOverview() {
 				</p>
 				<ul className="mt-2 flex flex-col gap-1.5 font-body text-[11px] leading-[1.7] text-inv-muted">
 					<li>· Blast WhatsApp lewat Wablas</li>
-					<li>· Editor frame photobooth</li>
 				</ul>
 			</div>
 
