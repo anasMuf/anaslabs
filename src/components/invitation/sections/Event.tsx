@@ -53,7 +53,7 @@ function EventCard({ event }: { event: InvitationEvent }) {
 				<dl className="grid w-fit max-w-full grid-cols-[auto_auto] items-baseline gap-x-3 gap-y-2">
 					{event.schedules.map((schedule) => (
 						<Fragment key={schedule.label}>
-							<dt className="whitespace-nowrap text-right text-[12px] font-body font-semibold text-inv-accent">
+							<dt className="min-w-[90px] whitespace-nowrap text-right text-[12px] font-body font-semibold text-inv-accent">
 								{schedule.label}
 							</dt>
 							<dd className="whitespace-nowrap text-left text-[13px] font-body leading-[1.65] text-inv-muted">
