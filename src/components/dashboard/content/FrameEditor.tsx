@@ -599,6 +599,17 @@ export default function FrameEditor({
 		selected?.type === "overlay" ? overlays[selected.index] : undefined;
 	const textX = layout.textX ?? 60;
 
+	const interactionHint =
+		selected?.type === "slot"
+			? "Geser kotak foto untuk memindahkan; tarik pegangan di sudut kanan bawah untuk mengubah ukuran. Nilai presisi bisa diketik di panel ini."
+			: selected?.type === "text"
+				? "Geser blok teks langsung di kartu, atau ketik X/Y di panel ini."
+				: selected?.type === "background"
+					? "Geser gambar background di kartu. Untuk memindahkan seluruh area (termasuk bagian kosong) atau mengubah ukuran dari sudut, aktifkan “Atur background” lalu tarik pegangan di kanan bawah."
+					: selected?.type === "overlay"
+						? "Geser overlay di kartu; tarik pegangan di sudut kanan bawah untuk mengubah lebar. Tinggi mengikuti rasio gambar."
+						: null;
+
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-center gap-2">
@@ -659,21 +670,41 @@ export default function FrameEditor({
 				}}
 			>
 				{backgroundImage ? (
-					<img
-						src={backgroundImage.url}
-						alt=""
-						draggable={false}
-						className={`pointer-events-none absolute max-w-none ${
-							selected?.type === "background"
-								? "outline outline-2 outline-inv-accent"
-								: ""
-						}`}
+					<button
+						type="button"
+						aria-label="Pilih dan geser background"
+						onPointerDown={(event) =>
+							startDrag(
+								event,
+								{
+									mode: "move",
+									target: "background",
+									startBackground: backgroundImage,
+								},
+								{ type: "background" },
+							)
+						}
+						onPointerMove={handlePointerMove}
+						onPointerUp={endDrag}
+						onPointerCancel={endDrag}
+						className="absolute block cursor-move touch-none"
 						style={{
 							left: `${(backgroundImage.x / layout.width) * 100}%`,
 							top: `${(backgroundImage.y / layout.height) * 100}%`,
 							width: `${(backgroundImage.width / layout.width) * 100}%`,
 						}}
-					/>
+					>
+						<img
+							src={backgroundImage.url}
+							alt=""
+							draggable={false}
+							className={`pointer-events-none block h-auto w-full ${
+								selected?.type === "background"
+									? "outline outline-2 outline-inv-accent"
+									: ""
+							}`}
+						/>
+					</button>
 				) : null}
 				{layout.slots.map((slot, index) => {
 					const active = selected?.type === "slot" && selected.index === index;
@@ -701,7 +732,7 @@ export default function FrameEditor({
 								onPointerMove={handlePointerMove}
 								onPointerUp={endDrag}
 								onPointerCancel={endDrag}
-								className={`absolute inset-0 flex items-center justify-center border border-dashed bg-[linear-gradient(135deg,rgba(239,231,223,0.9),rgba(212,195,181,0.9))] font-body text-[10px] font-semibold tracking-[0.1em] text-inv-ink/50 ${
+								className={`absolute inset-0 flex cursor-move items-center justify-center border border-dashed bg-[linear-gradient(135deg,rgba(239,231,223,0.9),rgba(212,195,181,0.9))] font-body text-[10px] font-semibold tracking-[0.1em] text-inv-ink/50 touch-none ${
 									active
 										? "border-inv-accent ring-2 ring-inv-accent"
 										: "border-inv-ink/30"
@@ -756,7 +787,7 @@ export default function FrameEditor({
 							onPointerMove={handlePointerMove}
 							onPointerUp={endDrag}
 							onPointerCancel={endDrag}
-							className="block w-full"
+							className="block w-full cursor-move touch-none"
 						>
 							<img
 								src={overlay.url}
@@ -810,7 +841,7 @@ export default function FrameEditor({
 					onPointerMove={handlePointerMove}
 					onPointerUp={endDrag}
 					onPointerCancel={endDrag}
-					className={`absolute flex flex-col items-center justify-center border border-dashed bg-inv-bg/50 px-1 text-center font-body ${
+					className={`absolute flex cursor-move flex-col items-center justify-center border border-dashed bg-inv-bg/50 px-1 text-center font-body touch-none ${
 						selected?.type === "text"
 							? "border-inv-accent ring-2 ring-inv-accent"
 							: "border-inv-ink/25"
@@ -1003,10 +1034,15 @@ export default function FrameEditor({
 					</div>
 				) : (
 					<p className="font-body text-[10.5px] leading-[1.6] text-inv-muted">
-						Pilih slot, blok teks, background, atau overlay untuk mengatur
-						posisi presisi.
+						Klik slot, blok teks, overlay, atau gambar background di kartu untuk
+						memilih dan menggesernya. Panel di sini menampilkan field presisi.
 					</p>
 				)}
+				{interactionHint ? (
+					<p className="mt-2 border-t border-inv-rule/60 pt-2 font-body text-[10px] leading-[1.6] text-inv-muted">
+						{interactionHint}
+					</p>
+				) : null}
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-2">

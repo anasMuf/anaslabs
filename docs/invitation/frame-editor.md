@@ -110,7 +110,10 @@ tanpa keputusan eksplisit.
 - [x] Panel angka untuk elemen terpilih.
 - [x] Background/radius + upload/hapus overlay.
 - [x] Background image global: upload, mode “Atur background” (geser + resize),
-      cover ulang, dan hapus.
+      cover ulang, dan hapus; gambar background juga bisa dipilih & digeser
+      langsung di kartu.
+- [x] Petunjuk interaksi kontekstual untuk slot, teks, overlay, dan background
+      saat elemen dipilih.
 - [x] Undo/redo + reset layout.
 
 ### 6C — Verifikasi
