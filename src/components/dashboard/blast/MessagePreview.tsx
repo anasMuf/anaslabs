@@ -1,5 +1,5 @@
 import type { LinkPreviewInfo } from "#/lib/blast/link-preview";
-import { prepareLinkPreviewMessage } from "#/lib/blast/link-preview";
+import { firstUrl } from "#/lib/blast/url";
 
 /** Balon pesan bergaya WhatsApp + kartu preview tautan (OG). */
 export function MessagePreview({
@@ -14,8 +14,7 @@ export function MessagePreview({
 	/** Kartu OG di atas teks (dipakai halaman template). */
 	linkPreviewFirst?: boolean;
 }) {
-	const prepared = prepareLinkPreviewMessage(message);
-	const url = prepared.url;
+	const url = firstUrl(message);
 
 	const linkCard =
 		url && linkPreview ? (
@@ -58,12 +57,17 @@ export function MessagePreview({
 			<div className="mt-2 rounded-2xl bg-[#dcf8c6] px-3 py-2.5 shadow-[0_10px_24px_-20px_rgba(52,54,46,0.6)]">
 				{linkPreviewFirst ? linkCard : null}
 				<p className="whitespace-pre-wrap break-words font-body text-[11.5px] leading-[1.65] text-[#1f2c22]">
-					{prepared.displayText}
+					{message}
 				</p>
 				{linkPreviewFirst ? null : linkCard}
 			</div>
 			<p className="mt-2 text-right font-body text-[10px] text-inv-muted">
-				{prepared.displayText.length} karakter
+				{message.length} karakter
+			</p>
+			<p className="mt-1 font-body text-[10px] leading-relaxed text-inv-muted">
+				Pesan dikirim sebagai teks dengan tautan di dalamnya. Kartu tautan di
+				atas tampil saat tautan dibuka atau dibagikan, bukan di dalam pesan
+				blast.
 			</p>
 		</div>
 	);

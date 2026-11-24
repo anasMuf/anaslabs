@@ -17,7 +17,7 @@ function BlastSetup() {
 	const [refreshing, setRefreshing] = useState(false);
 
 	// Segarkan status/kuota/expired setiap halaman dibuka, supaya perubahan paket
-	// Wablas (mis. upgrade untuk send-link) langsung terlihat tanpa klik manual.
+	// Wablas (mis. upgrade kuota) langsung terlihat tanpa klik manual.
 	useEffect(() => {
 		const targets = initial.channels.filter(
 			(channel) => channel.configured && !channel.needsReentry,

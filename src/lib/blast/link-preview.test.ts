@@ -1,43 +1,50 @@
 import { describe, expect, it } from "vitest";
-import { prepareLinkPreviewMessage } from "./link-preview";
+import {
+	buildLinkPreview,
+	DEFAULT_LINK_VERSION,
+	resolveLinkVersion,
+} from "./link-preview";
+import { DEFAULT_COUPLE_NAME } from "./template";
 
-describe("prepareLinkPreviewMessage", () => {
-	it("leaves a message without a URL untouched", () => {
-		expect(prepareLinkPreviewMessage("Halo Budi")).toEqual({
-			text: "Halo Budi",
-			url: null,
-			displayText: "Halo Budi",
+describe("buildLinkPreview", () => {
+	it("falls back to the default title, description, and image", () => {
+		const preview = buildLinkPreview({
+			title: null,
+			description: null,
+			imageUrl: null,
 		});
+
+		expect(preview.title).toBe(`Undangan Pernikahan ${DEFAULT_COUPLE_NAME}`);
+		expect(preview.imageUrl).toMatch(/\/invitation\/og-card\.jpg$/);
+		expect(preview.description.length).toBeGreaterThan(0);
+		expect(preview.host).toBe("anaslabs.my.id");
 	});
 
-	it("moves a dangling link label to the end and shows the URL", () => {
-		const message =
-			"Assalamu'alaikum Alan,\n\nBuka undangan: https://anaslabs.my.id/invitation/alan\n\nTerima kasih.";
-		expect(prepareLinkPreviewMessage(message)).toEqual({
-			text: "Assalamu'alaikum Alan,\n\nTerima kasih.\n\nBuka undangan:",
-			url: "https://anaslabs.my.id/invitation/alan",
-			displayText:
-				"Assalamu'alaikum Alan,\n\nTerima kasih.\n\nBuka undangan:\nhttps://anaslabs.my.id/invitation/alan",
+	it("prefers configured metadata and trims whitespace", () => {
+		const preview = buildLinkPreview({
+			title: "  Undangan Anas & Mila  ",
+			description: "  Kami menikah.  ",
+			imageUrl: "  https://contoh.test/kartu.jpg  ",
 		});
+
+		expect(preview.title).toBe("Undangan Anas & Mila");
+		expect(preview.description).toBe("Kami menikah.");
+		expect(preview.imageUrl).toBe("https://contoh.test/kartu.jpg");
+	});
+});
+
+describe("resolveLinkVersion", () => {
+	it("uses the default when there is no timestamp", () => {
+		expect(resolveLinkVersion(null)).toBe(DEFAULT_LINK_VERSION);
+		expect(resolveLinkVersion(undefined)).toBe(DEFAULT_LINK_VERSION);
 	});
 
-	it("handles a message that is only a URL", () => {
-		expect(
-			prepareLinkPreviewMessage("https://anaslabs.my.id/invitation/alan"),
-		).toEqual({
-			text: "",
-			url: "https://anaslabs.my.id/invitation/alan",
-			displayText: "https://anaslabs.my.id/invitation/alan",
-		});
+	it("uses the timestamp so the preview cache is busted", () => {
+		const updatedAt = "2026-11-24T13:48:56.000Z";
+		expect(resolveLinkVersion(updatedAt)).toBe(String(Date.parse(updatedAt)));
 	});
 
-	it("keeps inline sentence text while separating the URL", () => {
-		const prepared = prepareLinkPreviewMessage(
-			"Silakan buka https://anaslabs.my.id/invitation/alan ya",
-		);
-		expect(prepared.text).toBe("Silakan buka ya");
-		expect(prepared.displayText).toBe(
-			"Silakan buka ya\nhttps://anaslabs.my.id/invitation/alan",
-		);
+	it("ignores an unparsable timestamp", () => {
+		expect(resolveLinkVersion("bukan tanggal")).toBe(DEFAULT_LINK_VERSION);
 	});
 });

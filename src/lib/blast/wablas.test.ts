@@ -165,7 +165,7 @@ describe("sendMessages", () => {
 		expect(calls[0]?.url).toContain("/api/v2/send-message");
 	});
 
-	it("uses send-link (with preview) when the message contains a URL", async () => {
+	it("sends a message with a link through send-message without splitting the URL", async () => {
 		const calls: Call[] = [];
 		const fetchImpl = makeFetch(
 			() =>
@@ -188,52 +188,20 @@ describe("sendMessages", () => {
 			fetchImpl,
 		);
 
-		expect(calls[0]?.url).toContain("/api/v2/send-link");
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.url).toBe("https://jogja.wablas.com/api/v2/send-message");
 		expect(JSON.parse(String(calls[0]?.init.body))).toEqual({
 			data: [
 				{
 					phone: "628",
-					text: "Buka undangan:",
-					link: "https://anaslabs.my.id/invitation/budi",
+					message: "Buka undangan: https://anaslabs.my.id/invitation/budi",
 					ref_id: "r",
 				},
 			],
 		});
 	});
 
-	it("moves a dangling link label to the end for the preview URL", async () => {
-		const calls: Call[] = [];
-		const fetchImpl = makeFetch(
-			() =>
-				json({
-					status: true,
-					data: { messages: [{ id: "m", ref_id: "r", status: "pending" }] },
-				}),
-			calls,
-		);
-
-		await sendMessages(
-			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
-			[
-				{
-					phone: "628",
-					message:
-						"Assalamu'alaikum\n\nBuka undangan: https://anaslabs.my.id/invitation/budi\n\nTerima kasih.",
-					refId: "r",
-				},
-			],
-			fetchImpl,
-		);
-
-		const body = JSON.parse(String(calls[0]?.init.body)) as {
-			data: Array<{ text: string }>;
-		};
-		expect(body.data[0]?.text).toBe(
-			"Assalamu'alaikum\n\nTerima kasih.\n\nBuka undangan:",
-		);
-	});
-
-	it("matches send-link responses by phone when ref_id is missing", async () => {
+	it("matches responses by phone when ref_id is missing", async () => {
 		const fetchImpl = makeFetch(
 			() =>
 				json({
@@ -257,42 +225,6 @@ describe("sendMessages", () => {
 			fetchImpl,
 		);
 
-		expect(results).toEqual([
-			{ refId: "r", messageId: "m", status: "pending" },
-		]);
-	});
-
-	it("falls back to plain text when send-link is rejected", async () => {
-		const calls: Call[] = [];
-		const fetchImpl = makeFetch(
-			(call) =>
-				call.url.includes("send-link")
-					? json({ status: false, message: "your package not support" }, 400)
-					: json({
-							status: true,
-							data: {
-								messages: [{ id: "m", ref_id: "r", status: "pending" }],
-							},
-						}),
-			calls,
-		);
-
-		const results = await sendMessages(
-			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
-			[
-				{
-					phone: "628",
-					message: "Buka https://anaslabs.my.id/invitation/budi",
-					refId: "r",
-				},
-			],
-			fetchImpl,
-		);
-
-		expect(calls.map((call) => call.url)).toEqual([
-			"https://jogja.wablas.com/api/v2/send-link",
-			"https://jogja.wablas.com/api/v2/send-message",
-		]);
 		expect(results).toEqual([
 			{ refId: "r", messageId: "m", status: "pending" },
 		]);

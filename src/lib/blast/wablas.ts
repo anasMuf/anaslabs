@@ -8,9 +8,13 @@
  * - Device info: `GET {base}/api/device/info?token=...`
  * - Kirim teks: `POST {base}/api/v2/send-message`, auth `TOKEN.SECRET_KEY`,
  *   body `{ data: [{ phone, message, ref_id }] }`, maks 50 baris per request.
+ *
+ * `send-link` (kartu preview) tidak dipakai: pada paket akun ini endpoint itu
+ * mengirim JSON payload sebagai teks (dikonfirmasi lewat `/api/report/message`),
+ * dan `send-image` ditolak dengan "your package not support". Tautan karena itu
+ * ikut di dalam teks `send-message` biasa.
  */
 
-import { prepareLinkPreviewMessage } from "./link-preview";
 import { firstUrl } from "./url";
 
 export const DEFAULT_WABLAS_BASE_URL = "https://jogja.wablas.com";
@@ -47,7 +51,7 @@ export interface WablasSendResult {
 	status: string;
 }
 
-/** Baris mentah dari `data.messages[]`; send-link kadang tidak mengembalikan ref_id. */
+/** Baris mentah dari `data.messages[]`; `ref_id` bisa kosong pada sebagian respons. */
 interface ParsedSendMessage {
 	refId: string | null;
 	phone: string | null;
@@ -234,10 +238,6 @@ function readNumber(value: unknown): number | null {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
-function linkText(message: string): string {
-	return prepareLinkPreviewMessage(message).text;
-}
-
 function parseSendResults(response: JsonResponse): ParsedSendMessage[] {
 	const data =
 		response.body.data && typeof response.body.data === "object"
@@ -274,8 +274,8 @@ function digits(value: string | null): string {
 }
 
 /**
- * Cocokkan response ke baris request. `send-link` dapat mengembalikan
- * `ref_id: null`, jadi nomor telepon dipakai sebagai kunci cadangan.
+ * Cocokkan response ke baris request. Wablas kadang mengembalikan `ref_id`
+ * kosong, jadi nomor telepon dipakai sebagai kunci cadangan.
  */
 function alignResults(
 	rows: WablasSendRow[],
@@ -384,66 +384,16 @@ export async function sendMessages(
 		);
 	}
 
-	const textRows: WablasSendRow[] = [];
-	const linkRows: Array<{ row: WablasSendRow; link: string }> = [];
-	for (const row of rows) {
-		const link = firstUrl(row.message);
-		if (link) linkRows.push({ row, link });
-		else textRows.push(row);
-	}
-
-	const messages: ParsedSendMessage[] = [];
-
-	if (textRows.length) {
-		messages.push(
-			...(await postBatch(
-				credentials,
-				"/api/v2/send-message",
-				textRows.map((row) => ({
-					phone: row.phone,
-					message: row.message,
-					ref_id: row.refId,
-				})),
-				fetchImpl,
-			)),
-		);
-	}
-
-	if (linkRows.length) {
-		try {
-			messages.push(
-				...(await postBatch(
-					credentials,
-					"/api/v2/send-link",
-					linkRows.map(({ row, link }) => ({
-						phone: row.phone,
-						text: linkText(row.message),
-						link,
-						ref_id: row.refId,
-					})),
-					fetchImpl,
-				)),
-			);
-		} catch (error) {
-			// Transien tetap dilempar supaya worker mengulang, bukan mengirim dobel
-			// tanpa preview. Format link yang ditolak dikirim sebagai teks biasa.
-			if (error instanceof WablasError && error.kind === "transient") {
-				throw error;
-			}
-			messages.push(
-				...(await postBatch(
-					credentials,
-					"/api/v2/send-message",
-					linkRows.map(({ row }) => ({
-						phone: row.phone,
-						message: row.message,
-						ref_id: row.refId,
-					})),
-					fetchImpl,
-				)),
-			);
-		}
-	}
+	const messages = await postBatch(
+		credentials,
+		"/api/v2/send-message",
+		rows.map((row) => ({
+			phone: row.phone,
+			message: row.message,
+			ref_id: row.refId,
+		})),
+		fetchImpl,
+	);
 
 	return alignResults(rows, messages);
 }
