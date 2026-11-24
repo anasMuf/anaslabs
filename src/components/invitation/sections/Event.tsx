@@ -45,7 +45,7 @@ function EventCard({ event }: { event: InvitationEvent }) {
 				{event.label}
 			</p>
 
-			<p className="font-display text-[30px] leading-[1.3]">
+			<p className="font-display text-[26px] leading-[1.3]">
 				{formatEventDate(event.date)}
 			</p>
 
