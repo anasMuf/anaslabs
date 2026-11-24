@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TemplateEditor } from "#/components/dashboard/blast/TemplateEditor";
-import { buildLinkPreview } from "#/lib/blast/link-preview";
+import { buildLinkPreview, resolveLinkVersion } from "#/lib/blast/link-preview";
 import { getInvitationMeta } from "#/lib/blast/og";
 import { listBlastTemplates } from "#/lib/blast/templates";
 import { listGuestsPage } from "#/lib/guests";
@@ -19,13 +19,15 @@ export const Route = createFileRoute("/dashboard/blast/template")({
 			guests: page.rows,
 			guestTotal: page.total,
 			linkPreview: buildLinkPreview(meta),
+			linkVersion: resolveLinkVersion(meta.updatedAt),
 		};
 	},
 	component: BlastTemplatePage,
 });
 
 function BlastTemplatePage() {
-	const { templates, guests, guestTotal, linkPreview } = Route.useLoaderData();
+	const { templates, guests, guestTotal, linkPreview, linkVersion } =
+		Route.useLoaderData();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -38,6 +40,7 @@ function BlastTemplatePage() {
 				guests={guests}
 				guestTotal={guestTotal}
 				linkPreview={linkPreview}
+				linkVersion={linkVersion}
 			/>
 		</div>
 	);

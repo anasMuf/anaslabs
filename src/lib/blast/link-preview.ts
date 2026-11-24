@@ -38,6 +38,21 @@ export function buildLinkPreview(meta: InvitationMetaLike): LinkPreviewInfo {
 	};
 }
 
+/** Versi default untuk memaksa crawler mengambil metadata lama yang ter-cache. */
+export const DEFAULT_LINK_VERSION = "2";
+
+/**
+ * Cache-buster untuk link blast. Berubah setiap `invitation_meta.updated_at`
+ * berubah, jadi menyimpan OG baru otomatis menghasilkan URL preview baru.
+ */
+export function resolveLinkVersion(
+	updatedAt: string | null | undefined,
+): string {
+	if (!updatedAt) return DEFAULT_LINK_VERSION;
+	const parsed = Date.parse(updatedAt);
+	return Number.isFinite(parsed) ? String(parsed) : DEFAULT_LINK_VERSION;
+}
+
 export interface PreparedLinkMessage {
 	/** Teks yang dikirim ke Wablas; URL dipisah untuk preview. */
 	text: string;

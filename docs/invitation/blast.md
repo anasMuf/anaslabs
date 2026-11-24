@@ -87,6 +87,10 @@ dengan `blast-templates` setelah dua modul pertama selesai.
   `og:image:height`, `og:image:alt`, `twitter:card`, `twitter:image`.
 - Halaman dashboard menyediakan pratinjau kartu OG dan tombol "Salin URL uji".
 - Metadata tidak boleh memuat nomor HP atau data tamu.
+- **Cache preview WhatsApp**: link blast memakai `?v=<invitation_meta.updated_at>`
+  (default `v=2` bila belum ada metadata). Menyimpan OG baru otomatis mengganti
+  versi link; tombol "Segarkan preview WhatsApp" menaikkan `updated_at` manual.
+  Cache WhatsApp sendiri tidak bisa dihapus dari server kita.
 
 ### `blast-templates` — template & pratinjau
 

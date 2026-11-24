@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useToast } from "#/components/invitation/ui/Toast";
 import {
+	bumpOgVersion,
 	createOgUploadUrl,
 	type InvitationMetaView,
 	saveInvitationMeta,
@@ -26,7 +27,9 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 	const [title, setTitle] = useState(meta.title ?? "");
 	const [description, setDescription] = useState(meta.description ?? "");
 	const [imageUrl, setImageUrl] = useState(meta.imageUrl ?? "");
-	const [busy, setBusy] = useState<"text" | "image" | "remove" | null>(null);
+	const [busy, setBusy] = useState<"text" | "image" | "remove" | "bump" | null>(
+		null,
+	);
 
 	async function handleUpload(file: File) {
 		const validation = validateOgUpload({
@@ -112,6 +115,27 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 			});
 		} catch {
 			toast({ message: "Gagal menghapus gambar OG." });
+		} finally {
+			setBusy(null);
+		}
+	}
+
+	async function handleBump() {
+		setBusy("bump");
+		try {
+			const result = await bumpOgVersion();
+			if (!result.ok) {
+				toast({ message: result.error });
+				return;
+			}
+			toast({
+				tone: "success",
+				message:
+					"Versi link diperbarui. Link baru akan memakai ?v=… dan memuat ulang halaman…",
+			});
+			window.location.reload();
+		} catch {
+			toast({ message: "Gagal menyegarkan versi link." });
 		} finally {
 			setBusy(null);
 		}
@@ -207,6 +231,14 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 						className="rounded-full border border-inv-ink/25 px-4 py-2.5 font-body text-[11px] text-inv-ink transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 					>
 						Salin URL uji
+					</button>
+					<button
+						type="button"
+						onClick={() => void handleBump()}
+						disabled={busy !== null}
+						className="rounded-full border border-inv-rule px-4 py-2.5 font-body text-[11px] text-inv-muted transition-colors hover:bg-inv-ink/5 hover:text-inv-ink disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+					>
+						{busy === "bump" ? "Menyegarkan…" : "Segarkan preview WhatsApp"}
 					</button>
 				</div>
 			</form>

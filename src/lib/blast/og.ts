@@ -6,6 +6,12 @@ import {
 	validateOgUpload,
 } from "../invitation-upload";
 import { getSupabaseAdmin } from "../supabase-admin";
+import {
+	type InvitationMeta,
+	isMissingMeta,
+	loadInvitationMeta,
+	META_MIGRATION_HINT,
+} from "./meta-server";
 
 /**
  * Metadata Open Graph global (satu undangan).
@@ -16,14 +22,9 @@ import { getSupabaseAdmin } from "../supabase-admin";
  */
 
 const TABLE = "invitation_meta";
-const MIGRATION_HINT =
-	"Tabel invitation_meta belum ada. Jalankan supabase/migrations/0009_blast.sql di SQL Editor, lalu coba lagi.";
+const MIGRATION_HINT = META_MIGRATION_HINT;
 
-export interface InvitationMetaView {
-	title: string | null;
-	description: string | null;
-	imageUrl: string | null;
-}
+export type InvitationMetaView = InvitationMeta;
 
 export interface InvitationMetaResult {
 	ok: true;
@@ -43,22 +44,12 @@ export interface OgUploadTarget {
 
 export type OgUploadResult = OgUploadTarget | { ok: false; error: string };
 
-const EMPTY_META: InvitationMetaView = {
-	title: null,
-	description: null,
-	imageUrl: null,
-};
-
 function cleanText(value: unknown, max: number): string | null {
 	const text = String(value ?? "")
 		.replace(/\s+/g, " ")
 		.trim()
 		.slice(0, max);
 	return text || null;
-}
-
-function isMissing(error: { code?: string } | null): boolean {
-	return error?.code === "PGRST205" || error?.code === "42P01";
 }
 
 function errorMessage(error: unknown): string {
@@ -71,38 +62,7 @@ async function loadMeta(): Promise<{
 	meta: InvitationMetaView;
 	error: string | null;
 }> {
-	try {
-		const supabase = getSupabaseAdmin();
-		const { data, error } = await supabase
-			.from(TABLE)
-			.select("og_title, og_description, og_image_url")
-			.eq("id", "default")
-			.maybeSingle();
-
-		if (error) {
-			return {
-				meta: EMPTY_META,
-				error: isMissing(error) ? MIGRATION_HINT : error.message,
-			};
-		}
-
-		const row = data as {
-			og_title: string | null;
-			og_description: string | null;
-			og_image_url: string | null;
-		} | null;
-
-		return {
-			meta: {
-				title: row?.og_title ?? null,
-				description: row?.og_description ?? null,
-				imageUrl: row?.og_image_url ?? null,
-			},
-			error: null,
-		};
-	} catch (error) {
-		return { meta: EMPTY_META, error: errorMessage(error) };
-	}
+	return loadInvitationMeta();
 }
 
 export const getInvitationMeta = createServerFn({ method: "GET" }).handler(
@@ -157,7 +117,7 @@ export const saveInvitationMeta = createServerFn({ method: "POST" })
 			if (error) {
 				return {
 					ok: false,
-					error: isMissing(error) ? MIGRATION_HINT : error.message,
+					error: isMissingMeta(error) ? MIGRATION_HINT : error.message,
 				};
 			}
 
@@ -195,7 +155,7 @@ export const saveOgImage = createServerFn({ method: "POST" })
 			if (error) {
 				return {
 					ok: false,
-					error: isMissing(error) ? MIGRATION_HINT : error.message,
+					error: isMissingMeta(error) ? MIGRATION_HINT : error.message,
 				};
 			}
 
@@ -205,6 +165,44 @@ export const saveOgImage = createServerFn({ method: "POST" })
 			return { ok: false, error: errorMessage(error) };
 		}
 	});
+
+/**
+ * Menyegarkan cache preview WhatsApp dengan mengubah `updated_at`. Semua link
+ * blast baru akan memakai `?v=<timestamp>` sehingga crawler mengambil ulang.
+ */
+export const bumpOgVersion = createServerFn({ method: "POST" }).handler(
+	async (): Promise<InvitationMetaMutation> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk ulang.",
+			};
+		}
+
+		try {
+			const supabase = getSupabaseAdmin();
+			const { error } = await supabase
+				.from(TABLE)
+				.upsert(
+					{ id: "default", updated_at: new Date().toISOString() },
+					{ onConflict: "id" },
+				);
+
+			if (error) {
+				return {
+					ok: false,
+					error: isMissingMeta(error) ? MIGRATION_HINT : error.message,
+				};
+			}
+
+			const { meta } = await loadMeta();
+			return { ok: true, meta };
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+	},
+);
 
 export const createOgUploadUrl = createServerFn({ method: "POST" })
 	.inputValidator((data: { mime?: string; size?: number } | undefined) => ({
