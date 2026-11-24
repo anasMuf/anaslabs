@@ -389,6 +389,13 @@ jumlah migrasi tetap kecil.
   - Error map: 429/5xx/jaringan → transien; 400/401/403/404/422 dan pesan
     `token invalid`, `secret key invalid`, `device disconnected`,
     `quota is not enough`, `your package not support` → permanen.
+- Link preview: pesan yang berisi URL dikirim lewat
+  `POST {base_url}/api/v2/send-link` dengan body
+  `{ data: [{ phone, message: { text, link }, ref_id }] }`. `text` = isi pesan
+  tanpa URL. Bila endpoint ini menolak secara permanen (mis. paket tidak
+  mendukung), baris tersebut dikirim ulang sebagai teks biasa lewat
+  `send-message` agar undangan tetap sampai (tanpa kartu preview). Error
+  transien tetap dilempar supaya worker mengulang.
 - Timeout 10 s koneksi / 30 s request (`AbortSignal.timeout`).
 
 ### Kriptografi

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	classifyWablasError,
 	fetchDeviceInfo,
+	firstUrl,
 	normalizeBaseUrl,
 	sendMessages,
 	WablasError,
@@ -144,6 +145,107 @@ describe("fetchDeviceInfo", () => {
 });
 
 describe("sendMessages", () => {
+	it("sends a plain message without a URL through send-message", async () => {
+		const calls: Call[] = [];
+		const fetchImpl = makeFetch(
+			() =>
+				json({
+					status: true,
+					data: { messages: [{ id: "m", ref_id: "r", status: "pending" }] },
+				}),
+			calls,
+		);
+
+		await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[{ phone: "628", message: "Halo", refId: "r" }],
+			fetchImpl,
+		);
+
+		expect(calls[0]?.url).toContain("/api/v2/send-message");
+	});
+
+	it("uses send-link (with preview) when the message contains a URL", async () => {
+		const calls: Call[] = [];
+		const fetchImpl = makeFetch(
+			() =>
+				json({
+					status: true,
+					data: { messages: [{ id: "m", ref_id: "r", status: "pending" }] },
+				}),
+			calls,
+		);
+
+		await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[
+				{
+					phone: "628",
+					message: "Buka undangan: https://anaslabs.my.id/invitation/budi",
+					refId: "r",
+				},
+			],
+			fetchImpl,
+		);
+
+		expect(calls[0]?.url).toContain("/api/v2/send-link");
+		expect(JSON.parse(String(calls[0]?.init.body))).toEqual({
+			data: [
+				{
+					phone: "628",
+					message: {
+						text: "Buka undangan:",
+						link: "https://anaslabs.my.id/invitation/budi",
+					},
+					ref_id: "r",
+				},
+			],
+		});
+	});
+
+	it("falls back to plain text when send-link is rejected", async () => {
+		const calls: Call[] = [];
+		const fetchImpl = makeFetch(
+			(call) =>
+				call.url.includes("send-link")
+					? json({ status: false, message: "your package not support" }, 400)
+					: json({
+							status: true,
+							data: {
+								messages: [{ id: "m", ref_id: "r", status: "pending" }],
+							},
+						}),
+			calls,
+		);
+
+		const results = await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[
+				{
+					phone: "628",
+					message: "Buka https://anaslabs.my.id/invitation/budi",
+					refId: "r",
+				},
+			],
+			fetchImpl,
+		);
+
+		expect(calls.map((call) => call.url)).toEqual([
+			"https://jogja.wablas.com/api/v2/send-link",
+			"https://jogja.wablas.com/api/v2/send-message",
+		]);
+		expect(results).toEqual([
+			{ refId: "r", messageId: "m", status: "pending" },
+		]);
+	});
+
+	it("extracts the first URL without trailing punctuation", () => {
+		expect(firstUrl("Lihat https://contoh.test/a).")).toBe(
+			"https://contoh.test/a",
+		);
+		expect(firstUrl("tanpa tautan")).toBeNull();
+	});
+
 	it("posts the v2 payload with credentials and maps ref_id", async () => {
 		const calls: Call[] = [];
 		const fetchImpl = makeFetch(

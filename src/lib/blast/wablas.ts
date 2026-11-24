@@ -221,6 +221,76 @@ function readNumber(value: unknown): number | null {
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
+const URL_PATTERN = /https?:\/\/[^\s<>"']+/i;
+
+/** URL pertama dalam pesan, tanpa tanda baca penutup. */
+export function firstUrl(message: string): string | null {
+	const match = message.match(URL_PATTERN);
+	if (!match) return null;
+	return match[0].replace(/[.,;:!?)\]]+$/g, "");
+}
+
+function linkText(message: string, link: string): string {
+	return message
+		.split(link)
+		.join("")
+		.replace(/[ \t]+\n/g, "\n")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
+}
+
+function parseSendResults(response: JsonResponse): WablasSendResult[] {
+	const data =
+		response.body.data && typeof response.body.data === "object"
+			? (response.body.data as Record<string, unknown>)
+			: {};
+	const rawMessages = data.messages;
+	const list = Array.isArray(rawMessages)
+		? rawMessages
+		: rawMessages && typeof rawMessages === "object"
+			? [rawMessages]
+			: [];
+
+	const results: WablasSendResult[] = [];
+	for (const item of list) {
+		if (!item || typeof item !== "object") continue;
+		const message = item as Record<string, unknown>;
+		const refId = readString(message.ref_id);
+		if (!refId) continue;
+		results.push({
+			refId,
+			messageId: readString(message.id),
+			status: readString(message.status) ?? "pending",
+		});
+	}
+
+	return results;
+}
+
+async function postBatch(
+	credentials: WablasCredentials,
+	path: string,
+	items: unknown[],
+	fetchImpl: typeof fetch,
+): Promise<WablasSendResult[]> {
+	const baseUrl = normalizeBaseUrl(credentials.baseUrl);
+	const response = await requestJson(
+		`${baseUrl}${path}`,
+		{
+			method: "POST",
+			headers: {
+				Authorization: `${credentials.token}.${credentials.secretKey}`,
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ data: items }),
+		},
+		fetchImpl,
+	);
+	requireSuccess(response, "Wablas menolak permintaan kirim pesan.");
+	return parseSendResults(response);
+}
+
 export async function fetchDeviceInfo(
 	credentials: WablasCredentials,
 	fetchImpl: typeof fetch = fetch,
@@ -267,50 +337,67 @@ export async function sendMessages(
 		);
 	}
 
-	const baseUrl = normalizeBaseUrl(credentials.baseUrl);
-	const response = await requestJson(
-		`${baseUrl}/api/v2/send-message`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `${credentials.token}.${credentials.secretKey}`,
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				data: rows.map((row) => ({
+	const textRows: WablasSendRow[] = [];
+	const linkRows: Array<{ row: WablasSendRow; link: string }> = [];
+	for (const row of rows) {
+		const link = firstUrl(row.message);
+		if (link) linkRows.push({ row, link });
+		else textRows.push(row);
+	}
+
+	const results: WablasSendResult[] = [];
+
+	if (textRows.length) {
+		results.push(
+			...(await postBatch(
+				credentials,
+				"/api/v2/send-message",
+				textRows.map((row) => ({
 					phone: row.phone,
 					message: row.message,
 					ref_id: row.refId,
 				})),
-			}),
-		},
-		fetchImpl,
-	);
-	requireSuccess(response, "Wablas menolak permintaan kirim pesan.");
+				fetchImpl,
+			)),
+		);
+	}
 
-	const data =
-		response.body.data && typeof response.body.data === "object"
-			? (response.body.data as Record<string, unknown>)
-			: {};
-	const rawMessages = data.messages;
-	const list = Array.isArray(rawMessages)
-		? rawMessages
-		: rawMessages && typeof rawMessages === "object"
-			? [rawMessages]
-			: [];
-
-	const results: WablasSendResult[] = [];
-	for (const item of list) {
-		if (!item || typeof item !== "object") continue;
-		const message = item as Record<string, unknown>;
-		const refId = readString(message.ref_id);
-		if (!refId) continue;
-		results.push({
-			refId,
-			messageId: readString(message.id),
-			status: readString(message.status) ?? "pending",
-		});
+	if (linkRows.length) {
+		try {
+			results.push(
+				...(await postBatch(
+					credentials,
+					"/api/v2/send-link",
+					linkRows.map(({ row, link }) => {
+						const text = linkText(row.message, link);
+						return {
+							phone: row.phone,
+							message: text ? { text, link } : { link },
+							ref_id: row.refId,
+						};
+					}),
+					fetchImpl,
+				)),
+			);
+		} catch (error) {
+			// Transien tetap dilempar supaya worker mengulang, bukan mengirim dobel
+			// tanpa preview. Format link yang ditolak dikirim sebagai teks biasa.
+			if (error instanceof WablasError && error.kind === "transient") {
+				throw error;
+			}
+			results.push(
+				...(await postBatch(
+					credentials,
+					"/api/v2/send-message",
+					linkRows.map(({ row }) => ({
+						phone: row.phone,
+						message: row.message,
+						ref_id: row.refId,
+					})),
+					fetchImpl,
+				)),
+			);
+		}
 	}
 
 	return results;
