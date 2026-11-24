@@ -50,19 +50,16 @@ function EventCard({ event }: { event: InvitationEvent }) {
 			</p>
 
 			{event.schedules ? (
-				<dl className="flex flex-col gap-2">
+				<dl className="grid w-fit max-w-full grid-cols-[auto_auto] items-baseline gap-x-3 gap-y-2">
 					{event.schedules.map((schedule) => (
-						<div
-							key={schedule.label}
-							className="flex w-[168px] items-center gap-2"
-						>
-							<dt className="w-[90px] shrink-0 text-left text-[12px] font-body font-semibold text-inv-accent">
+						<Fragment key={schedule.label}>
+							<dt className="whitespace-nowrap text-right text-[12px] font-body font-semibold text-inv-accent">
 								{schedule.label}
 							</dt>
-							<dd className="text-left text-[13px] font-body leading-[1.65] text-inv-muted">
+							<dd className="whitespace-nowrap text-left text-[13px] font-body leading-[1.65] text-inv-muted">
 								{schedule.time}
 							</dd>
-						</div>
+						</Fragment>
 					))}
 				</dl>
 			) : null}
