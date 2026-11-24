@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "#/components/invitation/ui/Toast";
+import { GUEST_SOURCE_LABELS } from "#/lib/guest-import";
 import type { DashboardGuest } from "#/lib/guests";
 import { archiveGuest, updateGuest } from "#/lib/guests";
 
@@ -35,6 +36,7 @@ export default function GuestEditDialog({
 		invited: guest.invited ?? "",
 		delivery: guest.delivery,
 		phone: guest.phone ?? "",
+		blastChannel: guest.blastChannel ?? "",
 	});
 
 	useEffect(() => {
@@ -75,6 +77,7 @@ export default function GuestEditDialog({
 					invited: form.invited,
 					delivery: form.delivery,
 					phone: form.phone,
+					blastChannel: form.blastChannel,
 				},
 			});
 			if (!result.ok) {
@@ -272,20 +275,41 @@ export default function GuestEditDialog({
 								</div>
 							</div>
 
-							<div>
-								<label htmlFor="guest-phone" className={labelClass}>
-									NO HP
-								</label>
-								<input
-									id="guest-phone"
-									type="tel"
-									inputMode="tel"
-									value={form.phone}
-									onChange={(event) => update("phone", event.target.value)}
-									maxLength={20}
-									placeholder="08xx… (untuk blast nanti)"
-									className={fieldClass}
-								/>
+							<div className="grid grid-cols-2 gap-3">
+								<div>
+									<label htmlFor="guest-phone" className={labelClass}>
+										NO HP
+									</label>
+									<input
+										id="guest-phone"
+										type="tel"
+										inputMode="tel"
+										value={form.phone}
+										onChange={(event) => update("phone", event.target.value)}
+										maxLength={20}
+										placeholder="08xx…"
+										className={fieldClass}
+									/>
+								</div>
+								<div>
+									<label htmlFor="guest-blast-channel" className={labelClass}>
+										NOMOR PENGIRIM
+									</label>
+									<select
+										id="guest-blast-channel"
+										value={form.blastChannel}
+										onChange={(event) =>
+											update("blastChannel", event.target.value)
+										}
+										className={fieldClass}
+									>
+										<option value="">
+											Ikut sumber ({GUEST_SOURCE_LABELS[guest.source]})
+										</option>
+										<option value="anas">Anas</option>
+										<option value="mila">Mila</option>
+									</select>
+								</div>
 							</div>
 						</div>
 

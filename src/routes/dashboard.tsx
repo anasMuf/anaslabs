@@ -94,6 +94,12 @@ function DashboardLayout() {
 							Impor Tamu
 						</Link>
 						<Link
+							to="/dashboard/blast"
+							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
+						>
+							Blast WhatsApp
+						</Link>
+						<Link
 							to="/dashboard/wall"
 							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
 						>

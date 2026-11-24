@@ -4,8 +4,11 @@ import {
 	frameObjectPath,
 	MUSIC_MAX_BYTES,
 	musicObjectPath,
+	OG_MAX_BYTES,
+	ogObjectPath,
 	validateFrameUpload,
 	validateMusicUpload,
+	validateOgUpload,
 } from "./invitation-upload";
 
 describe("validateMusicUpload", () => {
@@ -108,5 +111,37 @@ describe("frameObjectPath", () => {
 
 	it("rejects traversal", () => {
 		expect(() => frameObjectPath("../png", "123e4567-e89b")).toThrow();
+	});
+});
+
+describe("validateOgUpload", () => {
+	it("accepts PNG, WebP and JPEG", () => {
+		expect(validateOgUpload({ mime: "image/png", size: 1024 })).toMatchObject({
+			ok: true,
+			ext: "png",
+		});
+		expect(validateOgUpload({ mime: "image/jpeg", size: 1024 })).toMatchObject({
+			ok: true,
+			ext: "jpg",
+		});
+	});
+
+	it("rejects unsupported or oversized files", () => {
+		expect(validateOgUpload({ mime: "image/gif", size: 1024 }).ok).toBe(false);
+		expect(
+			validateOgUpload({ mime: "image/png", size: OG_MAX_BYTES + 1 }).ok,
+		).toBe(false);
+	});
+});
+
+describe("ogObjectPath", () => {
+	it("builds a flat path under og/", () => {
+		expect(ogObjectPath("png", "123e4567-e89b-12d3-a456-426614174000")).toBe(
+			"og/123e4567-e89b-12d3-a456-426614174000.png",
+		);
+	});
+
+	it("rejects traversal", () => {
+		expect(() => ogObjectPath("../png", "123e4567-e89b")).toThrow();
 	});
 });

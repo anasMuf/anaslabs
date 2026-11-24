@@ -88,6 +88,27 @@ function DashboardOverview() {
 				</Link>
 
 				<Link
+					to="/dashboard/blast"
+					className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
+				>
+					<div>
+						<p className="font-display text-[18px] leading-tight">
+							Blast WhatsApp
+						</p>
+						<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
+							Atur dua nomor Wablas, susun pesan, kirim massal, dan pantau
+							status pengiriman.
+						</p>
+					</div>
+					<span
+						aria-hidden="true"
+						className="mt-1 font-body text-[14px] text-inv-muted"
+					>
+						→
+					</span>
+				</Link>
+
+				<Link
 					to="/dashboard/photobooth"
 					className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 				>
@@ -124,15 +145,6 @@ function DashboardOverview() {
 						→
 					</span>
 				</Link>
-			</div>
-
-			<div className="rounded-3xl border border-inv-rule bg-inv-card px-5 py-4">
-				<p className="font-body text-[10px] font-semibold tracking-[0.16em] text-inv-accent">
-					MENYUSUL
-				</p>
-				<ul className="mt-2 flex flex-col gap-1.5 font-body text-[11px] leading-[1.7] text-inv-muted">
-					<li>· Blast WhatsApp lewat Wablas</li>
-				</ul>
 			</div>
 
 			<button

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { parseBlastChannel } from "./blast/attribution";
 import { readDashboardUser } from "./dashboard-session-server";
 import {
 	type ExistingGuest,
@@ -26,6 +27,11 @@ import { getSupabaseAdmin } from "./supabase-admin";
  */
 
 const GUEST_COLUMNS =
+	"id, slug, name, name_key, source_sheet, group_name, address, invited, delivery, phone, blast_channel, sent_at, invitation_opened_at, archived_at";
+
+/** Select sebelum migrasi 0009: dipakai sebagai fallback agar daftar tamu tidak
+ * ikut rusak ketika kolom `blast_channel` belum ada. */
+const GUEST_COLUMNS_LEGACY =
 	"id, slug, name, name_key, source_sheet, group_name, address, invited, delivery, phone, sent_at, invitation_opened_at, archived_at";
 
 const MIGRATION_HINT =
@@ -49,6 +55,8 @@ export interface DashboardGuest {
 	source: GuestSource;
 	delivery: GuestDelivery;
 	phone: string | null;
+	/** Override nomor pengirim; null berarti ikut `source`. */
+	blastChannel: GuestSource | null;
 	sent: boolean;
 	openedAt: string | null;
 	archived: boolean;
@@ -65,6 +73,7 @@ interface GuestRow {
 	invited: string | null;
 	delivery: GuestDelivery;
 	phone: string | null;
+	blast_channel: GuestSource | null;
 	sent_at: string | null;
 	invitation_opened_at: string | null;
 	archived_at: string | null;
@@ -81,6 +90,7 @@ function toDashboardGuest(row: GuestRow): DashboardGuest {
 		source: row.source_sheet,
 		delivery: row.delivery,
 		phone: row.phone,
+		blastChannel: row.blast_channel ?? null,
 		sent: Boolean(row.sent_at),
 		openedAt: row.invitation_opened_at,
 		archived: Boolean(row.archived_at),
@@ -282,59 +292,68 @@ export const listGuestsPage = createServerFn({ method: "GET" })
 		const pattern = `%${term}%`;
 
 		const supabase = getSupabaseAdmin();
-		let request = supabase
-			.from("guests")
-			.select(GUEST_COLUMNS, { count: "exact" })
-			.is("archived_at", null);
 
-		if (data.source) request = request.eq("source_sheet", data.source);
-		if (data.group) request = request.eq("group_name", data.group);
-		if (data.address) request = request.eq("address", data.address);
-		if (data.delivery) request = request.eq("delivery", data.delivery);
+		const runPage = (columns: string) => {
+			let request = supabase
+				.from("guests")
+				.select(columns, { count: "exact" })
+				.is("archived_at", null);
 
-		if (data.sent === "sent") request = request.not("sent_at", "is", null);
-		if (data.sent === "unsent") request = request.is("sent_at", null);
+			if (data.source) request = request.eq("source_sheet", data.source);
+			if (data.group) request = request.eq("group_name", data.group);
+			if (data.address) request = request.eq("address", data.address);
+			if (data.delivery) request = request.eq("delivery", data.delivery);
 
-		// "Dibuka" only exists for digital guests; physical invitations have no
-		// link to open, so they are excluded instead of counting as "belum buka".
-		if (data.opened) {
-			request = request.eq("delivery", "digital");
-			request =
-				data.opened === "opened"
-					? request.not("invitation_opened_at", "is", null)
-					: request.is("invitation_opened_at", null);
-		}
+			if (data.sent === "sent") request = request.not("sent_at", "is", null);
+			if (data.sent === "unsent") request = request.is("sent_at", null);
 
-		if (term) {
-			request = request.or(
-				[
-					`name.ilike.${pattern}`,
-					`group_name.ilike.${pattern}`,
-					`address.ilike.${pattern}`,
-					`invited.ilike.${pattern}`,
-					`slug.ilike.${pattern}`,
-					`phone.ilike.${pattern}`,
-				].join(","),
+			// "Dibuka" hanya ada untuk tamu digital; undangan fisik tidak punya
+			// link untuk dibuka, jadi dikecualikan (bukan dihitung "belum buka").
+			if (data.opened) {
+				request = request.eq("delivery", "digital");
+				request =
+					data.opened === "opened"
+						? request.not("invitation_opened_at", "is", null)
+						: request.is("invitation_opened_at", null);
+			}
+
+			if (term) {
+				request = request.or(
+					[
+						`name.ilike.${pattern}`,
+						`group_name.ilike.${pattern}`,
+						`address.ilike.${pattern}`,
+						`invited.ilike.${pattern}`,
+						`slug.ilike.${pattern}`,
+						`phone.ilike.${pattern}`,
+					].join(","),
+				);
+			}
+
+			return (
+				request
+					// `id` keeps pagination stable when two guests share a sorted name.
+					.order("source_sheet", { ascending: true })
+					.order("name_key", { ascending: true })
+					.order("id", { ascending: true })
+					.range(data.offset, data.offset + data.limit - 1)
 			);
+		};
+
+		let result = await runPage(GUEST_COLUMNS);
+		// 42703 = kolom belum ada (migrasi 0009 belum dijalankan).
+		if (result.error?.code === "42703") {
+			result = await runPage(GUEST_COLUMNS_LEGACY);
 		}
 
-		const {
-			data: rows,
-			count,
-			error,
-		} = await request
-			// `id` keeps pagination stable when two guests share a sorted name.
-			.order("source_sheet", { ascending: true })
-			.order("name_key", { ascending: true })
-			.order("id", { ascending: true })
-			.range(data.offset, data.offset + data.limit - 1);
+		const { data: rows, count, error } = result;
 
 		if (error) {
 			throw new Error(needsMigration(error) ? MIGRATION_HINT : error.message);
 		}
 
 		return {
-			rows: (rows as GuestRow[]).map(toDashboardGuest),
+			rows: ((rows ?? []) as unknown as GuestRow[]).map(toDashboardGuest),
 			total: count ?? 0,
 		};
 	});
@@ -610,6 +629,7 @@ export const updateGuest = createServerFn({ method: "POST" })
 			invited?: string;
 			delivery?: string;
 			phone?: string;
+			blastChannel?: string;
 		}) => ({
 			id: String(data?.id ?? "")
 				.trim()
@@ -623,6 +643,7 @@ export const updateGuest = createServerFn({ method: "POST" })
 			invited: optionalText(data?.invited, 60),
 			delivery: data?.delivery === "fisik" ? "fisik" : "digital",
 			phone: String(data?.phone ?? ""),
+			blastChannel: parseBlastChannel(data?.blastChannel),
 		}),
 	)
 	.handler(async ({ data }): Promise<GuestMutation> => {
@@ -643,6 +664,7 @@ export const updateGuest = createServerFn({ method: "POST" })
 				invited: data.invited,
 				delivery: data.delivery,
 				phone: normalizeGuestPhone(data.phone),
+				blast_channel: data.blastChannel,
 				updated_at: new Date().toISOString(),
 			})
 			.eq("id", data.id)

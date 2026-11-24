@@ -31,13 +31,13 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
 - **Tamu `fisik`** tetap punya baris (untuk status cetak) tetapi link-nya tidak
   dibagikan.
 - **Nomor HP** belum ada di sheet; kolomnya sudah disiapkan (`guests.phone`,
-  dinormalisasi ke `62…`) untuk blast nanti.
+  dinormalisasi ke `62…`) untuk blast (lihat `docs/invitation/blast.md`).
 - **Pelacakan buka undangan**: saat tamu membuka `/invitation/:slug`,
   `guests.invitation_opened_at` diisi sekali (hanya jika masih null).
 - **Wall**: kartu foto/ucapan dikelola dari dashboard (lihat + hapus, termasuk
   file di Storage). Mode `?admin=<token>` lama tetap berfungsi sebagai cadangan.
-- **Blast WhatsApp**: **ditunda** (butuh contoh payload Wablas). Skema `wa_sends`
-  sudah disiapkan agar tidak perlu migrasi ulang.
+- **Blast WhatsApp**: dikerjakan sebagai epik terpisah di
+  `docs/invitation/blast.md` (kanal Wablas, template, antrian, tracking).
 - Semua akses DB lewat server function dengan service key; tidak ada key di
   browser kecuali publishable key khusus Supabase Auth.
 - Dashboard `noindex, nofollow`.
@@ -77,16 +77,15 @@ eksplisit). Task dibuat bertahap sesuai pelajaran dari task sebelumnya.
   tidak konsisten membuat upsert gagal dan blast dobel).
 - ❌ **Mock Supabase di test integrasi** (alasan: kita menguji alur nyata; mock
   hanya untuk fungsi murni).
-- ❌ **Membangun UI blast/konten sekarang** (alasan: blast ditunda, konten fase
-  berikutnya; jangan buat kode mati).
+- ❌ **Membangun fitur di luar epik yang disetujui** (alasan: jangan buat kode
+  mati; blast dikerjakan di `docs/invitation/blast.md`).
 
 ## Scope
 
 **In scope (sekarang):** auth + sesi, impor tamu dari Sheets, daftar/edit/hapus
 tamu, pelacakan buka undangan, tab wall (lihat + hapus), shell dashboard.
 
-**Out of scope:** blast Wablas, editor konten undangan, analitik lanjutan,
-multi-bahasa.
+**Out of scope:** analitik lanjutan, multi-bahasa.
 
 ## Setup manual (di luar kode)
 
@@ -230,4 +229,5 @@ Deliverable: koreksi data dari dashboard tanpa membunuh link yang sudah beredar.
 ## Task berikutnya
 
 - Task 4: tab Wall (lihat + hapus) memakai `listWallCards`/`deleteWallCard`.
-- Nanti: blast Wablas (`wa_sends`), editor konten.
+- Selesai: editor konten, photobooth, blast Wablas (epik terpisah:
+  `docs/invitation/blast.md`).

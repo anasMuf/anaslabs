@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import GuestEditDialog from "#/components/dashboard/GuestEditDialog";
 import CopyButton from "#/components/invitation/ui/CopyButton";
 import { useToast } from "#/components/invitation/ui/Toast";
+import { effectiveBlastChannel } from "#/lib/blast/attribution";
 import { GUEST_PAGE_SIZE, GUEST_SOURCE_LABELS } from "#/lib/guest-import";
 import {
 	type DashboardGuest,
@@ -549,6 +550,9 @@ function DashboardGuests() {
 										<span className="block truncate">{guest.name}</span>
 										<span className="mt-0.5 block font-normal text-[10px] text-inv-muted">
 											{GUEST_SOURCE_LABELS[guest.source]}
+											{guest.blastChannel
+												? ` · WA ${GUEST_SOURCE_LABELS[effectiveBlastChannel(guest)]}`
+												: ""}
 										</span>
 									</th>
 									<td className="max-w-[180px] px-4 py-3 text-[11px] text-inv-muted">

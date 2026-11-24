@@ -23,14 +23,22 @@ import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
 import { Route as DashboardKontenRouteImport } from './routes/dashboard.konten'
 import { Route as DashboardImporRouteImport } from './routes/dashboard.impor'
 import { Route as DashboardFotoboothRouteImport } from './routes/dashboard.fotobooth'
+import { Route as DashboardBlastRouteImport } from './routes/dashboard.blast'
 import { Route as DashboardAuthRouteImport } from './routes/dashboard.auth'
 import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as SiteAboutRouteImport } from './routes/_site.about'
 import { Route as InvitationSlugIndexRouteImport } from './routes/invitation.$slug.index'
+import { Route as DashboardBlastIndexRouteImport } from './routes/dashboard.blast.index'
 import { Route as SiteProjectsIndexRouteImport } from './routes/_site.projects.index'
 import { Route as SiteBlogIndexRouteImport } from './routes/_site.blog.index'
 import { Route as InvitationSlugWallRouteImport } from './routes/invitation.$slug.wall'
 import { Route as InvitationSlugPhotoboothRouteImport } from './routes/invitation.$slug.photobooth'
+import { Route as DashboardBlastTrackingRouteImport } from './routes/dashboard.blast.tracking'
+import { Route as DashboardBlastTemplateRouteImport } from './routes/dashboard.blast.template'
+import { Route as DashboardBlastSetupRouteImport } from './routes/dashboard.blast.setup'
+import { Route as DashboardBlastOgRouteImport } from './routes/dashboard.blast.og'
+import { Route as DashboardBlastKirimRouteImport } from './routes/dashboard.blast.kirim'
+import { Route as ApiBlastWorkerRouteImport } from './routes/api.blast.worker'
 import { Route as SiteProjectsSlugRouteImport } from './routes/_site.projects.$slug'
 import { Route as SiteBlogSlugRouteImport } from './routes/_site.blog.$slug'
 
@@ -103,6 +111,11 @@ const DashboardFotoboothRoute = DashboardFotoboothRouteImport.update({
   path: '/fotobooth',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardBlastRoute = DashboardBlastRouteImport.update({
+  id: '/blast',
+  path: '/blast',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAuthRoute = DashboardAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -122,6 +135,11 @@ const InvitationSlugIndexRoute = InvitationSlugIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => InvitationSlugRoute,
+} as any)
+const DashboardBlastIndexRoute = DashboardBlastIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardBlastRoute,
 } as any)
 const SiteProjectsIndexRoute = SiteProjectsIndexRouteImport.update({
   id: '/projects/',
@@ -144,6 +162,36 @@ const InvitationSlugPhotoboothRoute =
     path: '/photobooth',
     getParentRoute: () => InvitationSlugRoute,
   } as any)
+const DashboardBlastTrackingRoute = DashboardBlastTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
+const DashboardBlastTemplateRoute = DashboardBlastTemplateRouteImport.update({
+  id: '/template',
+  path: '/template',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
+const DashboardBlastSetupRoute = DashboardBlastSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
+const DashboardBlastOgRoute = DashboardBlastOgRouteImport.update({
+  id: '/og',
+  path: '/og',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
+const DashboardBlastKirimRoute = DashboardBlastKirimRouteImport.update({
+  id: '/kirim',
+  path: '/kirim',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
+const ApiBlastWorkerRoute = ApiBlastWorkerRouteImport.update({
+  id: '/api/blast/worker',
+  path: '/api/blast/worker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteProjectsSlugRoute = SiteProjectsSlugRouteImport.update({
   id: '/projects/$slug',
   path: '/projects/$slug',
@@ -163,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/blast': typeof DashboardBlastRouteWithChildren
   '/dashboard/fotobooth': typeof DashboardFotoboothRoute
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
@@ -174,10 +223,17 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
+  '/api/blast/worker': typeof ApiBlastWorkerRoute
+  '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
+  '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
+  '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
+  '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
   '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/blog/': typeof SiteBlogIndexRoute
   '/projects/': typeof SiteProjectsIndexRoute
+  '/dashboard/blast/': typeof DashboardBlastIndexRoute
   '/invitation/$slug/': typeof InvitationSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -197,10 +253,17 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardIndexRoute
   '/blog/$slug': typeof SiteBlogSlugRoute
   '/projects/$slug': typeof SiteProjectsSlugRoute
+  '/api/blast/worker': typeof ApiBlastWorkerRoute
+  '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
+  '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
+  '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
+  '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
   '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/blog': typeof SiteBlogIndexRoute
   '/projects': typeof SiteProjectsIndexRoute
+  '/dashboard/blast': typeof DashboardBlastIndexRoute
   '/invitation/$slug': typeof InvitationSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -212,6 +275,7 @@ export interface FileRoutesById {
   '/_site/about': typeof SiteAboutRoute
   '/api/health': typeof ApiHealthRoute
   '/dashboard/auth': typeof DashboardAuthRoute
+  '/dashboard/blast': typeof DashboardBlastRouteWithChildren
   '/dashboard/fotobooth': typeof DashboardFotoboothRoute
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
@@ -224,10 +288,17 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/_site/blog/$slug': typeof SiteBlogSlugRoute
   '/_site/projects/$slug': typeof SiteProjectsSlugRoute
+  '/api/blast/worker': typeof ApiBlastWorkerRoute
+  '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
+  '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
+  '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
+  '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
   '/invitation/$slug/photobooth': typeof InvitationSlugPhotoboothRoute
   '/invitation/$slug/wall': typeof InvitationSlugWallRoute
   '/_site/blog/': typeof SiteBlogIndexRoute
   '/_site/projects/': typeof SiteProjectsIndexRoute
+  '/dashboard/blast/': typeof DashboardBlastIndexRoute
   '/invitation/$slug/': typeof InvitationSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -240,6 +311,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/blast'
     | '/dashboard/fotobooth'
     | '/dashboard/impor'
     | '/dashboard/konten'
@@ -251,10 +323,17 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/blog/$slug'
     | '/projects/$slug'
+    | '/api/blast/worker'
+    | '/dashboard/blast/kirim'
+    | '/dashboard/blast/og'
+    | '/dashboard/blast/setup'
+    | '/dashboard/blast/template'
+    | '/dashboard/blast/tracking'
     | '/invitation/$slug/photobooth'
     | '/invitation/$slug/wall'
     | '/blog/'
     | '/projects/'
+    | '/dashboard/blast/'
     | '/invitation/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -274,10 +353,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/blog/$slug'
     | '/projects/$slug'
+    | '/api/blast/worker'
+    | '/dashboard/blast/kirim'
+    | '/dashboard/blast/og'
+    | '/dashboard/blast/setup'
+    | '/dashboard/blast/template'
+    | '/dashboard/blast/tracking'
     | '/invitation/$slug/photobooth'
     | '/invitation/$slug/wall'
     | '/blog'
     | '/projects'
+    | '/dashboard/blast'
     | '/invitation/$slug'
   id:
     | '__root__'
@@ -288,6 +374,7 @@ export interface FileRouteTypes {
     | '/_site/about'
     | '/api/health'
     | '/dashboard/auth'
+    | '/dashboard/blast'
     | '/dashboard/fotobooth'
     | '/dashboard/impor'
     | '/dashboard/konten'
@@ -300,10 +387,17 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/_site/blog/$slug'
     | '/_site/projects/$slug'
+    | '/api/blast/worker'
+    | '/dashboard/blast/kirim'
+    | '/dashboard/blast/og'
+    | '/dashboard/blast/setup'
+    | '/dashboard/blast/template'
+    | '/dashboard/blast/tracking'
     | '/invitation/$slug/photobooth'
     | '/invitation/$slug/wall'
     | '/_site/blog/'
     | '/_site/projects/'
+    | '/dashboard/blast/'
     | '/invitation/$slug/'
   fileRoutesById: FileRoutesById
 }
@@ -314,6 +408,7 @@ export interface RootRouteChildren {
   UndanganPreviewRoute: typeof UndanganPreviewRoute
   ApiHealthRoute: typeof ApiHealthRoute
   InvitationSlugRoute: typeof InvitationSlugRouteWithChildren
+  ApiBlastWorkerRoute: typeof ApiBlastWorkerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFotoboothRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/blast': {
+      id: '/dashboard/blast'
+      path: '/blast'
+      fullPath: '/dashboard/blast'
+      preLoaderRoute: typeof DashboardBlastRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/auth': {
       id: '/dashboard/auth'
       path: '/auth'
@@ -444,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationSlugIndexRouteImport
       parentRoute: typeof InvitationSlugRoute
     }
+    '/dashboard/blast/': {
+      id: '/dashboard/blast/'
+      path: '/'
+      fullPath: '/dashboard/blast/'
+      preLoaderRoute: typeof DashboardBlastIndexRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
     '/_site/projects/': {
       id: '/_site/projects/'
       path: '/projects'
@@ -471,6 +580,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/invitation/$slug/photobooth'
       preLoaderRoute: typeof InvitationSlugPhotoboothRouteImport
       parentRoute: typeof InvitationSlugRoute
+    }
+    '/dashboard/blast/tracking': {
+      id: '/dashboard/blast/tracking'
+      path: '/tracking'
+      fullPath: '/dashboard/blast/tracking'
+      preLoaderRoute: typeof DashboardBlastTrackingRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
+    '/dashboard/blast/template': {
+      id: '/dashboard/blast/template'
+      path: '/template'
+      fullPath: '/dashboard/blast/template'
+      preLoaderRoute: typeof DashboardBlastTemplateRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
+    '/dashboard/blast/setup': {
+      id: '/dashboard/blast/setup'
+      path: '/setup'
+      fullPath: '/dashboard/blast/setup'
+      preLoaderRoute: typeof DashboardBlastSetupRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
+    '/dashboard/blast/og': {
+      id: '/dashboard/blast/og'
+      path: '/og'
+      fullPath: '/dashboard/blast/og'
+      preLoaderRoute: typeof DashboardBlastOgRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
+    '/dashboard/blast/kirim': {
+      id: '/dashboard/blast/kirim'
+      path: '/kirim'
+      fullPath: '/dashboard/blast/kirim'
+      preLoaderRoute: typeof DashboardBlastKirimRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
+    '/api/blast/worker': {
+      id: '/api/blast/worker'
+      path: '/api/blast/worker'
+      fullPath: '/api/blast/worker'
+      preLoaderRoute: typeof ApiBlastWorkerRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_site/projects/$slug': {
       id: '/_site/projects/$slug'
@@ -509,8 +660,31 @@ const SiteRouteChildren: SiteRouteChildren = {
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
+interface DashboardBlastRouteChildren {
+  DashboardBlastKirimRoute: typeof DashboardBlastKirimRoute
+  DashboardBlastOgRoute: typeof DashboardBlastOgRoute
+  DashboardBlastSetupRoute: typeof DashboardBlastSetupRoute
+  DashboardBlastTemplateRoute: typeof DashboardBlastTemplateRoute
+  DashboardBlastTrackingRoute: typeof DashboardBlastTrackingRoute
+  DashboardBlastIndexRoute: typeof DashboardBlastIndexRoute
+}
+
+const DashboardBlastRouteChildren: DashboardBlastRouteChildren = {
+  DashboardBlastKirimRoute: DashboardBlastKirimRoute,
+  DashboardBlastOgRoute: DashboardBlastOgRoute,
+  DashboardBlastSetupRoute: DashboardBlastSetupRoute,
+  DashboardBlastTemplateRoute: DashboardBlastTemplateRoute,
+  DashboardBlastTrackingRoute: DashboardBlastTrackingRoute,
+  DashboardBlastIndexRoute: DashboardBlastIndexRoute,
+}
+
+const DashboardBlastRouteWithChildren = DashboardBlastRoute._addFileChildren(
+  DashboardBlastRouteChildren,
+)
+
 interface DashboardRouteChildren {
   DashboardAuthRoute: typeof DashboardAuthRoute
+  DashboardBlastRoute: typeof DashboardBlastRouteWithChildren
   DashboardFotoboothRoute: typeof DashboardFotoboothRoute
   DashboardImporRoute: typeof DashboardImporRoute
   DashboardKontenRoute: typeof DashboardKontenRoute
@@ -523,6 +697,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAuthRoute: DashboardAuthRoute,
+  DashboardBlastRoute: DashboardBlastRouteWithChildren,
   DashboardFotoboothRoute: DashboardFotoboothRoute,
   DashboardImporRoute: DashboardImporRoute,
   DashboardKontenRoute: DashboardKontenRoute,
@@ -560,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   UndanganPreviewRoute: UndanganPreviewRoute,
   ApiHealthRoute: ApiHealthRoute,
   InvitationSlugRoute: InvitationSlugRouteWithChildren,
+  ApiBlastWorkerRoute: ApiBlastWorkerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

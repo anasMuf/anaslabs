@@ -21,6 +21,7 @@ export const Route = createFileRoute("/api/health")({
 						supabaseSecret: Boolean(process.env.SUPABASE_SECRET_KEY),
 						supabasePublishable: Boolean(process.env.SUPABASE_PUBLISHABLE_KEY),
 						sessionSecret: Boolean(process.env.DASHBOARD_SESSION_SECRET),
+						blastWorker: Boolean(process.env.BLAST_WORKER_TOKEN),
 					},
 				};
 

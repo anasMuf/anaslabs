@@ -12,3 +12,20 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+
+  # Memicu worker antrian blast tiap 30 detik. Endpoint butuh token; container
+  # ini tidak mengekspos port apa pun.
+  worker:
+    image: curlimages/curl:8.10.1
+    container_name: anaslabs-worker
+    restart: unless-stopped
+    depends_on:
+      - app
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          curl -fsS -X POST -H "Authorization: Bearer $$BLAST_WORKER_TOKEN" http://app:3000/api/blast/worker > /dev/null || true
+          sleep 30
+        done

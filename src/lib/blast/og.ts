@@ -1,0 +1,255 @@
+import { createServerFn } from "@tanstack/react-start";
+import { readDashboardUser } from "../dashboard-session-server";
+import {
+	MUSIC_BUCKET,
+	ogObjectPath,
+	validateOgUpload,
+} from "../invitation-upload";
+import { getSupabaseAdmin } from "../supabase-admin";
+
+/**
+ * Metadata Open Graph global (satu undangan).
+ *
+ * Pembacaan bersifat publik karena dipakai `head()` halaman undangan. Bila
+ * migrasi belum dijalankan, pembacaan mengembalikan `null` (fallback default),
+ * bukan error, supaya halaman tamu tidak ikut rusak.
+ */
+
+const TABLE = "invitation_meta";
+const MIGRATION_HINT =
+	"Tabel invitation_meta belum ada. Jalankan supabase/migrations/0009_blast.sql di SQL Editor, lalu coba lagi.";
+
+export interface InvitationMetaView {
+	title: string | null;
+	description: string | null;
+	imageUrl: string | null;
+}
+
+export interface InvitationMetaResult {
+	ok: true;
+	meta: InvitationMetaView;
+}
+
+export type InvitationMetaMutation =
+	| InvitationMetaResult
+	| { ok: false; error: string };
+
+export interface OgUploadTarget {
+	ok: true;
+	path: string;
+	token: string;
+	publicUrl: string;
+}
+
+export type OgUploadResult = OgUploadTarget | { ok: false; error: string };
+
+const EMPTY_META: InvitationMetaView = {
+	title: null,
+	description: null,
+	imageUrl: null,
+};
+
+function cleanText(value: unknown, max: number): string | null {
+	const text = String(value ?? "")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, max);
+	return text || null;
+}
+
+function isMissing(error: { code?: string } | null): boolean {
+	return error?.code === "PGRST205" || error?.code === "42P01";
+}
+
+function errorMessage(error: unknown): string {
+	return error instanceof Error && error.message
+		? error.message
+		: "Terjadi kesalahan yang tidak diketahui.";
+}
+
+async function loadMeta(): Promise<{
+	meta: InvitationMetaView;
+	error: string | null;
+}> {
+	try {
+		const supabase = getSupabaseAdmin();
+		const { data, error } = await supabase
+			.from(TABLE)
+			.select("og_title, og_description, og_image_url")
+			.eq("id", "default")
+			.maybeSingle();
+
+		if (error) {
+			return {
+				meta: EMPTY_META,
+				error: isMissing(error) ? MIGRATION_HINT : error.message,
+			};
+		}
+
+		const row = data as {
+			og_title: string | null;
+			og_description: string | null;
+			og_image_url: string | null;
+		} | null;
+
+		return {
+			meta: {
+				title: row?.og_title ?? null,
+				description: row?.og_description ?? null,
+				imageUrl: row?.og_image_url ?? null,
+			},
+			error: null,
+		};
+	} catch (error) {
+		return { meta: EMPTY_META, error: errorMessage(error) };
+	}
+}
+
+export const getInvitationMeta = createServerFn({ method: "GET" }).handler(
+	async (): Promise<InvitationMetaView> => {
+		const { meta } = await loadMeta();
+		return meta;
+	},
+);
+
+export const getInvitationMetaForDashboard = createServerFn({
+	method: "GET",
+}).handler(async (): Promise<InvitationMetaMutation> => {
+	const user = await readDashboardUser();
+	if (!user) {
+		return {
+			ok: false,
+			error: "Sesi dashboard tidak valid. Silakan masuk ulang.",
+		};
+	}
+
+	const { meta, error } = await loadMeta();
+	if (error) return { ok: false, error };
+	return { ok: true, meta };
+});
+
+export const saveInvitationMeta = createServerFn({ method: "POST" })
+	.inputValidator((data: { title?: string; description?: string }) => ({
+		title: cleanText(data?.title, 120),
+		description: cleanText(data?.description, 300),
+	}))
+	.handler(async ({ data }): Promise<InvitationMetaMutation> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk ulang.",
+			};
+		}
+
+		try {
+			const supabase = getSupabaseAdmin();
+			const { error } = await supabase.from(TABLE).upsert(
+				{
+					id: "default",
+					og_title: data.title,
+					og_description: data.description,
+					updated_at: new Date().toISOString(),
+				},
+				{ onConflict: "id" },
+			);
+
+			if (error) {
+				return {
+					ok: false,
+					error: isMissing(error) ? MIGRATION_HINT : error.message,
+				};
+			}
+
+			const { meta } = await loadMeta();
+			return { ok: true, meta };
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+	});
+
+export const saveOgImage = createServerFn({ method: "POST" })
+	.inputValidator((data: { imageUrl?: string | null }) => ({
+		imageUrl: data?.imageUrl ? String(data.imageUrl).slice(0, 500) : null,
+	}))
+	.handler(async ({ data }): Promise<InvitationMetaMutation> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk ulang.",
+			};
+		}
+
+		try {
+			const supabase = getSupabaseAdmin();
+			const { error } = await supabase.from(TABLE).upsert(
+				{
+					id: "default",
+					og_image_url: data.imageUrl,
+					updated_at: new Date().toISOString(),
+				},
+				{ onConflict: "id" },
+			);
+
+			if (error) {
+				return {
+					ok: false,
+					error: isMissing(error) ? MIGRATION_HINT : error.message,
+				};
+			}
+
+			const { meta } = await loadMeta();
+			return { ok: true, meta };
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+	});
+
+export const createOgUploadUrl = createServerFn({ method: "POST" })
+	.inputValidator((data: { mime?: string; size?: number } | undefined) => ({
+		mime: String(data?.mime ?? ""),
+		size: Number(data?.size ?? 0),
+	}))
+	.handler(async ({ data }): Promise<OgUploadResult> => {
+		const user = await readDashboardUser();
+		if (!user) {
+			return {
+				ok: false,
+				error: "Sesi dashboard tidak valid. Silakan masuk ulang.",
+			};
+		}
+
+		const validation = validateOgUpload({ mime: data.mime, size: data.size });
+		if (!validation.ok) return validation;
+
+		try {
+			const supabase = getSupabaseAdmin();
+			const path = ogObjectPath(validation.ext, crypto.randomUUID());
+			const { data: signed, error } = await supabase.storage
+				.from(MUSIC_BUCKET)
+				.createSignedUploadUrl(path);
+
+			if (error) {
+				return {
+					ok: false,
+					error: /bucket|does not exist/i.test(error.message)
+						? "Bucket invitation-media belum ada. Jalankan supabase/migrations/0006_invitation_media.sql."
+						: error.message,
+				};
+			}
+
+			const { data: urlData } = supabase.storage
+				.from(MUSIC_BUCKET)
+				.getPublicUrl(path);
+
+			return {
+				ok: true,
+				path: signed.path,
+				token: signed.token,
+				publicUrl: urlData.publicUrl,
+			};
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+	});

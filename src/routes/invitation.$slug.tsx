@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { InvitationContentProvider } from "#/components/invitation/InvitationContentProvider";
 import { ToastProvider } from "#/components/invitation/ui/Toast";
+import { getInvitationMeta } from "#/lib/blast/og";
 import { getGuest } from "#/lib/guest";
 import { getInvitationContent } from "#/lib/invitation-content";
 import { defaultContent } from "#/lib/invitation-content-default";
@@ -14,12 +15,13 @@ import { SITE_URL } from "#/lib/site";
 
 export const Route = createFileRoute("/invitation/$slug")({
 	loader: async ({ params }) => {
-		const [guest, content] = await Promise.all([
+		const [guest, content, meta] = await Promise.all([
 			getGuest({ data: params.slug }),
 			getInvitationContent(),
+			getInvitationMeta(),
 		]);
 		if (!guest) throw notFound();
-		return { guest, content };
+		return { guest, content, meta };
 	},
 	head: ({ loaderData }) => {
 		const view = getInvitationView(
@@ -27,9 +29,13 @@ export const Route = createFileRoute("/invitation/$slug")({
 			loaderData?.content ?? defaultContent,
 		);
 		const names = `${view.firstNames} & ${view.secondNames}`;
-		const title = `${names} — Undangan Pernikahan`;
-		const description = `Undangan pernikahan ${view.fullNamePair}, ${view.coverDateLabel}.`;
-		const ogImage = `${SITE_URL}/invitation/og.jpg`;
+		const defaultTitle = `${names} — Undangan Pernikahan`;
+		const defaultDescription = `Undangan pernikahan ${view.fullNamePair}, ${view.coverDateLabel}.`;
+		const title = loaderData?.meta?.title?.trim() || defaultTitle;
+		const description =
+			loaderData?.meta?.description?.trim() || defaultDescription;
+		const ogImage =
+			loaderData?.meta?.imageUrl?.trim() || `${SITE_URL}/invitation/og.jpg`;
 
 		return {
 			meta: [
