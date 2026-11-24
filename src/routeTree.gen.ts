@@ -36,6 +36,7 @@ import { Route as InvitationSlugPhotoboothRouteImport } from './routes/invitatio
 import { Route as DashboardBlastTrackingRouteImport } from './routes/dashboard.blast.tracking'
 import { Route as DashboardBlastTemplateRouteImport } from './routes/dashboard.blast.template'
 import { Route as DashboardBlastSetupRouteImport } from './routes/dashboard.blast.setup'
+import { Route as DashboardBlastResetRouteImport } from './routes/dashboard.blast.reset'
 import { Route as DashboardBlastOgRouteImport } from './routes/dashboard.blast.og'
 import { Route as DashboardBlastKirimRouteImport } from './routes/dashboard.blast.kirim'
 import { Route as ApiBlastWorkerRouteImport } from './routes/api.blast.worker'
@@ -177,6 +178,11 @@ const DashboardBlastSetupRoute = DashboardBlastSetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => DashboardBlastRoute,
 } as any)
+const DashboardBlastResetRoute = DashboardBlastResetRouteImport.update({
+  id: '/reset',
+  path: '/reset',
+  getParentRoute: () => DashboardBlastRoute,
+} as any)
 const DashboardBlastOgRoute = DashboardBlastOgRouteImport.update({
   id: '/og',
   path: '/og',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/api/blast/worker': typeof ApiBlastWorkerRoute
   '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
   '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/reset': typeof DashboardBlastResetRoute
   '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
   '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
   '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/api/blast/worker': typeof ApiBlastWorkerRoute
   '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
   '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/reset': typeof DashboardBlastResetRoute
   '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
   '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
   '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/api/blast/worker': typeof ApiBlastWorkerRoute
   '/dashboard/blast/kirim': typeof DashboardBlastKirimRoute
   '/dashboard/blast/og': typeof DashboardBlastOgRoute
+  '/dashboard/blast/reset': typeof DashboardBlastResetRoute
   '/dashboard/blast/setup': typeof DashboardBlastSetupRoute
   '/dashboard/blast/template': typeof DashboardBlastTemplateRoute
   '/dashboard/blast/tracking': typeof DashboardBlastTrackingRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/api/blast/worker'
     | '/dashboard/blast/kirim'
     | '/dashboard/blast/og'
+    | '/dashboard/blast/reset'
     | '/dashboard/blast/setup'
     | '/dashboard/blast/template'
     | '/dashboard/blast/tracking'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/api/blast/worker'
     | '/dashboard/blast/kirim'
     | '/dashboard/blast/og'
+    | '/dashboard/blast/reset'
     | '/dashboard/blast/setup'
     | '/dashboard/blast/template'
     | '/dashboard/blast/tracking'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/api/blast/worker'
     | '/dashboard/blast/kirim'
     | '/dashboard/blast/og'
+    | '/dashboard/blast/reset'
     | '/dashboard/blast/setup'
     | '/dashboard/blast/template'
     | '/dashboard/blast/tracking'
@@ -602,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBlastSetupRouteImport
       parentRoute: typeof DashboardBlastRoute
     }
+    '/dashboard/blast/reset': {
+      id: '/dashboard/blast/reset'
+      path: '/reset'
+      fullPath: '/dashboard/blast/reset'
+      preLoaderRoute: typeof DashboardBlastResetRouteImport
+      parentRoute: typeof DashboardBlastRoute
+    }
     '/dashboard/blast/og': {
       id: '/dashboard/blast/og'
       path: '/og'
@@ -663,6 +682,7 @@ const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 interface DashboardBlastRouteChildren {
   DashboardBlastKirimRoute: typeof DashboardBlastKirimRoute
   DashboardBlastOgRoute: typeof DashboardBlastOgRoute
+  DashboardBlastResetRoute: typeof DashboardBlastResetRoute
   DashboardBlastSetupRoute: typeof DashboardBlastSetupRoute
   DashboardBlastTemplateRoute: typeof DashboardBlastTemplateRoute
   DashboardBlastTrackingRoute: typeof DashboardBlastTrackingRoute
@@ -672,6 +692,7 @@ interface DashboardBlastRouteChildren {
 const DashboardBlastRouteChildren: DashboardBlastRouteChildren = {
   DashboardBlastKirimRoute: DashboardBlastKirimRoute,
   DashboardBlastOgRoute: DashboardBlastOgRoute,
+  DashboardBlastResetRoute: DashboardBlastResetRoute,
   DashboardBlastSetupRoute: DashboardBlastSetupRoute,
   DashboardBlastTemplateRoute: DashboardBlastTemplateRoute,
   DashboardBlastTrackingRoute: DashboardBlastTrackingRoute,

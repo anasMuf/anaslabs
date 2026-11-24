@@ -54,6 +54,12 @@ function BlastLayout() {
 				>
 					Tracking
 				</Link>
+				<Link
+					to="/dashboard/blast/reset"
+					className="rounded-full border border-inv-rule px-3.5 py-1.5 text-inv-muted transition-colors hover:bg-inv-ink/5 data-[status=active]:border-inv-accent data-[status=active]:bg-inv-accent data-[status=active]:font-semibold data-[status=active]:text-inv-bg"
+				>
+					Reset
+				</Link>
 			</nav>
 
 			<Outlet />
