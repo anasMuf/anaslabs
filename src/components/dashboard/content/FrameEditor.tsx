@@ -49,6 +49,8 @@ interface FrameEditorProps {
 	photobooth: Photobooth;
 	grid: PhotoboothGrid;
 	onChange: (next: Photobooth) => void;
+	/** Called after a committed change so the page can autosave. */
+	onPersist?: () => void;
 }
 
 /**
@@ -62,10 +64,14 @@ export default function FrameEditor({
 	photobooth,
 	grid,
 	onChange,
+	onPersist,
 }: FrameEditorProps) {
 	const stageRef = useRef<HTMLDivElement | null>(null);
 	const dragRef = useRef<DragState | null>(null);
 	const latestRef = useRef(photobooth);
+	// Keep the callback fresh without re-creating the history helpers.
+	const onPersistRef = useRef(onPersist);
+	onPersistRef.current = onPersist;
 	const historyRef = useRef<Photobooth[]>([structuredClone(photobooth)]);
 	const indexRef = useRef(0);
 	const [canUndo, setCanUndo] = useState(false);
@@ -116,6 +122,7 @@ export default function FrameEditor({
 		historyRef.current = next;
 		indexRef.current = next.length - 1;
 		syncButtons();
+		onPersistRef.current?.();
 	}
 
 	function apply(value: Photobooth, commitChange = false) {
@@ -142,6 +149,7 @@ export default function FrameEditor({
 		latestRef.current = value;
 		onChange(value);
 		syncButtons();
+		onPersistRef.current?.();
 	}
 
 	function redo() {
@@ -151,6 +159,7 @@ export default function FrameEditor({
 		latestRef.current = value;
 		onChange(value);
 		syncButtons();
+		onPersistRef.current?.();
 	}
 
 	function resetLayout() {

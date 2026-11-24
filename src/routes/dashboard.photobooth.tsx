@@ -1,6 +1,6 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: photobooth slots are ordered and have no id; the list is read-only.
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ContentActionBar from "#/components/dashboard/content/ContentActionBar";
 import EditorPreviewTabs, {
 	type EditorTab,
@@ -92,6 +92,33 @@ function PhotoboothScreen({
 	});
 	const [grid, setGrid] = useState<PhotoboothGrid>(1);
 	const [tab, setTab] = useState<EditorTab>("editor");
+	const [persistTick, setPersistTick] = useState(0);
+
+	// Refs keep the debounced autosave on the latest render's closures.
+	const saveRef = useRef(save);
+	saveRef.current = save;
+	const dirtyRef = useRef(dirty);
+	dirtyRef.current = dirty;
+	const savingRef = useRef(saving);
+	savingRef.current = saving;
+
+	// Uploads land in Storage right away, but the URL and its position only live
+	// in the draft until the document is saved. Persist committed frame edits so
+	// refreshing the page keeps the image and where it was placed.
+	useEffect(() => {
+		if (!persistTick) return;
+
+		const timer = window.setTimeout(() => {
+			if (savingRef.current) {
+				setPersistTick((tick) => tick + 1);
+				return;
+			}
+			if (!dirtyRef.current) return;
+			void saveRef.current({ silent: true });
+		}, 800);
+
+		return () => window.clearTimeout(timer);
+	}, [persistTick]);
 
 	function updatePhotobooth(patch: Partial<InvitationContent["photobooth"]>) {
 		update({ ...content, photobooth: { ...content.photobooth, ...patch } });
@@ -248,6 +275,7 @@ function PhotoboothScreen({
 							photobooth={content.photobooth}
 							grid={grid}
 							onChange={(next) => update({ ...content, photobooth: next })}
+							onPersist={() => setPersistTick((tick) => tick + 1)}
 						/>
 					</SectionCard>
 				</div>

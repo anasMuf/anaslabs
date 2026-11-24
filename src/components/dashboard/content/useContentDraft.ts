@@ -17,7 +17,8 @@ export interface ContentDraftInitial {
 export interface ContentDraft {
 	content: InvitationContent;
 	update: (next: InvitationContent) => void;
-	save: () => Promise<void>;
+	/** `silent` skips the success toast, used by the photobooth autosave. */
+	save: (options?: { silent?: boolean }) => Promise<void>;
 	resetAll: () => Promise<void>;
 	dirty: boolean;
 	saving: boolean;
@@ -62,7 +63,7 @@ export function useContentDraft(initial: ContentDraftInitial): ContentDraft {
 		setErrorText(null);
 	}
 
-	async function save() {
+	async function save(options: { silent?: boolean } = {}) {
 		setSaving(true);
 		setErrorText(null);
 
@@ -80,10 +81,12 @@ export function useContentDraft(initial: ContentDraftInitial): ContentDraft {
 			setBaseUpdatedAt(result.updatedAt);
 			setUpdatedBy(null);
 			setDirty(false);
-			toast({
-				tone: "success",
-				message: "Konten disimpan dan langsung tayang di undangan.",
-			});
+			if (!options.silent) {
+				toast({
+					tone: "success",
+					message: "Konten disimpan dan langsung tayang di undangan.",
+				});
+			}
 		} catch {
 			const message = "Gagal menyimpan. Periksa koneksi lalu coba lagi.";
 			setErrorText(message);

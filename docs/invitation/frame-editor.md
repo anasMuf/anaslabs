@@ -118,6 +118,9 @@ tanpa keputusan eksplisit.
       saat elemen dipilih; pilihan bisa dilepas lewat tombol “Batalkan pilihan”
       atau Esc (perlu karena background bisa menutupi seluruh kartu).
 - [x] Undo/redo + reset layout.
+- [x] Perubahan frame yang sudah commit (upload, drag/resize, undo/redo, field
+      angka) disimpan otomatis dengan debounce 800 ms, jadi refresh memuat
+      gambar dan posisinya seperti terakhir diatur.
 
 ### 6C — Verifikasi
 

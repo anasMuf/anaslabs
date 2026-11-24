@@ -87,7 +87,9 @@ Asumsi yang disetujui secara default:
 - Fase A (`/dashboard/photobooth`): edit copy kartu (`eyebrow`, `names`, `date`),
   `textColor` (satu warna untuk ketiga baris; default hitam), `downloadName`,
   `scale`; preview canvas memakai `drawComposition` dengan foto placeholder.
-  Geometri layout ditampilkan read-only.
+  Geometri layout ditampilkan read-only. Upload frame/background dan perubahan
+  posisi yang sudah selesai (drag, resize, undo) disimpan otomatis setelah jeda
+  singkat agar refresh tidak kehilangan gambar.
 - Fase B (4C): editor frame bebas — drag/resize slot, tambah/hapus slot per
   layout (1/2/4), geser teks, atur background/radius, unggah overlay PNG
   opsional; perubahan tersimpan ke dokumen konten yang sama. Fase B punya spec
