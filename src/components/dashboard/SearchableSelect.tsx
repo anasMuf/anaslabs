@@ -82,6 +82,7 @@ export function SearchableSelect({
 		const onDocumentClick = (event: MouseEvent) => {
 			if (!containerRef.current?.contains(event.target as Node)) {
 				setOpen(false);
+				setTerm("");
 			}
 		};
 		document.addEventListener("mousedown", onDocumentClick);
@@ -98,10 +99,14 @@ export function SearchableSelect({
 		return () => clearTimeout(timer);
 	}, [open, needle]);
 
-	function choose(option: SearchableOption) {
-		onChange(option.value);
+	function close() {
 		setOpen(false);
 		setTerm("");
+	}
+
+	function choose(option: SearchableOption) {
+		onChange(option.value);
+		close();
 	}
 
 	function handleKeyDown(event: React.KeyboardEvent) {
@@ -129,7 +134,7 @@ export function SearchableSelect({
 			return;
 		}
 		if (event.key === "Escape") {
-			setOpen(false);
+			close();
 		}
 	}
 
@@ -172,8 +177,12 @@ export function SearchableSelect({
 					aria-expanded={open}
 					aria-controls={listId}
 					onClick={() => {
+						if (open) {
+							close();
+							return;
+						}
 						setActive(0);
-						setOpen((current) => !current);
+						setOpen(true);
 					}}
 					onKeyDown={handleKeyDown}
 					className={triggerClass}

@@ -7,15 +7,21 @@ export const Route = createFileRoute("/dashboard/blast/template")({
 	loader: async () => {
 		const [templates, page] = await Promise.all([
 			listBlastTemplates(),
-			listGuestsPage({ data: { limit: 12, offset: 0 } }),
+			listGuestsPage({
+				data: { limit: 30, offset: 0, delivery: "digital", source: "anas" },
+			}),
 		]);
-		return { templates: templates.templates, guests: page.rows };
+		return {
+			templates: templates.templates,
+			guests: page.rows,
+			guestTotal: page.total,
+		};
 	},
 	component: BlastTemplatePage,
 });
 
 function BlastTemplatePage() {
-	const { templates, guests } = Route.useLoaderData();
+	const { templates, guests, guestTotal } = Route.useLoaderData();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -23,7 +29,11 @@ function BlastTemplatePage() {
 				Satu template per nomor pengirim. Variabel diisi otomatis untuk setiap
 				tamu; pratinjau memakai tamu contoh yang bisa diganti.
 			</p>
-			<TemplateEditor initial={templates} guests={guests} />
+			<TemplateEditor
+				initial={templates}
+				guests={guests}
+				guestTotal={guestTotal}
+			/>
 		</div>
 	);
 }

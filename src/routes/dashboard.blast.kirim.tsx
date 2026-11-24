@@ -60,6 +60,7 @@ function BlastSendPage() {
 	const [status, setStatus] = useState<BlastStatusView>(initial.status);
 	const [guests, setGuests] = useState<DashboardGuest[]>(initial.guests);
 	const [guestTotal, setGuestTotal] = useState(initial.guestTotal);
+	const [guestSource, setGuestSource] = useState<GuestSource | "all">("all");
 	const [selectedGuest, setSelectedGuest] = useState<DashboardGuest | null>(
 		initial.guests[0] ?? null,
 	);
@@ -197,7 +198,12 @@ function BlastSendPage() {
 		}
 	}
 
-	async function loadGuestPage(reset: boolean, term: string) {
+	async function loadGuestPage(
+		reset: boolean,
+		term: string,
+		nextSource: GuestSource | "all" = guestSource,
+		keepSelection = true,
+	) {
 		setGuestLoading(true);
 		try {
 			const page = await listGuestsPage({
@@ -206,15 +212,22 @@ function BlastSendPage() {
 					offset: reset ? 0 : guests.length,
 					query: term,
 					delivery: "digital",
+					source: nextSource === "all" ? "" : nextSource,
 				},
 			});
 			setGuests((current) => (reset ? page.rows : [...current, ...page.rows]));
 			setGuestTotal(page.total);
 			if (reset) {
 				const stillThere =
-					selectedGuest &&
-					page.rows.find((guest) => guest.id === selectedGuest.id);
-				setSelectedGuest(stillThere ?? selectedGuest ?? page.rows[0] ?? null);
+					keepSelection && selectedGuest
+						? page.rows.find((guest) => guest.id === selectedGuest.id)
+						: undefined;
+				setSelectedGuest(
+					stillThere ??
+						(keepSelection ? selectedGuest : null) ??
+						page.rows[0] ??
+						null,
+				);
 			}
 		} catch {
 			toast({ message: "Gagal memuat daftar tamu." });
@@ -223,10 +236,22 @@ function BlastSendPage() {
 		}
 	}
 
+	function handleGuestSource(next: GuestSource | "all") {
+		setGuestSource(next);
+		setGuestQuery("");
+		setPreview(null);
+		void loadGuestPage(true, "", next, false);
+	}
+
 	const guestOptions = guests.map((guest) => ({
 		value: guest.id,
 		label: guest.name,
-		hint: [guest.groupName, guest.phone, guest.sent ? "terkirim" : null]
+		hint: [
+			GUEST_SOURCE_LABELS[guest.blastChannel ?? guest.source],
+			guest.groupName,
+			guest.phone,
+			guest.sent ? "terkirim" : null,
+		]
 			.filter(Boolean)
 			.join(" · "),
 	}));
@@ -234,7 +259,11 @@ function BlastSendPage() {
 		guestOptions.unshift({
 			value: selectedGuest.id,
 			label: selectedGuest.name,
-			hint: [selectedGuest.groupName, selectedGuest.phone]
+			hint: [
+				GUEST_SOURCE_LABELS[selectedGuest.blastChannel ?? selectedGuest.source],
+				selectedGuest.groupName,
+				selectedGuest.phone,
+			]
 				.filter(Boolean)
 				.join(" · "),
 		});
@@ -426,6 +455,21 @@ function BlastSendPage() {
 				</p>
 				<div className="mt-2 flex flex-wrap items-center gap-2">
 					<SearchableSelect
+						className="w-40"
+						ariaLabel="Sumber tamu"
+						value={guestSource}
+						options={[
+							{ value: "all", label: "Semua sumber" },
+							{ value: "anas", label: "Anas" },
+							{ value: "mila", label: "Mila" },
+						]}
+						onChange={(next) =>
+							handleGuestSource(
+								next === "anas" || next === "mila" ? next : "all",
+							)
+						}
+					/>
+					<SearchableSelect
 						className="min-w-0 flex-1"
 						ariaLabel="Pilih tamu"
 						value={selectedId}
@@ -459,7 +503,8 @@ function BlastSendPage() {
 
 				{selected ? (
 					<p className="mt-2 font-body text-[10.5px] text-inv-muted">
-						{selected.phone ?? "Tanpa nomor HP"} · kanal{" "}
+						{selected.phone ?? "Tanpa nomor HP"} · sumber{" "}
+						{GUEST_SOURCE_LABELS[selected.source]} · kanal{" "}
 						{GUEST_SOURCE_LABELS[selected.blastChannel ?? selected.source]}
 					</p>
 				) : (

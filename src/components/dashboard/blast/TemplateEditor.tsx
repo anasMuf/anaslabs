@@ -10,12 +10,13 @@ import {
 import type { BlastTemplateView } from "#/lib/blast/templates";
 import { resetBlastTemplate, saveBlastTemplate } from "#/lib/blast/templates";
 import { GUEST_SOURCE_LABELS, type GuestSource } from "#/lib/guest-import";
-import type { DashboardGuest } from "#/lib/guests";
+import { type DashboardGuest, listGuestsPage } from "#/lib/guests";
 import { MessagePreview } from "./MessagePreview";
 
 interface Props {
 	initial: BlastTemplateView[];
 	guests: DashboardGuest[];
+	guestTotal: number;
 }
 
 const SAMPLE_GUEST = {
@@ -26,11 +27,19 @@ const SAMPLE_GUEST = {
 	slug: "budi-santoso",
 };
 
-export function TemplateEditor({ initial, guests }: Props) {
+export function TemplateEditor({
+	initial,
+	guests: initialGuests,
+	guestTotal: initialGuestTotal,
+}: Props) {
 	const toast = useToast();
 	const [templates, setTemplates] = useState<BlastTemplateView[]>(initial);
 	const [source, setSource] = useState<GuestSource>("anas");
-	const [sampleId, setSampleId] = useState(guests[0]?.id ?? "");
+	const [guests, setGuests] = useState<DashboardGuest[]>(initialGuests);
+	const [guestTotal, setGuestTotal] = useState(initialGuestTotal);
+	const [guestQuery, setGuestQuery] = useState("");
+	const [guestLoading, setGuestLoading] = useState(false);
+	const [sampleId, setSampleId] = useState(initialGuests[0]?.id ?? "");
 	const [busy, setBusy] = useState<"save" | "reset" | null>(null);
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -47,7 +56,55 @@ export function TemplateEditor({ initial, guests }: Props) {
 		const template = templates.find((item) => item.source === next);
 		setSource(next);
 		setBody(template?.body ?? "");
+		setGuestQuery("");
+		void loadGuests(true, "", next, false);
 	}
+
+	async function loadGuests(
+		reset: boolean,
+		term: string,
+		nextSource: GuestSource = source,
+		keepSelection = true,
+	) {
+		setGuestLoading(true);
+		try {
+			const page = await listGuestsPage({
+				data: {
+					limit: 30,
+					offset: reset ? 0 : guests.length,
+					query: term,
+					delivery: "digital",
+					source: nextSource,
+				},
+			});
+			setGuests((current) => (reset ? page.rows : [...current, ...page.rows]));
+			setGuestTotal(page.total);
+			if (reset) {
+				const stillThere = keepSelection
+					? page.rows.find((guest) => guest.id === sampleId)
+					: null;
+				setSampleId(stillThere?.id ?? page.rows[0]?.id ?? "");
+			}
+		} catch {
+			toast({ message: "Gagal memuat tamu contoh." });
+		} finally {
+			setGuestLoading(false);
+		}
+	}
+
+	const guestOptions = guests.length
+		? guests.map((guest) => ({
+				value: guest.id,
+				label: guest.name,
+				hint: [
+					GUEST_SOURCE_LABELS[guest.blastChannel ?? guest.source],
+					guest.groupName,
+					guest.phone,
+				]
+					.filter(Boolean)
+					.join(" · "),
+			}))
+		: [{ value: "", label: "Tamu contoh bawaan" }];
 
 	function replaceTemplate(next: BlastTemplateView) {
 		setTemplates((current) =>
@@ -223,15 +280,16 @@ export function TemplateEditor({ initial, guests }: Props) {
 						onChange={setSampleId}
 						ariaLabel="Tamu contoh"
 						placeholder="Tamu contoh bawaan"
-						options={
-							guests.length
-								? guests.map((guest) => ({
-										value: guest.id,
-										label: guest.name,
-										hint: guest.groupName ?? undefined,
-									}))
-								: [{ value: "", label: "Tamu contoh bawaan" }]
-						}
+						searchPlaceholder="Cari tamu…"
+						options={guestOptions}
+						hasMore={guests.length < guestTotal}
+						loading={guestLoading}
+						onSearch={(term) => {
+							if (term === guestQuery) return;
+							setGuestQuery(term);
+							void loadGuests(true, term);
+						}}
+						onLoadMore={() => void loadGuests(false, guestQuery)}
 					/>
 				</div>
 
