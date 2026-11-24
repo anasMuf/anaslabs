@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { MessagePreview } from "#/components/dashboard/blast/MessagePreview";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
 import {
 	getBlastAudience,
@@ -18,9 +19,14 @@ export const Route = createFileRoute("/dashboard/blast/kirim")({
 		const [audience, status, guests] = await Promise.all([
 			getBlastAudience({ data: { onlyUnsent: true, source: "" } }),
 			getBlastStatus(),
-			listGuestsPage({ data: { limit: 60, offset: 0, delivery: "digital" } }),
+			listGuestsPage({ data: { limit: 30, offset: 0, delivery: "digital" } }),
 		]);
-		return { audience, status, guests: guests.rows };
+		return {
+			audience,
+			status,
+			guests: guests.rows,
+			guestTotal: guests.total,
+		};
 	},
 	component: BlastSendPage,
 });
@@ -53,14 +59,20 @@ function BlastSendPage() {
 	);
 	const [status, setStatus] = useState<BlastStatusView>(initial.status);
 	const [guests, setGuests] = useState<DashboardGuest[]>(initial.guests);
-	const [selectedId, setSelectedId] = useState(initial.guests[0]?.id ?? "");
+	const [guestTotal, setGuestTotal] = useState(initial.guestTotal);
+	const [selectedGuest, setSelectedGuest] = useState<DashboardGuest | null>(
+		initial.guests[0] ?? null,
+	);
+	const [guestQuery, setGuestQuery] = useState("");
+	const [guestLoading, setGuestLoading] = useState(false);
 	const [preview, setPreview] = useState<string | null>(null);
 	const [confirming, setConfirming] = useState(false);
 	const [busy, setBusy] = useState<
 		"queue" | "process" | "preview" | "send" | "refresh" | null
 	>(null);
 
-	const selected = guests.find((guest) => guest.id === selectedId) ?? null;
+	const selected = selectedGuest;
+	const selectedId = selectedGuest?.id ?? "";
 
 	async function refreshAudience(
 		nextOnly: boolean,
@@ -172,6 +184,11 @@ function BlastSendPage() {
 					guest.id === selected.id ? { ...guest, sent: true } : guest,
 				),
 			);
+			setSelectedGuest((current) =>
+				current && current.id === selected.id
+					? { ...current, sent: true }
+					: current,
+			);
 			setStatus(await getBlastStatus());
 		} catch {
 			toast({ message: "Gagal mengirim pesan." });
@@ -180,15 +197,47 @@ function BlastSendPage() {
 		}
 	}
 
-	async function refreshGuests() {
+	async function loadGuestPage(reset: boolean, term: string) {
+		setGuestLoading(true);
 		try {
 			const page = await listGuestsPage({
-				data: { limit: 60, offset: 0, delivery: "digital" },
+				data: {
+					limit: 30,
+					offset: reset ? 0 : guests.length,
+					query: term,
+					delivery: "digital",
+				},
 			});
-			setGuests(page.rows);
+			setGuests((current) => (reset ? page.rows : [...current, ...page.rows]));
+			setGuestTotal(page.total);
+			if (reset) {
+				const stillThere =
+					selectedGuest &&
+					page.rows.find((guest) => guest.id === selectedGuest.id);
+				setSelectedGuest(stillThere ?? selectedGuest ?? page.rows[0] ?? null);
+			}
 		} catch {
 			toast({ message: "Gagal memuat daftar tamu." });
+		} finally {
+			setGuestLoading(false);
 		}
+	}
+
+	const guestOptions = guests.map((guest) => ({
+		value: guest.id,
+		label: guest.name,
+		hint: [guest.groupName, guest.phone, guest.sent ? "terkirim" : null]
+			.filter(Boolean)
+			.join(" · "),
+	}));
+	if (selectedGuest && !guests.some((guest) => guest.id === selectedGuest.id)) {
+		guestOptions.unshift({
+			value: selectedGuest.id,
+			label: selectedGuest.name,
+			hint: [selectedGuest.groupName, selectedGuest.phone]
+				.filter(Boolean)
+				.join(" · "),
+		});
 	}
 
 	const pillClass =
@@ -376,28 +425,35 @@ function BlastSendPage() {
 					KIRIM SATU TAMU
 				</p>
 				<div className="mt-2 flex flex-wrap items-center gap-2">
-					<select
+					<SearchableSelect
+						className="min-w-0 flex-1"
+						ariaLabel="Pilih tamu"
 						value={selectedId}
-						onChange={(event) => {
-							setSelectedId(event.target.value);
+						placeholder="Pilih tamu…"
+						searchPlaceholder="Cari nama/nomor…"
+						options={guestOptions}
+						hasMore={guests.length < guestTotal}
+						loading={guestLoading}
+						onSearch={(term) => {
+							if (term === guestQuery) return;
+							setGuestQuery(term);
+							void loadGuestPage(true, term);
+						}}
+						onLoadMore={() => void loadGuestPage(false, guestQuery)}
+						onChange={(guestId) => {
+							const next =
+								guests.find((guest) => guest.id === guestId) ??
+								(selectedGuest?.id === guestId ? selectedGuest : null);
+							setSelectedGuest(next);
 							setPreview(null);
 						}}
-						className="min-w-0 flex-1 rounded-2xl border border-inv-rule bg-inv-bg px-3 py-2 font-body text-[11px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-					>
-						{guests.map((guest) => (
-							<option key={guest.id} value={guest.id}>
-								{guest.name}
-								{guest.groupName ? ` · ${guest.groupName}` : ""}
-								{guest.sent ? " · terkirim" : ""}
-							</option>
-						))}
-					</select>
+					/>
 					<button
 						type="button"
-						onClick={() => void refreshGuests()}
+						onClick={() => void loadGuestPage(true, guestQuery)}
 						className="rounded-full border border-inv-rule px-3 py-2 font-body text-[10.5px] text-inv-muted transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 					>
-						Muat tamu
+						{guestLoading ? "Memuat…" : "Muat ulang"}
 					</button>
 				</div>
 

@@ -9,6 +9,7 @@ import FrameEditor from "#/components/dashboard/content/FrameEditor";
 import { SectionCard, TextField } from "#/components/dashboard/content/fields";
 import PhotoboothPreviewCanvas from "#/components/dashboard/content/PhotoboothPreviewCanvas";
 import { useContentDraft } from "#/components/dashboard/content/useContentDraft";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { getInvitationContentForDashboard } from "#/lib/invitation-content";
 import { defaultContent } from "#/lib/invitation-content-default";
 import type { InvitationContent } from "#/lib/invitation-content-schema";
@@ -16,9 +17,6 @@ import type { PhotoboothGrid } from "#/lib/photobooth/types";
 
 const GRID_OPTIONS: PhotoboothGrid[] = [1, 2, 4];
 const SCALE_OPTIONS = [1, 2, 3, 4];
-
-const selectClass =
-	"mt-1 w-full rounded-xl border border-inv-rule bg-inv-bg px-3 py-2 font-body text-[12px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent";
 
 export const Route = createFileRoute("/dashboard/photobooth")({
 	loader: async () => {
@@ -226,27 +224,24 @@ function PhotoboothScreen({
 							value={content.photobooth.downloadName}
 							onChange={(downloadName) => updatePhotobooth({ downloadName })}
 						/>
-						<label className="block">
+						<div className="block">
 							<span className="font-body text-[9.5px] font-semibold tracking-[0.12em] text-inv-muted">
 								SKALA
 							</span>
-							<select
-								value={content.photobooth.scale}
-								onChange={(event) =>
-									updatePhotobooth({ scale: Number(event.target.value) })
-								}
-								className={selectClass}
-							>
-								{SCALE_OPTIONS.map((scale) => (
-									<option key={scale} value={scale}>
-										{scale}x
-									</option>
-								))}
-							</select>
+							<SearchableSelect
+								ariaLabel="Skala kartu"
+								className="mt-1"
+								value={String(content.photobooth.scale)}
+								options={SCALE_OPTIONS.map((scale) => ({
+									value: String(scale),
+									label: `${scale}x`,
+								}))}
+								onChange={(value) => updatePhotobooth({ scale: Number(value) })}
+							/>
 							<span className="mt-1 block font-body text-[10px] leading-[1.5] text-inv-muted">
 								3x disarankan. Skala lebih besar menghasilkan file lebih berat.
 							</span>
-						</label>
+						</div>
 					</SectionCard>
 
 					<SectionCard

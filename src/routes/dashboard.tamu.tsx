@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import GuestEditDialog from "#/components/dashboard/GuestEditDialog";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import CopyButton from "#/components/invitation/ui/CopyButton";
 import { useToast } from "#/components/invitation/ui/Toast";
 import { effectiveBlastChannel } from "#/lib/blast/attribution";
@@ -32,9 +33,6 @@ const EMPTY_OPTIONS: GuestFilterOptions = {
 	anas: { groups: [], addresses: [] },
 	mila: { groups: [], addresses: [] },
 };
-
-const selectClass =
-	"w-full rounded-xl border border-inv-rule bg-inv-bg px-2.5 py-2 font-body text-[11px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent disabled:opacity-50";
 
 function FilterField({
 	label,
@@ -341,14 +339,18 @@ function DashboardGuests() {
 					}`}
 				>
 					<FilterField label="TAMU" htmlFor="filter-source">
-						<select
+						<SearchableSelect
 							id="filter-source"
+							ariaLabel="Filter tamu"
 							value={filters.source}
-							onChange={(event) => {
+							options={[
+								{ value: "", label: "Semua sheet" },
+								{ value: "anas", label: "Anas" },
+								{ value: "mila", label: "Mila" },
+							]}
+							onChange={(value) => {
 								const source =
-									event.target.value === "anas" || event.target.value === "mila"
-										? event.target.value
-										: "";
+									value === "anas" || value === "mila" ? value : "";
 								const nextOptions = options[source || "all"];
 								setFilters((current) => ({
 									...current,
@@ -362,53 +364,55 @@ function DashboardGuests() {
 										: "",
 								}));
 							}}
-							className={selectClass}
-						>
-							<option value="">Semua sheet</option>
-							<option value="anas">Anas</option>
-							<option value="mila">Mila</option>
-						</select>
+						/>
 					</FilterField>
 
 					<FilterField label="GRUP" htmlFor="filter-group">
-						<select
+						<SearchableSelect
 							id="filter-group"
+							ariaLabel="Filter grup"
 							value={filters.group}
-							onChange={(event) => setFilter("group", event.target.value)}
-							className={selectClass}
-						>
-							<option value="">Semua grup</option>
-							{activeOptions.groups.map((group) => (
-								<option key={group} value={group}>
-									{group}
-								</option>
-							))}
-						</select>
+							searchPlaceholder="Cari grup…"
+							options={[
+								{ value: "", label: "Semua grup" },
+								...activeOptions.groups.map((group) => ({
+									value: group,
+									label: group,
+								})),
+							]}
+							onChange={(value) => setFilter("group", value)}
+						/>
 					</FilterField>
 
 					<FilterField label="ALAMAT" htmlFor="filter-address">
-						<select
+						<SearchableSelect
 							id="filter-address"
+							ariaLabel="Filter alamat"
 							value={filters.address}
 							disabled={activeOptions.addresses.length === 0}
-							onChange={(event) => setFilter("address", event.target.value)}
-							className={selectClass}
-						>
-							<option value="">Semua alamat</option>
-							{activeOptions.addresses.map((address) => (
-								<option key={address} value={address}>
-									{address}
-								</option>
-							))}
-						</select>
+							searchPlaceholder="Cari alamat…"
+							options={[
+								{ value: "", label: "Semua alamat" },
+								...activeOptions.addresses.map((address) => ({
+									value: address,
+									label: address,
+								})),
+							]}
+							onChange={(value) => setFilter("address", value)}
+						/>
 					</FilterField>
 
 					<FilterField label="TIPE" htmlFor="filter-delivery">
-						<select
+						<SearchableSelect
 							id="filter-delivery"
+							ariaLabel="Filter tipe"
 							value={filters.delivery}
-							onChange={(event) => {
-								const value = event.target.value;
+							options={[
+								{ value: "", label: "Semua tipe" },
+								{ value: "digital", label: "Digital" },
+								{ value: "fisik", label: "Fisik" },
+							]}
+							onChange={(value) => {
 								const delivery =
 									value === "digital" || value === "fisik" ? value : "";
 								setFilters((current) => ({
@@ -417,51 +421,46 @@ function DashboardGuests() {
 									opened: delivery === "fisik" ? "" : current.opened,
 								}));
 							}}
-							className={selectClass}
-						>
-							<option value="">Semua tipe</option>
-							<option value="digital">Digital</option>
-							<option value="fisik">Fisik</option>
-						</select>
+						/>
 					</FilterField>
 
 					<FilterField label="PENGIRIMAN" htmlFor="filter-sent">
-						<select
+						<SearchableSelect
 							id="filter-sent"
+							ariaLabel="Filter pengiriman"
 							value={filters.sent}
-							onChange={(event) => {
-								const value = event.target.value;
+							options={[
+								{ value: "", label: "Semua status" },
+								{ value: "sent", label: "Sudah dikirim" },
+								{ value: "unsent", label: "Belum dikirim" },
+							]}
+							onChange={(value) =>
 								setFilter(
 									"sent",
 									value === "sent" || value === "unsent" ? value : "",
-								);
-							}}
-							className={selectClass}
-						>
-							<option value="">Semua status</option>
-							<option value="sent">Sudah dikirim</option>
-							<option value="unsent">Belum dikirim</option>
-						</select>
+								)
+							}
+						/>
 					</FilterField>
 
 					<FilterField label="BUKA UNDANGAN" htmlFor="filter-opened">
-						<select
+						<SearchableSelect
 							id="filter-opened"
+							ariaLabel="Filter buka undangan"
 							value={filters.opened}
 							disabled={filters.delivery === "fisik"}
-							onChange={(event) => {
-								const value = event.target.value;
+							options={[
+								{ value: "", label: "Semua" },
+								{ value: "opened", label: "Sudah buka" },
+								{ value: "unopened", label: "Belum buka" },
+							]}
+							onChange={(value) =>
 								setFilter(
 									"opened",
 									value === "opened" || value === "unopened" ? value : "",
-								);
-							}}
-							className={selectClass}
-						>
-							<option value="">Semua</option>
-							<option value="opened">Sudah buka</option>
-							<option value="unopened">Belum buka</option>
-						</select>
+								)
+							}
+						/>
 					</FilterField>
 				</div>
 

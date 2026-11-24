@@ -1,4 +1,5 @@
 // biome-ignore-all lint/suspicious/noArrayIndexKey: editor rows are fully controlled; list order mirrors the saved document and rows hold no independent state.
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import type { InvitationContent } from "#/lib/invitation-content-schema";
 import {
 	DangerMiniButton,
@@ -15,9 +16,6 @@ interface ContentEditorProps {
 	onChange: (next: InvitationContent) => void;
 }
 
-const selectClass =
-	"mt-1 w-full rounded-xl border border-inv-rule bg-inv-bg px-3 py-2 font-body text-[12px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent";
-
 const hintClass = "font-body text-[10px] leading-[1.6] text-inv-muted";
 const subheadingClass =
 	"font-body text-[10px] font-semibold uppercase tracking-[0.14em] text-inv-accent";
@@ -30,21 +28,21 @@ function SideSelect({
 	onChange: (value: "groom" | "bride") => void;
 }) {
 	return (
-		<label className="block">
+		<div className="block">
 			<span className="font-body text-[9.5px] font-semibold tracking-[0.12em] text-inv-muted">
 				SISI
 			</span>
-			<select
+			<SearchableSelect
+				ariaLabel="Sisi mempelai"
+				className="mt-1"
 				value={value}
-				onChange={(event) =>
-					onChange(event.target.value === "bride" ? "bride" : "groom")
-				}
-				className={selectClass}
-			>
-				<option value="groom">Anas (pria)</option>
-				<option value="bride">Mila (wanita)</option>
-			</select>
-		</label>
+				options={[
+					{ value: "groom", label: "Anas (pria)" },
+					{ value: "bride", label: "Mila (wanita)" },
+				]}
+				onChange={(next) => onChange(next === "bride" ? "bride" : "groom")}
+			/>
+		</div>
 	);
 }
 

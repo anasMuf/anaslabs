@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
 import { GUEST_SOURCE_LABELS } from "#/lib/guest-import";
 import type { DashboardGuest } from "#/lib/guests";
@@ -204,22 +205,20 @@ export default function GuestEditDialog({
 									<label htmlFor="guest-group" className={labelClass}>
 										GRUP
 									</label>
-									<input
+									<SearchableSelect
 										id="guest-group"
-										list="guest-group-options"
+										ariaLabel="Grup tamu"
+										className="mt-1"
 										value={form.groupName}
-										onChange={(event) =>
-											update("groupName", event.target.value)
-										}
-										maxLength={60}
+										allowCustom
 										placeholder="tanpa grup"
-										className={fieldClass}
+										searchPlaceholder="Cari grup…"
+										options={groupOptions.map((group) => ({
+											value: group,
+											label: group,
+										}))}
+										onChange={(value) => update("groupName", value)}
 									/>
-									<datalist id="guest-group-options">
-										{groupOptions.map((group) => (
-											<option key={group} value={group} />
-										))}
-									</datalist>
 								</div>
 								<div>
 									<label htmlFor="guest-address" className={labelClass}>
@@ -241,37 +240,37 @@ export default function GuestEditDialog({
 									<label htmlFor="guest-invited" className={labelClass}>
 										DIUNDANG
 									</label>
-									<input
+									<SearchableSelect
 										id="guest-invited"
-										list="guest-invited-options"
+										ariaLabel="Kolom diundang"
+										className="mt-1"
 										value={form.invited}
-										onChange={(event) => update("invited", event.target.value)}
-										maxLength={60}
+										allowCustom
 										placeholder="mis. Sekalian"
-										className={fieldClass}
+										options={[{ value: "Sekalian", label: "Sekalian" }]}
+										onChange={(value) => update("invited", value)}
 									/>
-									<datalist id="guest-invited-options">
-										<option value="Sekalian" />
-									</datalist>
 								</div>
 								<div>
 									<label htmlFor="guest-delivery" className={labelClass}>
 										TIPE
 									</label>
-									<select
+									<SearchableSelect
 										id="guest-delivery"
+										ariaLabel="Tipe undangan"
+										className="mt-1"
 										value={form.delivery}
-										onChange={(event) =>
+										options={[
+											{ value: "digital", label: "Digital" },
+											{ value: "fisik", label: "Fisik" },
+										]}
+										onChange={(value) =>
 											update(
 												"delivery",
-												event.target.value === "fisik" ? "fisik" : "digital",
+												value === "fisik" ? "fisik" : "digital",
 											)
 										}
-										className={fieldClass}
-									>
-										<option value="digital">Digital</option>
-										<option value="fisik">Fisik</option>
-									</select>
+									/>
 								</div>
 							</div>
 
@@ -295,20 +294,21 @@ export default function GuestEditDialog({
 									<label htmlFor="guest-blast-channel" className={labelClass}>
 										NOMOR PENGIRIM
 									</label>
-									<select
+									<SearchableSelect
 										id="guest-blast-channel"
+										ariaLabel="Nomor pengirim"
+										className="mt-1"
 										value={form.blastChannel}
-										onChange={(event) =>
-											update("blastChannel", event.target.value)
-										}
-										className={fieldClass}
-									>
-										<option value="">
-											Ikut sumber ({GUEST_SOURCE_LABELS[guest.source]})
-										</option>
-										<option value="anas">Anas</option>
-										<option value="mila">Mila</option>
-									</select>
+										options={[
+											{
+												value: "",
+												label: `Ikut sumber (${GUEST_SOURCE_LABELS[guest.source]})`,
+											},
+											{ value: "anas", label: "Anas" },
+											{ value: "mila", label: "Mila" },
+										]}
+										onChange={(value) => update("blastChannel", value)}
+									/>
 								</div>
 							</div>
 						</div>

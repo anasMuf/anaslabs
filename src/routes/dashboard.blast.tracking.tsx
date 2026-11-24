@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
 import {
 	cancelQueuedSend,
@@ -148,9 +149,6 @@ function BlastTrackingPage() {
 		}
 	}
 
-	const selectClass =
-		"rounded-2xl border border-inv-rule bg-inv-bg px-3 py-2 font-body text-[11px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent";
-
 	return (
 		<div className="flex flex-col gap-4">
 			<section className="rounded-3xl border border-inv-rule bg-inv-card px-5 py-4">
@@ -170,42 +168,44 @@ function BlastTrackingPage() {
 				) : null}
 
 				<div className="mt-3 flex flex-wrap items-center gap-2">
-					<select
+					<SearchableSelect
+						ariaLabel="Filter batch"
 						value={batchId}
-						onChange={(event) => {
-							const next = event.target.value;
+						placeholder="Semua batch"
+						options={[
+							{ value: "", label: "Semua batch" },
+							...status.batches.map((batch) => ({
+								value: batch.id,
+								label: `${
+									batch.source === "all"
+										? "Semua nomor"
+										: GUEST_SOURCE_LABELS[batch.source]
+								} · ${formatTime(batch.createdAt)}`,
+								hint: `${batch.sent}/${batch.total}`,
+							})),
+						]}
+						onChange={(next) => {
 							setBatchId(next);
 							void load(0, false, { batchId: next });
 						}}
-						className={selectClass}
-					>
-						<option value="">Semua batch</option>
-						{status.batches.map((batch) => (
-							<option key={batch.id} value={batch.id}>
-								{batch.source === "all"
-									? "Semua nomor"
-									: GUEST_SOURCE_LABELS[batch.source]}{" "}
-								· {formatTime(batch.createdAt)} · {batch.sent}/{batch.total}
-							</option>
-						))}
-					</select>
+					/>
 
-					<select
+					<SearchableSelect
+						ariaLabel="Filter status"
 						value={statusFilter}
-						onChange={(event) => {
-							const next = event.target.value;
+						placeholder="Semua status"
+						options={[
+							{ value: "", label: "Semua status" },
+							...Object.entries(STATUS_LABELS).map(([value, label]) => ({
+								value,
+								label,
+							})),
+						]}
+						onChange={(next) => {
 							setStatusFilter(next);
 							void load(0, false, { statusFilter: next });
 						}}
-						className={selectClass}
-					>
-						<option value="">Semua status</option>
-						{Object.entries(STATUS_LABELS).map(([value, label]) => (
-							<option key={value} value={value}>
-								{label}
-							</option>
-						))}
-					</select>
+					/>
 
 					<form
 						onSubmit={(event) => {

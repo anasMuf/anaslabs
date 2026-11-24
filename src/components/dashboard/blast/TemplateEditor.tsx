@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
 import {
 	renderTemplate,
@@ -31,6 +32,7 @@ export function TemplateEditor({ initial, guests }: Props) {
 	const [source, setSource] = useState<GuestSource>("anas");
 	const [sampleId, setSampleId] = useState(guests[0]?.id ?? "");
 	const [busy, setBusy] = useState<"save" | "reset" | null>(null);
+	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const active =
 		templates.find((template) => template.source === source) ?? templates[0];
@@ -55,9 +57,22 @@ export function TemplateEditor({ initial, guests }: Props) {
 	}
 
 	function insertVariable(key: string) {
-		setBody(
-			(current) => `${current}${current.endsWith(" ") ? "" : " "}{${key}}`,
-		);
+		const token = `{${key}}`;
+		const textarea = textareaRef.current;
+		const start = textarea?.selectionStart ?? body.length;
+		const end = textarea?.selectionEnd ?? start;
+		const next = `${body.slice(0, start)}${token}${body.slice(end)}`;
+		setBody(next);
+
+		// Kembalikan fokus dan letakkan kursor tepat setelah variabel yang baru
+		// disisipkan, agar pengetikan bisa lanjut di posisi itu.
+		requestAnimationFrame(() => {
+			const element = textareaRef.current;
+			if (!element) return;
+			const position = start + token.length;
+			element.focus();
+			element.setSelectionRange(position, position);
+		});
 	}
 
 	async function handleSave() {
@@ -136,6 +151,7 @@ export function TemplateEditor({ initial, guests }: Props) {
 						ISI PESAN
 					</span>
 					<textarea
+						ref={textareaRef}
 						value={body}
 						onChange={(event) => setBody(event.target.value)}
 						rows={12}
@@ -198,26 +214,26 @@ export function TemplateEditor({ initial, guests }: Props) {
 			</div>
 
 			<div className="flex flex-col gap-3">
-				<label className="flex flex-col gap-1">
+				<div className="flex flex-col gap-1">
 					<span className="font-body text-[10px] font-semibold tracking-[0.14em] text-inv-muted">
 						TAMU CONTOH
 					</span>
-					<select
+					<SearchableSelect
 						value={sampleId}
-						onChange={(event) => setSampleId(event.target.value)}
-						className="w-full rounded-2xl border border-inv-rule bg-inv-card px-3 py-2 font-body text-[11px] text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-					>
-						{guests.length ? null : (
-							<option value="">Tamu contoh bawaan</option>
-						)}
-						{guests.map((guest) => (
-							<option key={guest.id} value={guest.id}>
-								{guest.name}
-								{guest.groupName ? ` · ${guest.groupName}` : ""}
-							</option>
-						))}
-					</select>
-				</label>
+						onChange={setSampleId}
+						ariaLabel="Tamu contoh"
+						placeholder="Tamu contoh bawaan"
+						options={
+							guests.length
+								? guests.map((guest) => ({
+										value: guest.id,
+										label: guest.name,
+										hint: guest.groupName ?? undefined,
+									}))
+								: [{ value: "", label: "Tamu contoh bawaan" }]
+						}
+					/>
+				</div>
 
 				<MessagePreview
 					message={preview}
