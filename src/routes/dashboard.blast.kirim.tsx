@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessagePreview } from "#/components/dashboard/blast/MessagePreview";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
@@ -72,13 +72,40 @@ function BlastSendPage() {
 	const [guestQuery, setGuestQuery] = useState("");
 	const [guestLoading, setGuestLoading] = useState(false);
 	const [preview, setPreview] = useState<string | null>(null);
+	const [previewLoading, setPreviewLoading] = useState(false);
 	const [confirming, setConfirming] = useState(false);
 	const [busy, setBusy] = useState<
-		"queue" | "process" | "preview" | "send" | "refresh" | null
+		"queue" | "process" | "send" | "refresh" | null
 	>(null);
 
 	const selected = selectedGuest;
 	const selectedId = selectedGuest?.id ?? "";
+
+	// Pratinjau dibuat otomatis setiap tamu berganti, supaya kartu OG langsung
+	// terlihat tanpa harus menekan tombol.
+	useEffect(() => {
+		if (!selectedId) {
+			setPreview(null);
+			return;
+		}
+
+		let cancelled = false;
+		setPreviewLoading(true);
+		void sendSingleInvitation({ data: { guestId: selectedId, dryRun: true } })
+			.then((result) => {
+				if (!cancelled) setPreview(result.ok ? result.message : null);
+			})
+			.catch(() => {
+				if (!cancelled) setPreview(null);
+			})
+			.finally(() => {
+				if (!cancelled) setPreviewLoading(false);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [selectedId]);
 
 	async function refreshAudience(
 		nextOnly: boolean,
@@ -152,7 +179,7 @@ function BlastSendPage() {
 
 	async function handlePreview() {
 		if (!selected) return;
-		setBusy("preview");
+		setPreviewLoading(true);
 		try {
 			const result = await sendSingleInvitation({
 				data: { guestId: selected.id, dryRun: true },
@@ -165,7 +192,7 @@ function BlastSendPage() {
 		} catch {
 			toast({ message: "Gagal membuat pratinjau." });
 		} finally {
-			setBusy(null);
+			setPreviewLoading(false);
 		}
 	}
 
@@ -184,7 +211,6 @@ function BlastSendPage() {
 				tone: "success",
 				message: `Pesan untuk ${selected.name} diterima Wablas.`,
 			});
-			setPreview(null);
 			setGuests((current) =>
 				current.map((guest) =>
 					guest.id === selected.id ? { ...guest, sent: true } : guest,
@@ -522,10 +548,10 @@ function BlastSendPage() {
 					<button
 						type="button"
 						onClick={() => void handlePreview()}
-						disabled={busy !== null || !selected}
+						disabled={previewLoading || busy !== null || !selected}
 						className="rounded-full border border-inv-ink/25 px-4 py-2.5 font-body text-[11px] text-inv-ink transition-colors hover:bg-inv-ink/5 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 					>
-						{busy === "preview" ? "Menyiapkan…" : "Pratinjau pesan"}
+						{previewLoading ? "Menyiapkan…" : "Muat ulang pratinjau"}
 					</button>
 					<button
 						type="button"
@@ -545,6 +571,14 @@ function BlastSendPage() {
 							linkPreview={linkPreview}
 						/>
 					</div>
+				) : previewLoading && selected ? (
+					<p className="mt-3 font-body text-[10.5px] text-inv-muted">
+						Menyiapkan pratinjau…
+					</p>
+				) : selected ? (
+					<p className="mt-3 font-body text-[10.5px] leading-relaxed text-inv-muted">
+						Pratinjau belum tersedia. Periksa template atau lengkapi data tamu.
+					</p>
 				) : null}
 			</section>
 		</div>

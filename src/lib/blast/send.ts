@@ -94,22 +94,6 @@ export const sendSingleInvitation = createServerFn({ method: "POST" })
 			blastChannel: guest.blast_channel,
 		});
 
-		let credentials: Awaited<ReturnType<typeof readChannelCredentials>>;
-		try {
-			credentials = await readChannelCredentials(channel);
-		} catch (error) {
-			return { ok: false, error: errorMessage(error) };
-		}
-		if (!credentials) {
-			return {
-				ok: false,
-				error: "Kredensial kanal ini belum diisi. Buka Setup nomor dulu.",
-			};
-		}
-		if (!credentials.enabled) {
-			return { ok: false, error: "Kanal pengirim ini sedang dinonaktifkan." };
-		}
-
 		const body = await readTemplateBody(channel);
 		const message = renderTemplate(body, {
 			name: guest.name,
@@ -125,6 +109,8 @@ export const sendSingleInvitation = createServerFn({ method: "POST" })
 			};
 		}
 
+		// Pratinjau tidak butuh kredensial/kuota; tampilkan walau kanal belum
+		// diisi supaya template dan OG bisa diperiksa lebih dulu.
 		if (data.dryRun) {
 			return {
 				ok: true,
@@ -133,6 +119,22 @@ export const sendSingleInvitation = createServerFn({ method: "POST" })
 				phone: guest.phone,
 				channel,
 			};
+		}
+
+		let credentials: Awaited<ReturnType<typeof readChannelCredentials>>;
+		try {
+			credentials = await readChannelCredentials(channel);
+		} catch (error) {
+			return { ok: false, error: errorMessage(error) };
+		}
+		if (!credentials) {
+			return {
+				ok: false,
+				error: "Kredensial kanal ini belum diisi. Buka Setup nomor dulu.",
+			};
+		}
+		if (!credentials.enabled) {
+			return { ok: false, error: "Kanal pengirim ini sedang dinonaktifkan." };
 		}
 
 		const now = new Date().toISOString();
