@@ -569,6 +569,7 @@ function BlastSendPage() {
 							message={preview}
 							label={selected?.name ?? "Tamu"}
 							linkPreview={linkPreview}
+							linkPreviewFirst
 						/>
 					</div>
 				) : previewLoading && selected ? (

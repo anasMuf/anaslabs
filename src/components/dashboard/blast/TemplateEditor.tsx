@@ -302,6 +302,12 @@ export function TemplateEditor({
 					linkPreview={linkPreview}
 					linkPreviewFirst
 				/>
+				<p className="font-body text-[10px] leading-relaxed text-inv-muted">
+					Saat dikirim, Wablas menambahkan URL preview di akhir pesan. Pratinjau
+					di atas sudah menampilkan hasil finalnya; letakkan{" "}
+					<span className="text-inv-ink">{"{link}"}</span> di baris terakhir
+					agar urutan template sama.
+				</p>
 			</div>
 		</div>
 	);
