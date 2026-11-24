@@ -1,7 +1,9 @@
 import {
 	createRouter as createTanStackRouter,
 	type ErrorComponentProps,
+	useRouterState,
 } from "@tanstack/react-router";
+import DashboardPending from "#/components/dashboard/DashboardPending";
 import { routeTree } from "./routeTree.gen";
 
 /**
@@ -60,6 +62,19 @@ function DefaultError({ reset }: ErrorComponentProps) {
 	);
 }
 
+/**
+ * Pending UI for route loaders. Only the dashboard shows it; public routes keep
+ * their previous behaviour of leaving the old content in place.
+ */
+function RoutePending() {
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	});
+
+	if (!pathname.startsWith("/dashboard")) return null;
+	return <DashboardPending />;
+}
+
 export function getRouter() {
 	const router = createTanStackRouter({
 		routeTree,
@@ -67,6 +82,10 @@ export function getRouter() {
 		scrollRestoration: true,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
+		defaultPendingComponent: RoutePending,
+		// Short delay avoids a flash on instant loads; once shown, keep it briefly.
+		defaultPendingMs: 150,
+		defaultPendingMinMs: 400,
 		defaultNotFoundComponent: DefaultNotFound,
 		defaultErrorComponent: DefaultError,
 	});
