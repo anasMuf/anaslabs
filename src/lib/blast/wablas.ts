@@ -359,14 +359,12 @@ export async function sendMessages(
 				...(await postBatch(
 					credentials,
 					"/api/v2/send-link",
-					linkRows.map(({ row, link }) => {
-						const text = linkText(row.message);
-						return {
-							phone: row.phone,
-							message: text ? { text, link } : { link },
-							ref_id: row.refId,
-						};
-					}),
+					linkRows.map(({ row, link }) => ({
+						phone: row.phone,
+						text: linkText(row.message),
+						link,
+						ref_id: row.refId,
+					})),
 					fetchImpl,
 				)),
 			);

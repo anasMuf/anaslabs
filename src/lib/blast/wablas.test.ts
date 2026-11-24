@@ -193,10 +193,8 @@ describe("sendMessages", () => {
 			data: [
 				{
 					phone: "628",
-					message: {
-						text: "Buka undangan:",
-						link: "https://anaslabs.my.id/invitation/budi",
-					},
+					text: "Buka undangan:",
+					link: "https://anaslabs.my.id/invitation/budi",
 					ref_id: "r",
 				},
 			],
@@ -228,9 +226,9 @@ describe("sendMessages", () => {
 		);
 
 		const body = JSON.parse(String(calls[0]?.init.body)) as {
-			data: Array<{ message: { text: string } }>;
+			data: Array<{ text: string }>;
 		};
-		expect(body.data[0]?.message.text).toBe(
+		expect(body.data[0]?.text).toBe(
 			"Assalamu'alaikum\n\nTerima kasih.\n\nBuka undangan:",
 		);
 	});
