@@ -599,13 +599,25 @@ export default function FrameEditor({
 		selected?.type === "overlay" ? overlays[selected.index] : undefined;
 	const textX = layout.textX ?? 60;
 
+	// The background resize handle must follow the image corner, not the stage.
+	// Clamp it so it stays reachable when the image is panned past the edges.
+	const backgroundHeight = backgroundImage
+		? heightForWidth(backgroundImage.width)
+		: 0;
+	const backgroundRight = backgroundImage
+		? clamp(backgroundImage.x + backgroundImage.width, 0, layout.width)
+		: 0;
+	const backgroundBottom = backgroundImage
+		? clamp(backgroundImage.y + backgroundHeight, 0, layout.height)
+		: 0;
+
 	const interactionHint =
 		selected?.type === "slot"
 			? "Geser kotak foto untuk memindahkan; tarik pegangan di sudut kanan bawah untuk mengubah ukuran. Nilai presisi bisa diketik di panel ini."
 			: selected?.type === "text"
 				? "Geser blok teks langsung di kartu, atau ketik X/Y di panel ini."
 				: selected?.type === "background"
-					? "Geser gambar background di kartu. Untuk memindahkan seluruh area (termasuk bagian kosong) atau mengubah ukuran dari sudut, aktifkan “Atur background” lalu tarik pegangan di kanan bawah."
+					? "Geser gambar background di kartu; tarik pegangan di sudut kanan bawah gambar untuk mengubah ukurannya. Aktifkan “Atur background” untuk menggeser seluruh area, termasuk bagian kosong."
 					: selected?.type === "overlay"
 						? "Geser overlay di kartu; tarik pegangan di sudut kanan bawah untuk mengubah lebar. Tinggi mengikuti rasio gambar."
 						: null;
@@ -862,46 +874,51 @@ export default function FrameEditor({
 				</button>
 
 				{backgroundMode && backgroundImage ? (
-					<div className="absolute inset-0 z-20">
-						<button
-							type="button"
-							aria-label="Geser background"
-							onPointerDown={(event) =>
-								startDrag(
-									event,
-									{
-										mode: "move",
-										target: "background",
-										startBackground: backgroundImage,
-									},
-									{ type: "background" },
-								)
-							}
-							onPointerMove={handlePointerMove}
-							onPointerUp={endDrag}
-							onPointerCancel={endDrag}
-							className="absolute inset-0 cursor-move"
-						/>
-						<button
-							type="button"
-							aria-label="Ubah ukuran background"
-							onPointerDown={(event) =>
-								startDrag(
-									event,
-									{
-										mode: "resize",
-										target: "background",
-										startBackground: backgroundImage,
-									},
-									{ type: "background" },
-								)
-							}
-							onPointerMove={handlePointerMove}
-							onPointerUp={endDrag}
-							onPointerCancel={endDrag}
-							className="absolute bottom-2 right-2 h-5 w-5 cursor-nwse-resize rounded-sm border border-inv-ink bg-inv-bg"
-						/>
-					</div>
+					<button
+						type="button"
+						aria-label="Geser background"
+						onPointerDown={(event) =>
+							startDrag(
+								event,
+								{
+									mode: "move",
+									target: "background",
+									startBackground: backgroundImage,
+								},
+								{ type: "background" },
+							)
+						}
+						onPointerMove={handlePointerMove}
+						onPointerUp={endDrag}
+						onPointerCancel={endDrag}
+						className="absolute inset-0 z-20 cursor-move"
+					/>
+				) : null}
+				{backgroundImage &&
+				(backgroundMode || selected?.type === "background") ? (
+					<button
+						type="button"
+						aria-label="Ubah ukuran background"
+						onPointerDown={(event) =>
+							startDrag(
+								event,
+								{
+									mode: "resize",
+									target: "background",
+									startBackground: backgroundImage,
+								},
+								{ type: "background" },
+							)
+						}
+						onPointerMove={handlePointerMove}
+						onPointerUp={endDrag}
+						onPointerCancel={endDrag}
+						className="absolute z-30 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize rounded-sm border border-inv-ink bg-inv-bg"
+						style={{
+							left: `${(backgroundRight / layout.width) * 100}%`,
+							top: `${(backgroundBottom / layout.height) * 100}%`,
+						}}
+					/>
 				) : null}
 			</div>
 

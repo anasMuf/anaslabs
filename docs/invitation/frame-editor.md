@@ -111,7 +111,8 @@ tanpa keputusan eksplisit.
 - [x] Background/radius + upload/hapus overlay.
 - [x] Background image global: upload, mode “Atur background” (geser + resize),
       cover ulang, dan hapus; gambar background juga bisa dipilih & digeser
-      langsung di kartu.
+      langsung di kartu, dengan pegangan resize yang menempel di sudut kanan
+      bawah gambar dan di-clamp agar tetap terjangkau.
 - [x] Petunjuk interaksi kontekstual untuk slot, teks, overlay, dan background
       saat elemen dipilih.
 - [x] Undo/redo + reset layout.
