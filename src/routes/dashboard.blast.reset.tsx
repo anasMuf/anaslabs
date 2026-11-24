@@ -27,7 +27,7 @@ function BlastResetPage() {
 		null,
 	);
 
-	const ready = confirm.trim() === "RESET";
+	const ready = confirm.trim().toUpperCase() === "RESET";
 
 	async function refresh() {
 		const next = await getBlastResetSummary();
@@ -105,7 +105,7 @@ function BlastResetPage() {
 					</span>
 					<input
 						value={confirm}
-						onChange={(event) => setConfirm(event.target.value)}
+						onChange={(event) => setConfirm(event.target.value.toUpperCase())}
 						placeholder="RESET"
 						autoComplete="off"
 						className="w-40 rounded-2xl border border-inv-rule bg-inv-bg px-3 py-2 font-body text-[11px] tracking-[0.12em] text-inv-ink uppercase placeholder:text-inv-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"

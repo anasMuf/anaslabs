@@ -57,7 +57,11 @@ function parseTarget(value: unknown): ResetTarget {
 }
 
 function confirmed(value: unknown): boolean {
-	return String(value ?? "").trim() === CONFIRM_WORD;
+	return (
+		String(value ?? "")
+			.trim()
+			.toUpperCase() === CONFIRM_WORD
+	);
 }
 
 function firstError(
