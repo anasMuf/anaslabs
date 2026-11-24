@@ -1,27 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TemplateEditor } from "#/components/dashboard/blast/TemplateEditor";
+import { buildLinkPreview } from "#/lib/blast/link-preview";
+import { getInvitationMeta } from "#/lib/blast/og";
 import { listBlastTemplates } from "#/lib/blast/templates";
 import { listGuestsPage } from "#/lib/guests";
 
 export const Route = createFileRoute("/dashboard/blast/template")({
 	loader: async () => {
-		const [templates, page] = await Promise.all([
+		const [templates, page, meta] = await Promise.all([
 			listBlastTemplates(),
 			listGuestsPage({
 				data: { limit: 30, offset: 0, delivery: "digital", source: "anas" },
 			}),
+			getInvitationMeta(),
 		]);
 		return {
 			templates: templates.templates,
 			guests: page.rows,
 			guestTotal: page.total,
+			linkPreview: buildLinkPreview(meta),
 		};
 	},
 	component: BlastTemplatePage,
 });
 
 function BlastTemplatePage() {
-	const { templates, guests, guestTotal } = Route.useLoaderData();
+	const { templates, guests, guestTotal, linkPreview } = Route.useLoaderData();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -33,6 +37,7 @@ function BlastTemplatePage() {
 				initial={templates}
 				guests={guests}
 				guestTotal={guestTotal}
+				linkPreview={linkPreview}
 			/>
 		</div>
 	);

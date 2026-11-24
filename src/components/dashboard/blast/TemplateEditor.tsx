@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
+import type { LinkPreviewInfo } from "#/lib/blast/link-preview";
 import {
 	renderTemplate,
 	TEMPLATE_MAX_LENGTH,
@@ -17,6 +18,7 @@ interface Props {
 	initial: BlastTemplateView[];
 	guests: DashboardGuest[];
 	guestTotal: number;
+	linkPreview: LinkPreviewInfo;
 }
 
 const SAMPLE_GUEST = {
@@ -31,6 +33,7 @@ export function TemplateEditor({
 	initial,
 	guests: initialGuests,
 	guestTotal: initialGuestTotal,
+	linkPreview,
 }: Props) {
 	const toast = useToast();
 	const [templates, setTemplates] = useState<BlastTemplateView[]>(initial);
@@ -296,6 +299,7 @@ export function TemplateEditor({
 				<MessagePreview
 					message={preview}
 					label={`${GUEST_SOURCE_LABELS[source]} → ${sample.name}`}
+					linkPreview={linkPreview}
 				/>
 			</div>
 		</div>

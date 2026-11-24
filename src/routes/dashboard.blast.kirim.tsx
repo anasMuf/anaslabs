@@ -3,6 +3,8 @@ import { useState } from "react";
 import { MessagePreview } from "#/components/dashboard/blast/MessagePreview";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
+import { buildLinkPreview } from "#/lib/blast/link-preview";
+import { getInvitationMeta } from "#/lib/blast/og";
 import {
 	getBlastAudience,
 	getBlastStatus,
@@ -16,16 +18,18 @@ import { type DashboardGuest, listGuestsPage } from "#/lib/guests";
 
 export const Route = createFileRoute("/dashboard/blast/kirim")({
 	loader: async () => {
-		const [audience, status, guests] = await Promise.all([
+		const [audience, status, guests, meta] = await Promise.all([
 			getBlastAudience({ data: { onlyUnsent: true, source: "" } }),
 			getBlastStatus(),
 			listGuestsPage({ data: { limit: 30, offset: 0, delivery: "digital" } }),
+			getInvitationMeta(),
 		]);
 		return {
 			audience,
 			status,
 			guests: guests.rows,
 			guestTotal: guests.total,
+			linkPreview: buildLinkPreview(meta),
 		};
 	},
 	component: BlastSendPage,
@@ -51,6 +55,7 @@ function formatTime(value: string | null): string {
 
 function BlastSendPage() {
 	const initial = Route.useLoaderData();
+	const linkPreview = initial.linkPreview;
 	const toast = useToast();
 	const [onlyUnsent, setOnlyUnsent] = useState(true);
 	const [source, setSource] = useState<GuestSource | "">("");
@@ -537,6 +542,7 @@ function BlastSendPage() {
 						<MessagePreview
 							message={preview}
 							label={selected?.name ?? "Tamu"}
+							linkPreview={linkPreview}
 						/>
 					</div>
 				) : null}

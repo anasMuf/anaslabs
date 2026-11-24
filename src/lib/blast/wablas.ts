@@ -10,9 +10,13 @@
  *   body `{ data: [{ phone, message, ref_id }] }`, maks 50 baris per request.
  */
 
+import { firstUrl } from "./url";
+
 export const DEFAULT_WABLAS_BASE_URL = "https://jogja.wablas.com";
 export const WABLAS_MAX_ROWS = 50;
 const REQUEST_TIMEOUT_MS = 30_000;
+
+export { firstUrl };
 
 export interface WablasCredentials {
 	baseUrl: string;
@@ -219,15 +223,6 @@ function readString(value: unknown): string | null {
 function readNumber(value: unknown): number | null {
 	const parsed = Number(value);
 	return Number.isFinite(parsed) ? parsed : null;
-}
-
-const URL_PATTERN = /https?:\/\/[^\s<>"']+/i;
-
-/** URL pertama dalam pesan, tanpa tanda baca penutup. */
-export function firstUrl(message: string): string | null {
-	const match = message.match(URL_PATTERN);
-	if (!match) return null;
-	return match[0].replace(/[.,;:!?)\]]+$/g, "");
 }
 
 function linkText(message: string, link: string): string {
