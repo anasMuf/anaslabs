@@ -47,6 +47,14 @@ export interface WablasSendResult {
 	status: string;
 }
 
+/** Baris mentah dari `data.messages[]`; send-link kadang tidak mengembalikan ref_id. */
+interface ParsedSendMessage {
+	refId: string | null;
+	phone: string | null;
+	messageId: string | null;
+	status: string;
+}
+
 export type WablasErrorKind = "transient" | "permanent";
 
 export class WablasError extends Error {
@@ -230,7 +238,7 @@ function linkText(message: string): string {
 	return prepareLinkPreviewMessage(message).text;
 }
 
-function parseSendResults(response: JsonResponse): WablasSendResult[] {
+function parseSendResults(response: JsonResponse): ParsedSendMessage[] {
 	const data =
 		response.body.data && typeof response.body.data === "object"
 			? (response.body.data as Record<string, unknown>)
@@ -242,16 +250,64 @@ function parseSendResults(response: JsonResponse): WablasSendResult[] {
 			? [rawMessages]
 			: [];
 
-	const results: WablasSendResult[] = [];
+	const results: ParsedSendMessage[] = [];
 	for (const item of list) {
 		if (!item || typeof item !== "object") continue;
 		const message = item as Record<string, unknown>;
 		const refId = readString(message.ref_id);
-		if (!refId) continue;
+		const phone = readString(message.phone);
+		// Tanpa ref_id maupun phone baris ini tidak bisa dicocokkan ke request.
+		if (!refId && !phone) continue;
 		results.push({
 			refId,
+			phone,
 			messageId: readString(message.id),
 			status: readString(message.status) ?? "pending",
+		});
+	}
+
+	return results;
+}
+
+function digits(value: string | null): string {
+	return (value ?? "").replace(/\D/g, "");
+}
+
+/**
+ * Cocokkan response ke baris request. `send-link` dapat mengembalikan
+ * `ref_id: null`, jadi nomor telepon dipakai sebagai kunci cadangan.
+ */
+function alignResults(
+	rows: WablasSendRow[],
+	messages: ParsedSendMessage[],
+): WablasSendResult[] {
+	const used = new Set<number>();
+	const byRef = new Map<string, number>();
+	messages.forEach((message, index) => {
+		if (message.refId) byRef.set(message.refId, index);
+	});
+
+	const results: WablasSendResult[] = [];
+	for (const row of rows) {
+		let index = byRef.get(row.refId);
+		if (index !== undefined && used.has(index)) index = undefined;
+		if (index === undefined) {
+			index = messages.findIndex(
+				(message, position) =>
+					!used.has(position) &&
+					Boolean(message.phone) &&
+					digits(message.phone) === digits(row.phone),
+			);
+		}
+		if (index === undefined || index < 0) continue;
+
+		used.add(index);
+		const message = messages[index];
+		if (!message) continue;
+		results.push({
+			refId: row.refId,
+			messageId: message.messageId,
+			status: message.status,
 		});
 	}
 
@@ -263,7 +319,7 @@ async function postBatch(
 	path: string,
 	items: unknown[],
 	fetchImpl: typeof fetch,
-): Promise<WablasSendResult[]> {
+): Promise<ParsedSendMessage[]> {
 	const baseUrl = normalizeBaseUrl(credentials.baseUrl);
 	const response = await requestJson(
 		`${baseUrl}${path}`,
@@ -336,10 +392,10 @@ export async function sendMessages(
 		else textRows.push(row);
 	}
 
-	const results: WablasSendResult[] = [];
+	const messages: ParsedSendMessage[] = [];
 
 	if (textRows.length) {
-		results.push(
+		messages.push(
 			...(await postBatch(
 				credentials,
 				"/api/v2/send-message",
@@ -355,7 +411,7 @@ export async function sendMessages(
 
 	if (linkRows.length) {
 		try {
-			results.push(
+			messages.push(
 				...(await postBatch(
 					credentials,
 					"/api/v2/send-link",
@@ -374,7 +430,7 @@ export async function sendMessages(
 			if (error instanceof WablasError && error.kind === "transient") {
 				throw error;
 			}
-			results.push(
+			messages.push(
 				...(await postBatch(
 					credentials,
 					"/api/v2/send-message",
@@ -389,5 +445,5 @@ export async function sendMessages(
 		}
 	}
 
-	return results;
+	return alignResults(rows, messages);
 }

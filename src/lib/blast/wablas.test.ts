@@ -233,6 +233,35 @@ describe("sendMessages", () => {
 		);
 	});
 
+	it("matches send-link responses by phone when ref_id is missing", async () => {
+		const fetchImpl = makeFetch(
+			() =>
+				json({
+					status: true,
+					data: {
+						messages: [{ id: "m", phone: "628111", status: "pending" }],
+					},
+				}),
+			[],
+		);
+
+		const results = await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[
+				{
+					phone: "628111",
+					message: "Buka https://anaslabs.my.id/invitation/budi",
+					refId: "r",
+				},
+			],
+			fetchImpl,
+		);
+
+		expect(results).toEqual([
+			{ refId: "r", messageId: "m", status: "pending" },
+		]);
+	});
+
 	it("falls back to plain text when send-link is rejected", async () => {
 		const calls: Call[] = [];
 		const fetchImpl = makeFetch(
