@@ -300,6 +300,7 @@ export function TemplateEditor({
 					message={preview}
 					label={`${GUEST_SOURCE_LABELS[source]} → ${sample.name}`}
 					linkPreview={linkPreview}
+					linkPreviewFirst
 				/>
 			</div>
 		</div>
