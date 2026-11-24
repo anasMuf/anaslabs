@@ -85,8 +85,9 @@ Asumsi yang disetujui secara default:
 ### Photobooth
 
 - Fase A (`/dashboard/photobooth`): edit copy kartu (`eyebrow`, `names`, `date`),
-  `downloadName`, `scale`; preview canvas memakai `drawComposition` dengan foto
-  placeholder. Geometri layout ditampilkan read-only.
+  `textColor` (satu warna untuk ketiga baris; default hitam), `downloadName`,
+  `scale`; preview canvas memakai `drawComposition` dengan foto placeholder.
+  Geometri layout ditampilkan read-only.
 - Fase B (4C): editor frame bebas — drag/resize slot, tambah/hapus slot per
   layout (1/2/4), geser teks, atur background/radius, unggah overlay PNG
   opsional; perubahan tersimpan ke dokumen konten yang sama. Fase B punya spec
@@ -138,7 +139,8 @@ Asumsi yang disetujui secara default:
 - [ ] Dua tab editor: tab dengan `baseUpdatedAt` lama ditolak dan tidak
       menimpa perubahan tab lain.
 - [ ] `/dashboard/photobooth` mengubah copy kartu dan preview canvas ikut berubah;
-      undangan/photobooth memakai copy baru.
+      undangan/photobooth memakai copy baru. Mengubah warna teks kartu juga
+      tercermin di preview dan hasil unduhan.
 - [ ] Fase B: drag/resize slot tersimpan dan hasil unduhan mengikuti posisi baru.
 - [ ] `/dashboard/wall` menghapus kartu + file Storage; mode token lama tetap
       berfungsi.

@@ -22,6 +22,7 @@ export const CARD_RADIUS = 10;
 export function buildPhotoboothSettings(
 	config: PhotoboothConfig,
 ): PhotoboothSettings {
+	const textColor = config.textColor ?? "#000000";
 	const lines = (y: number, x: number): PhotoboothTextLine[] => [
 		{
 			value: config.card.eyebrow,
@@ -31,7 +32,7 @@ export function buildPhotoboothSettings(
 			fontFamily: DISPLAY_FONT,
 			fontSize: 8,
 			letterSpacing: 0.8,
-			color: "#000000",
+			color: textColor,
 			align: "center",
 		},
 		{
@@ -41,7 +42,7 @@ export function buildPhotoboothSettings(
 			width: 228,
 			fontFamily: DISPLAY_FONT,
 			fontSize: 18,
-			color: "#000000",
+			color: textColor,
 			align: "center",
 		},
 		{
@@ -52,7 +53,7 @@ export function buildPhotoboothSettings(
 			fontFamily: BODY_FONT,
 			fontSize: 8,
 			letterSpacing: 0.8,
-			color: "#000000",
+			color: textColor,
 			align: "center",
 		},
 	];

@@ -219,6 +219,7 @@ export const invitation = {
 			names: "Anas & Mila",
 			date: "19 - 20 Desember 2026",
 		},
+		textColor: "#000000",
 		layouts: {
 			1: {
 				width: 348,

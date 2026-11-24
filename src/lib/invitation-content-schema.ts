@@ -149,6 +149,7 @@ const photoboothSchema = z.object({
 		names: text(160),
 		date: text(120),
 	}),
+	textColor: hexColor.optional(),
 	layouts: z.object({
 		"1": cardLayoutSchema,
 		"2": cardLayoutSchema,

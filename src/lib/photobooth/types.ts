@@ -105,5 +105,7 @@ export interface PhotoboothConfig {
 		names: string;
 		date: string;
 	};
+	/** Colour of all three card text lines, `#RRGGBB`; defaults to black. */
+	textColor?: string;
 	layouts: Record<PhotoboothGrid, PhotoboothCardLayout>;
 }

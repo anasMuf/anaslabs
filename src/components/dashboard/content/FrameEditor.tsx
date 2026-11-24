@@ -900,7 +900,10 @@ export default function FrameEditor({
 					<span className="text-[8px] uppercase tracking-[0.14em] text-inv-muted">
 						Teks
 					</span>
-					<span className="w-full truncate font-display text-[10px] text-inv-ink">
+					<span
+						className="w-full truncate font-display text-[10px]"
+						style={{ color: photobooth.textColor ?? "#000000" }}
+					>
 						{photobooth.card.names}
 					</span>
 				</button>

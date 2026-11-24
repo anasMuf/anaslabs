@@ -67,6 +67,20 @@ describe("buildPhotoboothSettings", () => {
 		expect(date.fontFamily).toBe("Montserrat Variable");
 	});
 
+	it("applies the configured card text colour, defaulting to black", () => {
+		const [eyebrow, names, date] = settings.layouts[1].text;
+		expect(eyebrow.color).toBe("#000000");
+		expect(names.color).toBe("#000000");
+		expect(date.color).toBe("#000000");
+
+		const themed = buildPhotoboothSettings({ ...config, textColor: "#7B2438" });
+		expect(themed.layouts[1].text.map((line) => line.color)).toEqual([
+			"#7B2438",
+			"#7B2438",
+			"#7B2438",
+		]);
+	});
+
 	it("copies slots so callers cannot mutate the shared config", () => {
 		const layout = buildPhotoboothSettings(config).layouts[1];
 		layout.slots[0].x = 999;

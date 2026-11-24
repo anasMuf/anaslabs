@@ -172,6 +172,22 @@ function PhotoboothScreen({
 							value={content.photobooth.card.date}
 							onChange={(date) => updateCard({ date })}
 						/>
+						<label className="block">
+							<span className="font-body text-[9.5px] font-semibold tracking-[0.12em] text-inv-muted">
+								WARNA TEKS
+							</span>
+							<input
+								type="color"
+								value={content.photobooth.textColor ?? "#000000"}
+								onChange={(event) =>
+									updatePhotobooth({ textColor: event.target.value })
+								}
+								className="mt-1 h-9 w-full rounded-xl border border-inv-rule bg-inv-bg"
+							/>
+							<span className="mt-1 block font-body text-[10px] leading-[1.5] text-inv-muted">
+								Berlaku untuk eyebrow, nama, dan tanggal di kartu.
+							</span>
+						</label>
 					</SectionCard>
 
 					<SectionCard
