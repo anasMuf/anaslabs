@@ -637,7 +637,7 @@ export default function FrameEditor({
 			: selected?.type === "text"
 				? "Geser blok teks langsung di kartu, atau ketik X/Y di panel ini."
 				: selected?.type === "background"
-					? "Geser gambar background di kartu; tarik pegangan di sudut kanan bawah gambar untuk mengubah ukurannya. Aktifkan “Atur background” untuk menggeser seluruh area, termasuk bagian kosong. Klik “Batalkan pilihan” atau tekan Esc untuk melepas pilihan."
+					? "Geser gambar background di kartu; tarik pegangan di sudut kanan bawah gambar untuk mengubah ukurannya. Mode “Atur background” membuat seluruh area gambar tetap bisa digeser meski tertutup slot atau teks. Klik di luar gambar atau tekan Esc untuk melepas pilihan."
 					: selected?.type === "overlay"
 						? "Geser overlay di kartu; tarik pegangan di sudut kanan bawah untuk mengubah lebar. Tinggi mengikuti rasio gambar."
 						: null;
@@ -701,7 +701,10 @@ export default function FrameEditor({
 			<div
 				ref={stageRef}
 				onPointerDown={(event) => {
-					if (event.target === event.currentTarget) setSelected(null);
+					if (event.target === event.currentTarget) {
+						setSelected(null);
+						setBackgroundMode(false);
+					}
 				}}
 				className="relative mx-auto w-full max-w-[360px] touch-none select-none overflow-hidden border border-inv-rule shadow-[0_10px_28px_-24px_rgba(52,54,46,0.6)]"
 				style={{
@@ -920,7 +923,13 @@ export default function FrameEditor({
 						onPointerMove={handlePointerMove}
 						onPointerUp={endDrag}
 						onPointerCancel={endDrag}
-						className="absolute inset-0 z-20 cursor-move"
+						className="absolute z-20 cursor-move touch-none"
+						style={{
+							left: `${(backgroundImage.x / layout.width) * 100}%`,
+							top: `${(backgroundImage.y / layout.height) * 100}%`,
+							width: `${(backgroundImage.width / layout.width) * 100}%`,
+							height: `${(backgroundHeight / layout.height) * 100}%`,
+						}}
 					/>
 				) : null}
 				{backgroundImage &&

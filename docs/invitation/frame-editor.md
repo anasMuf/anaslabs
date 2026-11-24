@@ -112,7 +112,8 @@ tanpa keputusan eksplisit.
 - [x] Background image global: upload, mode “Atur background” (geser + resize),
       cover ulang, dan hapus; gambar background juga bisa dipilih & digeser
       langsung di kartu, dengan pegangan resize yang menempel di sudut kanan
-      bawah gambar dan di-clamp agar tetap terjangkau.
+      bawah gambar dan di-clamp agar tetap terjangkau. Area geser mode ini dibatasi
+      ke area gambar, bukan seluruh kartu.
 - [x] Petunjuk interaksi kontekstual untuk slot, teks, overlay, dan background
       saat elemen dipilih; pilihan bisa dilepas lewat tombol “Batalkan pilihan”
       atau Esc (perlu karena background bisa menutupi seluruh kartu).
