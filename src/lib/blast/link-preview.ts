@@ -32,7 +32,7 @@ export function buildLinkPreview(meta: InvitationMetaLike): LinkPreviewInfo {
 		description:
 			meta.description?.trim() ||
 			"Dengan penuh kebahagiaan, kami mengundang Anda untuk menghadiri pernikahan kami.",
-		imageUrl: meta.imageUrl?.trim() || `${SITE_URL}/invitation/og.jpg`,
+		imageUrl: meta.imageUrl?.trim() || `${SITE_URL}/invitation/og-card.jpg`,
 		host,
 	};
 }

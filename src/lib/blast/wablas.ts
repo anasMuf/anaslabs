@@ -226,12 +226,39 @@ function readNumber(value: unknown): number | null {
 }
 
 function linkText(message: string, link: string): string {
-	return message
-		.split(link)
-		.join("")
+	const lines = message.replace(/\r\n?/g, "\n").split("\n");
+	const kept: string[] = [];
+	let trailingLabel = "";
+
+	for (const line of lines) {
+		if (!line.includes(link)) {
+			kept.push(line);
+			continue;
+		}
+
+		const index = line.indexOf(link);
+		const before = line.slice(0, index).trim();
+		const after = line.slice(index + link.length).trim();
+
+		// Baris "Buka undangan: <link>" — Wablas selalu menambahkan URL preview
+		// di akhir pesan, jadi labelnya dipindah ke akhir agar tidak menggantung.
+		if (!after && before.endsWith(":")) {
+			trailingLabel = before;
+			continue;
+		}
+
+		const remainder = `${before} ${after}`.trim();
+		if (remainder) kept.push(remainder);
+	}
+
+	const text = kept
+		.join("\n")
 		.replace(/[ \t]+\n/g, "\n")
 		.replace(/\n{3,}/g, "\n\n")
 		.trim();
+
+	if (!trailingLabel) return text;
+	return text ? `${text}\n\n${trailingLabel}` : trailingLabel;
 }
 
 function parseSendResults(response: JsonResponse): WablasSendResult[] {

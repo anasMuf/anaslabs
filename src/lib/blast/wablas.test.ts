@@ -203,6 +203,38 @@ describe("sendMessages", () => {
 		});
 	});
 
+	it("moves a dangling link label to the end for the preview URL", async () => {
+		const calls: Call[] = [];
+		const fetchImpl = makeFetch(
+			() =>
+				json({
+					status: true,
+					data: { messages: [{ id: "m", ref_id: "r", status: "pending" }] },
+				}),
+			calls,
+		);
+
+		await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[
+				{
+					phone: "628",
+					message:
+						"Assalamu'alaikum\n\nBuka undangan: https://anaslabs.my.id/invitation/budi\n\nTerima kasih.",
+					refId: "r",
+				},
+			],
+			fetchImpl,
+		);
+
+		const body = JSON.parse(String(calls[0]?.init.body)) as {
+			data: Array<{ message: { text: string } }>;
+		};
+		expect(body.data[0]?.message.text).toBe(
+			"Assalamu'alaikum\n\nTerima kasih.\n\nBuka undangan:",
+		);
+	});
+
 	it("falls back to plain text when send-link is rejected", async () => {
 		const calls: Call[] = [];
 		const fetchImpl = makeFetch(

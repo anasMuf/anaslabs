@@ -13,6 +13,13 @@ import { defaultContent } from "#/lib/invitation-content-default";
 import { getInvitationView } from "#/lib/invitation-view";
 import { SITE_URL } from "#/lib/site";
 
+function ogImageMime(url: string): string {
+	const path = url.split("?")[0]?.toLowerCase() ?? "";
+	if (path.endsWith(".png")) return "image/png";
+	if (path.endsWith(".webp")) return "image/webp";
+	return "image/jpeg";
+}
+
 export const Route = createFileRoute("/invitation/$slug")({
 	loader: async ({ params }) => {
 		const [guest, content, meta] = await Promise.all([
@@ -35,7 +42,9 @@ export const Route = createFileRoute("/invitation/$slug")({
 		const description =
 			loaderData?.meta?.description?.trim() || defaultDescription;
 		const ogImage =
-			loaderData?.meta?.imageUrl?.trim() || `${SITE_URL}/invitation/og.jpg`;
+			loaderData?.meta?.imageUrl?.trim() ||
+			`${SITE_URL}/invitation/og-card.jpg`;
+		const ogImageType = ogImageMime(ogImage);
 
 		return {
 			meta: [
@@ -50,11 +59,17 @@ export const Route = createFileRoute("/invitation/$slug")({
 				{ property: "og:title", content: title },
 				{ property: "og:description", content: description },
 				{ property: "og:type", content: "website" },
+				{ property: "og:site_name", content: "Anas & Mila" },
+				{ property: "og:locale", content: "id_ID" },
 				{ property: "og:image", content: ogImage },
+				{ property: "og:image:secure_url", content: ogImage },
+				{ property: "og:image:type", content: ogImageType },
 				{ property: "og:image:width", content: "1200" },
 				{ property: "og:image:height", content: "630" },
 				{ property: "og:image:alt", content: title },
 				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
 				{ name: "twitter:image", content: ogImage },
 			],
 		};

@@ -78,7 +78,7 @@ dengan `blast-templates` setelah dua modul pertama selesai.
   `og_description`, `og_image_url`.
 - Field kosong berarti memakai nilai default yang sekarang:
   judul `${nama pasangan} — Undangan Pernikahan`, deskripsi dari view undangan,
-  gambar `${SITE_URL}/invitation/og.jpg`.
+  gambar `${SITE_URL}/invitation/og-card.jpg`.
 - Gambar OG dapat diunggah dari dashboard: JPEG/PNG/WebP, maks 2 MB, disarankan
   1200×630. Disimpan di bucket `invitation-media` dengan path `og/<uuid>.<ext>`
   dan URL publiknya disimpan di `invitation_meta`.

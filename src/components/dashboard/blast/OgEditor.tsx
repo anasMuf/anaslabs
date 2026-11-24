@@ -224,7 +224,7 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 						/>
 					) : (
 						<div className="flex aspect-[1200/630] w-full items-center justify-center bg-inv-ink/5 font-body text-[11px] text-inv-muted">
-							Gambar default (og.jpg)
+							Gambar default (og-card.jpg)
 						</div>
 					)}
 					<div className="bg-inv-bg px-4 py-3">
