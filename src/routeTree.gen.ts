@@ -18,6 +18,7 @@ import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as InvitationSlugRouteImport } from './routes/invitation.$slug'
 import { Route as DashboardWallRouteImport } from './routes/dashboard.wall'
 import { Route as DashboardTamuRouteImport } from './routes/dashboard.tamu'
+import { Route as DashboardPhotoboothRouteImport } from './routes/dashboard.photobooth'
 import { Route as DashboardLoginRouteImport } from './routes/dashboard.login'
 import { Route as DashboardKontenRouteImport } from './routes/dashboard.konten'
 import { Route as DashboardImporRouteImport } from './routes/dashboard.impor'
@@ -75,6 +76,11 @@ const DashboardWallRoute = DashboardWallRouteImport.update({
 const DashboardTamuRoute = DashboardTamuRouteImport.update({
   id: '/tamu',
   path: '/tamu',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPhotoboothRoute = DashboardPhotoboothRouteImport.update({
+  id: '/photobooth',
+  path: '/photobooth',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardLoginRoute = DashboardLoginRouteImport.update({
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
+  '/dashboard/photobooth': typeof DashboardPhotoboothRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/dashboard/wall': typeof DashboardWallRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
+  '/dashboard/photobooth': typeof DashboardPhotoboothRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/dashboard/wall': typeof DashboardWallRoute
   '/': typeof SiteIndexRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/dashboard/impor': typeof DashboardImporRoute
   '/dashboard/konten': typeof DashboardKontenRoute
   '/dashboard/login': typeof DashboardLoginRoute
+  '/dashboard/photobooth': typeof DashboardPhotoboothRoute
   '/dashboard/tamu': typeof DashboardTamuRoute
   '/dashboard/wall': typeof DashboardWallRoute
   '/invitation/$slug': typeof InvitationSlugRouteWithChildren
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
+    | '/dashboard/photobooth'
     | '/dashboard/tamu'
     | '/dashboard/wall'
     | '/invitation/$slug'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
+    | '/dashboard/photobooth'
     | '/dashboard/tamu'
     | '/dashboard/wall'
     | '/'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/dashboard/impor'
     | '/dashboard/konten'
     | '/dashboard/login'
+    | '/dashboard/photobooth'
     | '/dashboard/tamu'
     | '/dashboard/wall'
     | '/invitation/$slug'
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/tamu'
       fullPath: '/dashboard/tamu'
       preLoaderRoute: typeof DashboardTamuRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/photobooth': {
+      id: '/dashboard/photobooth'
+      path: '/photobooth'
+      fullPath: '/dashboard/photobooth'
+      preLoaderRoute: typeof DashboardPhotoboothRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/login': {
@@ -496,6 +515,7 @@ interface DashboardRouteChildren {
   DashboardImporRoute: typeof DashboardImporRoute
   DashboardKontenRoute: typeof DashboardKontenRoute
   DashboardLoginRoute: typeof DashboardLoginRoute
+  DashboardPhotoboothRoute: typeof DashboardPhotoboothRoute
   DashboardTamuRoute: typeof DashboardTamuRoute
   DashboardWallRoute: typeof DashboardWallRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -507,6 +527,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardImporRoute: DashboardImporRoute,
   DashboardKontenRoute: DashboardKontenRoute,
   DashboardLoginRoute: DashboardLoginRoute,
+  DashboardPhotoboothRoute: DashboardPhotoboothRoute,
   DashboardTamuRoute: DashboardTamuRoute,
   DashboardWallRoute: DashboardWallRoute,
   DashboardIndexRoute: DashboardIndexRoute,

@@ -88,11 +88,11 @@ function DashboardOverview() {
 				</Link>
 
 				<Link
-					to="/dashboard/fotobooth"
+					to="/dashboard/photobooth"
 					className="flex items-start justify-between gap-4 rounded-3xl border border-inv-rule bg-inv-card px-5 py-4 transition-colors hover:bg-inv-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 				>
 					<div>
-						<p className="font-display text-[18px] leading-tight">Fotobooth</p>
+						<p className="font-display text-[18px] leading-tight">Photobooth</p>
 						<p className="mt-1 font-body text-[11px] leading-[1.7] text-inv-muted">
 							Ubah teks kartu, nama file, skala, dan lihat pratinjau semua
 							layout.

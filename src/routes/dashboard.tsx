@@ -76,10 +76,10 @@ function DashboardLayout() {
 							Konten Undangan
 						</Link>
 						<Link
-							to="/dashboard/fotobooth"
+							to="/dashboard/photobooth"
 							className="transition-colors hover:text-inv-ink data-[status=active]:font-semibold data-[status=active]:text-inv-ink"
 						>
-							Fotobooth
+							Photobooth
 						</Link>
 						<Link
 							to="/dashboard/tamu"

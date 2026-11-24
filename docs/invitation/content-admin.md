@@ -84,7 +84,7 @@ Asumsi yang disetujui secara default:
 
 ### Photobooth
 
-- Fase A (`/dashboard/fotobooth`): edit copy kartu (`eyebrow`, `names`, `date`),
+- Fase A (`/dashboard/photobooth`): edit copy kartu (`eyebrow`, `names`, `date`),
   `downloadName`, `scale`; preview canvas memakai `drawComposition` dengan foto
   placeholder. Geometri layout ditampilkan read-only.
 - Fase B (4C): editor frame bebas — drag/resize slot, tambah/hapus slot per
@@ -111,7 +111,7 @@ Asumsi yang disetujui secara default:
 
 ### Responsif
 
-- Editor konten dan fotobooth memakai action bar **fixed** di bawah layar berisi
+- Editor konten dan photobooth memakai action bar **fixed** di bawah layar berisi
   Reset dan Simpan; konten diberi padding bawah agar tidak tertutup.
 - Di bawah `lg`, editor dan pratinjau dipisah dengan tab `Editor | Pratinjau`;
   kedua panel tetap ter-mount sehingga iframe/canvas tidak kehilangan state dan
@@ -137,7 +137,7 @@ Asumsi yang disetujui secara default:
       tersimpan.
 - [ ] Dua tab editor: tab dengan `baseUpdatedAt` lama ditolak dan tidak
       menimpa perubahan tab lain.
-- [ ] `/dashboard/fotobooth` mengubah copy kartu dan preview canvas ikut berubah;
+- [ ] `/dashboard/photobooth` mengubah copy kartu dan preview canvas ikut berubah;
       undangan/photobooth memakai copy baru.
 - [ ] Fase B: drag/resize slot tersimpan dan hasil unduhan mengikuti posisi baru.
 - [ ] `/dashboard/wall` menghapus kartu + file Storage; mode token lama tetap
@@ -221,7 +221,7 @@ tanpa listing) beserta policy SELECT publik.
 | `src/routes/dashboard.konten.tsx` | editor + live preview |
 | `src/routes/undangan-preview.tsx` | iframe target, guard dashboard, noindex |
 | `src/components/dashboard/content/*` | form per bagian |
-| `src/routes/dashboard.fotobooth.tsx` | copy + preview canvas |
+| `src/routes/dashboard.photobooth.tsx` | copy + preview canvas |
 | `src/routes/dashboard.wall.tsx` | daftar + hapus kartu |
 | `src/components/invitation/audio/*` | player direct + YouTube, controller |
 | `supabase/migrations/0005_invitation_content.sql` | tabel konten |
@@ -333,7 +333,7 @@ mengubah tampilan undangan.
 - [x] `/undangan-preview` guarded + `postMessage` + toggle sisi.
 - [x] Upload musik (bucket `invitation-media`, migrasi `0006`) + input YouTube +
       toggle aktif + judul.
-- [ ] Navigasi dashboard: Konten, Fotobooth, Wall. (Konten sudah; Fotobooth dan
+- [ ] Navigasi dashboard: Konten, Photobooth, Wall. (Konten sudah; Photobooth dan
       Wall menyusul di Task 5/7.)
 
 ### Task 4 — Player musik
@@ -348,11 +348,11 @@ mengubah tampilan undangan.
 
 ### Task 5 — Photobooth admin (copy + preview)
 
-- [x] `/dashboard/fotobooth`: copy kartu, `downloadName`, `scale`, preview
+- [x] `/dashboard/photobooth`: copy kartu, `downloadName`, `scale`, preview
       canvas dengan placeholder, geometri read-only.
 - [x] Validasi schema slot (1/2/4) sudah berjalan di content-store.
 - [x] `useContentDraft` — hook simpan/concurrency bersama untuk halaman Konten
-      dan Fotobooth.
+      dan Photobooth.
 - [x] Verifikasi: `/invitation/test/photobooth` `200`; dashboard tanpa sesi
       `307`; dengan sesi `200` dan canvas pratinjau dirender.
 

@@ -16,7 +16,7 @@ tanpa keputusan eksplisit.
 
 ## Requirements (IMMUTABLE)
 
-- Editor tinggal di `/dashboard/fotobooth`, memakai dokumen konten yang sama
+- Editor tinggal di `/dashboard/photobooth`, memakai dokumen konten yang sama
   (`content.photobooth`); tidak ada tabel baru.
 - Layout tetap `1`, `2`, `4` dengan jumlah slot **persis** 1/2/4.
 - Setiap layout boleh mengatur:
