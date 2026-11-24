@@ -114,7 +114,8 @@ tanpa keputusan eksplisit.
       langsung di kartu, dengan pegangan resize yang menempel di sudut kanan
       bawah gambar dan di-clamp agar tetap terjangkau.
 - [x] Petunjuk interaksi kontekstual untuk slot, teks, overlay, dan background
-      saat elemen dipilih.
+      saat elemen dipilih; pilihan bisa dilepas lewat tombol “Batalkan pilihan”
+      atau Esc (perlu karena background bisa menutupi seluruh kartu).
 - [x] Undo/redo + reset layout.
 
 ### 6C — Verifikasi

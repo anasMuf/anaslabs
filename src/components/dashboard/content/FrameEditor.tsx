@@ -319,6 +319,26 @@ export default function FrameEditor({
 		commit();
 	}
 
+	function clearSelection() {
+		setSelected(null);
+		setBackgroundMode(false);
+	}
+
+	// A background image can cover the whole stage, so the stage's own click
+	// never fires. Escape gives a reliable way to drop the selection.
+	useEffect(() => {
+		function handleKey(event: KeyboardEvent) {
+			if (event.key !== "Escape") return;
+			const target = event.target as HTMLElement | null;
+			if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+			setSelected(null);
+			setBackgroundMode(false);
+		}
+
+		window.addEventListener("keydown", handleKey);
+		return () => window.removeEventListener("keydown", handleKey);
+	}, []);
+
 	function updateSlotField(index: number, key: keyof Slot, value: number) {
 		const current = latestRef.current;
 		const currentLayout = current.layouts[layoutKey];
@@ -617,7 +637,7 @@ export default function FrameEditor({
 			: selected?.type === "text"
 				? "Geser blok teks langsung di kartu, atau ketik X/Y di panel ini."
 				: selected?.type === "background"
-					? "Geser gambar background di kartu; tarik pegangan di sudut kanan bawah gambar untuk mengubah ukurannya. Aktifkan “Atur background” untuk menggeser seluruh area, termasuk bagian kosong."
+					? "Geser gambar background di kartu; tarik pegangan di sudut kanan bawah gambar untuk mengubah ukurannya. Aktifkan “Atur background” untuk menggeser seluruh area, termasuk bagian kosong. Klik “Batalkan pilihan” atau tekan Esc untuk melepas pilihan."
 					: selected?.type === "overlay"
 						? "Geser overlay di kartu; tarik pegangan di sudut kanan bawah untuk mengubah lebar. Tinggi mengikuti rasio gambar."
 						: null;
@@ -667,6 +687,15 @@ export default function FrameEditor({
 									? "Background"
 									: "Pilih elemen di kartu"}
 				</span>
+				{selected ? (
+					<button
+						type="button"
+						onClick={clearSelection}
+						className={buttonClass}
+					>
+						Batalkan pilihan
+					</button>
+				) : null}
 			</div>
 
 			<div
