@@ -2,8 +2,14 @@
 @import "@fontsource-variable/playfair-display";
 @import "@fontsource-variable/playfair-display/wght-italic.css";
 @import "@fontsource-variable/montserrat";
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @plugin "@tailwindcss/typography";
+
+/* Pindai hanya folder src/ agar hash nama file CSS stabil di semua lingkungan.
+   Autodeteksi bawaan ikut memindai docs/, README, dist/, dan .content-collections;
+   isi folder-folder itu berbeda antara mesin lokal dan image Docker, sehingga nama
+   styles-<hash>.css berubah dan URL yang dibekukan di bundle server bisa 404. */
+@source ".";
 
 @theme {
 	--font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;

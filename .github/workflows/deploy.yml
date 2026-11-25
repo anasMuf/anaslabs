@@ -123,4 +123,24 @@ jobs:
               exit 1
             fi
 
+            # Pernah terjadi: container berjalan dan health check hijau, tapi
+            # bundle server menunjuk stylesheet yang tidak ada di dist/client
+            # (server dan client dari build berbeda), sehingga seluruh situs
+            # tampil tanpa CSS. Periksa semua aset yang dirujuk HTML.
+            for page in / /dashboard/login; do
+              html=$(curl -fsSL "http://localhost:3000${page}")
+              assets=$(printf '%s' "${html}" | grep -o '/assets/[A-Za-z0-9._/-]*\.\(css\|js\)' | sort -u || true)
+              if [ -z "${assets}" ]; then
+                echo "tidak menemukan aset di HTML ${page}"
+                exit 1
+              fi
+              for asset in ${assets}; do
+                if ! curl -fsS -o /dev/null "http://localhost:3000${asset}"; then
+                  echo "aset dirujuk HTML tapi tidak tersedia: ${page} -> ${asset}"
+                  exit 1
+                fi
+              done
+            done
+            echo "semua aset yang dirujuk HTML tersedia"
+
             docker image prune -f
