@@ -165,18 +165,20 @@ describe("sendMessages", () => {
 		expect(calls[0]?.url).toContain("/api/v2/send-message");
 	});
 
-	it("sends a message with a link through send-message without splitting the URL", async () => {
+	it("sends link messages through send-link with documented message object", async () => {
 		const calls: Call[] = [];
 		const fetchImpl = makeFetch(
 			() =>
 				json({
 					status: true,
-					data: { messages: [{ id: "m", ref_id: "r", status: "pending" }] },
+					data: {
+						messages: [{ id: "m", phone: "628", status: "pending" }],
+					},
 				}),
 			calls,
 		);
 
-		await sendMessages(
+		const results = await sendMessages(
 			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
 			[
 				{
@@ -189,16 +191,93 @@ describe("sendMessages", () => {
 		);
 
 		expect(calls).toHaveLength(1);
-		expect(calls[0]?.url).toBe("https://jogja.wablas.com/api/v2/send-message");
+		expect(calls[0]?.url).toBe("https://jogja.wablas.com/api/v2/send-link");
 		expect(JSON.parse(String(calls[0]?.init.body))).toEqual({
 			data: [
 				{
 					phone: "628",
-					message: "Buka undangan: https://anaslabs.my.id/invitation/budi",
+					message: {
+						text: "Buka undangan:",
+						link: "https://anaslabs.my.id/invitation/budi",
+					},
 					ref_id: "r",
 				},
 			],
 		});
+		// send-link tidak meng-echo ref_id, jadi pencocokan lewat nomor.
+		expect(results).toEqual([
+			{ refId: "r", messageId: "m", status: "pending" },
+		]);
+	});
+
+	it("falls back to plain text when send-link is rejected", async () => {
+		const calls: Call[] = [];
+		const fetchImpl = makeFetch(
+			(call) =>
+				call.url.includes("send-link")
+					? json({ status: false, message: "your package not support" }, 500)
+					: json({
+							status: true,
+							data: {
+								messages: [{ id: "m", ref_id: "r", status: "pending" }],
+							},
+						}),
+			calls,
+		);
+
+		const results = await sendMessages(
+			{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+			[
+				{
+					phone: "628",
+					message: "Buka https://anaslabs.my.id/invitation/budi",
+					refId: "r",
+				},
+			],
+			fetchImpl,
+		);
+
+		expect(calls.map((call) => call.url)).toEqual([
+			"https://jogja.wablas.com/api/v2/send-link",
+			"https://jogja.wablas.com/api/v2/send-message",
+		]);
+		// Fallback mempertahankan URL di dalam teks supaya tautan tetap sampai.
+		expect(JSON.parse(String(calls[1]?.init.body))).toEqual({
+			data: [
+				{
+					phone: "628",
+					message: "Buka https://anaslabs.my.id/invitation/budi",
+					ref_id: "r",
+				},
+			],
+		});
+		expect(results).toEqual([
+			{ refId: "r", messageId: "m", status: "pending" },
+		]);
+	});
+
+	it("retries transient send-link failures instead of falling back", async () => {
+		const fetchImpl = makeFetch(
+			(call) =>
+				call.url.includes("send-link")
+					? json({ status: false, retry_after: 10 }, 429)
+					: json({ status: true }),
+			[],
+		);
+
+		await expect(
+			sendMessages(
+				{ baseUrl: "https://jogja.wablas.com", token: "t", secretKey: "s" },
+				[
+					{
+						phone: "628",
+						message: "Buka https://anaslabs.my.id/invitation/budi",
+						refId: "r",
+					},
+				],
+				fetchImpl,
+			),
+		).rejects.toMatchObject({ name: "WablasError", kind: "transient" });
 	});
 
 	it("matches responses by phone when ref_id is missing", async () => {

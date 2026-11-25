@@ -8,13 +8,12 @@
  * - Device info: `GET {base}/api/device/info?token=...`
  * - Kirim teks: `POST {base}/api/v2/send-message`, auth `TOKEN.SECRET_KEY`,
  *   body `{ data: [{ phone, message, ref_id }] }`, maks 50 baris per request.
- *
- * `send-link` (kartu preview) tidak dipakai: pada paket akun ini endpoint itu
- * mengirim JSON payload sebagai teks (dikonfirmasi lewat `/api/report/message`),
- * dan `send-image` ditolak dengan "your package not support". Tautan karena itu
- * ikut di dalam teks `send-message` biasa.
+ * - Kirim tautan (kartu preview OG): `POST {base}/api/v2/send-link` dengan
+ *   `message: { text, link }`. Bila paket/akun menolak endpoint ini, pesan
+ *   dikirim ulang lewat `send-message` supaya tautan tetap sampai.
  */
 
+import { prepareLinkPreviewMessage } from "./link-preview";
 import { firstUrl } from "./url";
 
 export const DEFAULT_WABLAS_BASE_URL = "https://jogja.wablas.com";
@@ -384,16 +383,68 @@ export async function sendMessages(
 		);
 	}
 
-	const messages = await postBatch(
-		credentials,
-		"/api/v2/send-message",
-		rows.map((row) => ({
-			phone: row.phone,
-			message: row.message,
-			ref_id: row.refId,
-		})),
-		fetchImpl,
-	);
+	const textRows: WablasSendRow[] = [];
+	const linkRows: Array<{ row: WablasSendRow; link: string }> = [];
+	for (const row of rows) {
+		const link = firstUrl(row.message);
+		if (link) linkRows.push({ row, link });
+		else textRows.push(row);
+	}
+
+	const messages: ParsedSendMessage[] = [];
+
+	if (textRows.length) {
+		messages.push(
+			...(await postBatch(
+				credentials,
+				"/api/v2/send-message",
+				textRows.map((row) => ({
+					phone: row.phone,
+					message: row.message,
+					ref_id: row.refId,
+				})),
+				fetchImpl,
+			)),
+		);
+	}
+
+	if (linkRows.length) {
+		try {
+			messages.push(
+				...(await postBatch(
+					credentials,
+					"/api/v2/send-link",
+					linkRows.map(({ row, link }) => ({
+						phone: row.phone,
+						message: {
+							text: prepareLinkPreviewMessage(row.message).text,
+							link,
+						},
+						ref_id: row.refId,
+					})),
+					fetchImpl,
+				)),
+			);
+		} catch (error) {
+			// Transien tetap dilempar supaya worker mengulang, bukan mengirim dobel.
+			if (error instanceof WablasError && error.kind === "transient") {
+				throw error;
+			}
+			// Paket tanpa kartu preview: kirim teks apa adanya agar tautan tetap sampai.
+			messages.push(
+				...(await postBatch(
+					credentials,
+					"/api/v2/send-message",
+					linkRows.map(({ row }) => ({
+						phone: row.phone,
+						message: row.message,
+						ref_id: row.refId,
+					})),
+					fetchImpl,
+				)),
+			);
+		}
+	}
 
 	return alignResults(rows, messages);
 }

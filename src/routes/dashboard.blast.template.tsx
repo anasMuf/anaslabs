@@ -18,7 +18,7 @@ export const Route = createFileRoute("/dashboard/blast/template")({
 			templates: templates.templates,
 			guests: page.rows,
 			guestTotal: page.total,
-			linkPreview: buildLinkPreview(meta),
+			linkPreview: buildLinkPreview(meta, resolveLinkVersion(meta.updatedAt)),
 			linkVersion: resolveLinkVersion(meta.updatedAt),
 		};
 	},
