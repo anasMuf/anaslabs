@@ -5,8 +5,10 @@ import {
 	ogObjectPath,
 	validateOgUpload,
 } from "../invitation-upload";
+import { createTtlCache } from "../server-cache";
 import { getSupabaseAdmin } from "../supabase-admin";
 import {
+	EMPTY_META,
 	type InvitationMeta,
 	isMissingMeta,
 	loadInvitationMeta,
@@ -65,10 +67,25 @@ async function loadMeta(): Promise<{
 	return loadInvitationMeta();
 }
 
+/** Read on every invitation request; cleared whenever the dashboard writes. */
+const metaCache = createTtlCache<InvitationMetaView>(60_000);
+
 export const getInvitationMeta = createServerFn({ method: "GET" }).handler(
 	async (): Promise<InvitationMetaView> => {
-		const { meta } = await loadMeta();
-		return meta;
+		try {
+			return await metaCache.read(async () => {
+				const { meta, error } = await loadMeta();
+				// Do not cache a failed read; the next request should retry.
+				if (error) throw new Error(error);
+				return meta;
+			});
+		} catch (error) {
+			console.error(
+				"[invitation-meta] gagal membaca metadata, memakai default:",
+				errorMessage(error),
+			);
+			return EMPTY_META;
+		}
 	},
 );
 
@@ -121,6 +138,7 @@ export const saveInvitationMeta = createServerFn({ method: "POST" })
 				};
 			}
 
+			metaCache.clear();
 			const { meta } = await loadMeta();
 			return { ok: true, meta };
 		} catch (error) {
@@ -159,6 +177,7 @@ export const saveOgImage = createServerFn({ method: "POST" })
 				};
 			}
 
+			metaCache.clear();
 			const { meta } = await loadMeta();
 			return { ok: true, meta };
 		} catch (error) {
@@ -196,6 +215,7 @@ export const bumpOgVersion = createServerFn({ method: "POST" }).handler(
 				};
 			}
 
+			metaCache.clear();
 			const { meta } = await loadMeta();
 			return { ok: true, meta };
 		} catch (error) {

@@ -14,6 +14,7 @@ import {
 	validateFrameUpload,
 	validateMusicUpload,
 } from "./invitation-upload";
+import { createTtlCache } from "./server-cache";
 import { getSupabaseAdmin } from "./supabase-admin";
 
 /**
@@ -27,6 +28,13 @@ import { getSupabaseAdmin } from "./supabase-admin";
 const TABLE = "invitation_content";
 const MIGRATION_HINT =
 	"Tabel invitation_content belum ada. Jalankan supabase/migrations/0005_invitation_content.sql di SQL Editor, lalu coba lagi.";
+
+/**
+ * Every invitation request reads this document, but it only changes when the
+ * owner saves from the dashboard (which clears the cache). A short TTL keeps a
+ * stale entry from surviving a write that happened in another process.
+ */
+const contentCache = createTtlCache<InvitationContent>(60_000);
 
 interface ContentRow {
 	content: unknown;
@@ -149,15 +157,20 @@ async function readContent(): Promise<LoadResult> {
 /** Public read used by the invitation loader; always resolves to usable content. */
 export const getInvitationContent = createServerFn({ method: "GET" }).handler(
 	async (): Promise<InvitationContent> => {
-		const result = await readContent();
-		if (!result.ok) {
+		try {
+			return await contentCache.read(async () => {
+				const result = await readContent();
+				// Throwing keeps failures out of the cache; the caller falls back.
+				if (!result.ok) throw new Error(result.error);
+				return result.snapshot.content;
+			});
+		} catch (error) {
 			console.error(
 				"[invitation-content] gagal membaca konten, memakai default:",
-				result.error,
+				errorMessage(error),
 			);
 			return defaultContent;
 		}
-		return result.snapshot.content;
 	},
 );
 
@@ -232,6 +245,8 @@ async function writeContent(
 		return { ok: false, error: saveError.message };
 	}
 
+	// Guests should see the new content on their next request, not after the TTL.
+	contentCache.clear();
 	return { ok: true, updatedAt: (saved as VersionRow).updated_at };
 }
 
