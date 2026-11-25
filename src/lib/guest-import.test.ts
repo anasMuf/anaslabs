@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	digitsOnly,
 	type ExistingGuest,
 	guestNameKey,
 	normalizeGuestPhone,
@@ -170,6 +171,19 @@ describe("guestNameKey", () => {
 		expect(guestNameKey("  Cak  Abid ")).toBe("cak abid");
 		expect(guestNameKey("CAK ABID")).toBe(guestNameKey("cak abid"));
 		expect(guestNameKey("Mas Agung.")).toBe("mas agung");
+	});
+});
+
+describe("digitsOnly", () => {
+	it("keeps digits and drops pasted symbols", () => {
+		expect(digitsOnly("+62 812-3456-7890")).toBe("6281234567890");
+		expect(digitsOnly("0812 3456 7890")).toBe("081234567890");
+		expect(digitsOnly("0812.3456/7890")).toBe("081234567890");
+	});
+
+	it("returns an empty string for blanks", () => {
+		expect(digitsOnly("")).toBe("");
+		expect(digitsOnly(null)).toBe("");
 	});
 });
 

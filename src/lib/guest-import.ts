@@ -183,6 +183,16 @@ export function nextFreeSlug(base: string, taken: ReadonlySet<string>): string {
 }
 
 /**
+ * Strips everything except digits so a pasted number like `+62 812-3456-7890`
+ * turns into `6281234567890` while the user is still typing. Keeps the raw
+ * digit string (leading `0` included); use {@link normalizeGuestPhone} when the
+ * value is about to be stored or sent.
+ */
+export function digitsOnly(raw: string | null | undefined): string {
+	return (raw ?? "").replace(/\D/g, "");
+}
+
+/**
  * `08xx`/`8xx` become `62…` because Wablas (and WhatsApp) expect the country
  * code. Anything that does not look like a phone number becomes `null` rather
  * than being stored half-formed.
@@ -190,7 +200,7 @@ export function nextFreeSlug(base: string, taken: ReadonlySet<string>): string {
 export function normalizeGuestPhone(
 	raw: string | null | undefined,
 ): string | null {
-	const digits = (raw ?? "").replace(/\D/g, "");
+	const digits = digitsOnly(raw);
 	if (!digits) return null;
 
 	let candidate: string;
