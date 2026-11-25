@@ -1,3 +1,6 @@
+import montserratLatin from "@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url";
+import playfairItalic from "@fontsource-variable/playfair-display/files/playfair-display-latin-wght-italic.woff2?url";
+import playfairLatin from "@fontsource-variable/playfair-display/files/playfair-display-latin-wght-normal.woff2?url";
 import {
 	createFileRoute,
 	Link,
@@ -16,6 +19,22 @@ import { getInvitationContent } from "#/lib/invitation-content";
 import { defaultContent } from "#/lib/invitation-content-default";
 import { getInvitationView } from "#/lib/invitation-view";
 import { SITE_URL } from "#/lib/site";
+
+/**
+ * Preload the faces the cover uses, so the display heading is rendered with the
+ * real font instead of swapping mid-paint. The invitation only uses Playfair
+ * (normal + italic ampersand) and Montserrat; Inter is left to load on demand
+ * because only small UI bits inherit it.
+ */
+function fontPreload(href: string) {
+	return {
+		rel: "preload",
+		as: "font",
+		type: "font/woff2",
+		href,
+		crossOrigin: "anonymous",
+	} as const;
+}
 
 function ogImageMime(url: string): string {
 	const path = url.split("?")[0]?.toLowerCase() ?? "";
@@ -84,6 +103,11 @@ export const Route = createFileRoute("/invitation/$slug")({
 				{ name: "twitter:title", content: title },
 				{ name: "twitter:description", content: description },
 				{ name: "twitter:image", content: ogImage },
+			],
+			links: [
+				fontPreload(playfairLatin),
+				fontPreload(playfairItalic),
+				fontPreload(montserratLatin),
 			],
 		};
 	},

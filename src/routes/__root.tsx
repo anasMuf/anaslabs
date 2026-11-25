@@ -29,10 +29,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="min-h-screen antialiased">
 				{children}
-				<noscript>
-					{/* Scroll-reveal content must stay readable without JS. */}
-					<style>{`.reveal[data-hidden="true"]{opacity:1;transform:none}`}</style>
-				</noscript>
 				<Scripts />
 			</body>
 		</html>

@@ -9,13 +9,14 @@ interface RevealProps {
  * Fades a section in when it enters the viewport and hides it again on exit, so
  * the animation replays every time the section is scrolled back into view.
  *
- * Content is visible without JS and for visitors who ask for reduced motion:
- * both cases are handled in CSS (`src/styles.css`), so the server-rendered
- * markup never leaves the page blank.
+ * The server renders every section visible. Hiding is decided by JS after mount
+ * from the section's actual position, so content never depends on hydration: a
+ * slow bundle can delay the animation but never the text.
  */
 export default function Reveal({ children, className = "" }: RevealProps) {
 	const ref = useRef<HTMLDivElement | null>(null);
-	const [shown, setShown] = useState(false);
+	const [hidden, setHidden] = useState(false);
+	const first = useRef(true);
 
 	useEffect(() => {
 		const node = ref.current;
@@ -25,14 +26,21 @@ export default function Reveal({ children, className = "" }: RevealProps) {
 			typeof IntersectionObserver === "undefined" ||
 			window.matchMedia("(prefers-reduced-motion: reduce)").matches
 		) {
-			setShown(true);
+			setHidden(false);
 			return;
 		}
 
 		const observer = new IntersectionObserver(
 			(entries) => {
 				const entry = entries[0];
-				if (entry) setShown(entry.isIntersecting);
+				if (!entry) return;
+				// The first callback reports the current position. Only a section
+				// with zero visible pixels may be hidden then; a sliver at the edge
+				// of the viewport must not fade out after hydration.
+				setHidden(
+					first.current ? entry.intersectionRatio === 0 : !entry.isIntersecting,
+				);
+				first.current = false;
 			},
 			// Hide only once the section is mostly out of view, otherwise the
 			// content would fade mid-scroll.
@@ -109,7 +117,7 @@ export default function Reveal({ children, className = "" }: RevealProps) {
 	return (
 		<div
 			ref={ref}
-			data-hidden={!shown}
+			data-hidden={hidden}
 			className={`reveal my-auto ${className}`}
 		>
 			{children}

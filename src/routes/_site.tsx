@@ -1,3 +1,4 @@
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import siteData from "#/data/site.json";
 import Footer from "../components/Footer";
@@ -30,6 +31,17 @@ export const Route = createFileRoute("/_site")({
 			{ name: "twitter:title", content: pageTitle },
 			{ name: "twitter:description", content: siteData.description },
 			...ogImageMeta,
+		],
+		links: [
+			// Inter is the body face of the public site, so fetch it with the
+			// stylesheet instead of swapping text in after the CSS is parsed.
+			{
+				rel: "preload",
+				as: "font",
+				type: "font/woff2",
+				href: interLatin,
+				crossOrigin: "anonymous",
+			},
 		],
 	}),
 	component: SiteLayout,
