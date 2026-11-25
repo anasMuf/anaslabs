@@ -15,6 +15,7 @@ import { getGuest } from "#/lib/guest";
 import { getInvitationContent } from "#/lib/invitation-content";
 import { defaultContent } from "#/lib/invitation-content-default";
 import { getInvitationView } from "#/lib/invitation-view";
+import { SITE_URL } from "#/lib/site";
 
 function ogImageMime(url: string): string {
 	const path = url.split("?")[0]?.toLowerCase() ?? "";
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/invitation/$slug")({
 		if (!guest) throw notFound();
 		return { guest, content, meta };
 	},
-	head: ({ loaderData }) => {
+	head: ({ loaderData, params }) => {
 		const view = getInvitationView(
 			loaderData?.guest.side ?? null,
 			loaderData?.content ?? defaultContent,
@@ -48,6 +49,10 @@ export const Route = createFileRoute("/invitation/$slug")({
 			loaderData?.meta?.imageUrl?.trim() ||
 			defaultOgImageUrl(resolveLinkVersion(loaderData?.meta?.updatedAt));
 		const ogImageType = ogImageMime(ogImage);
+		// Dimensi hanya benar untuk gambar default 1200×630; gambar unggahan
+		// pengguna bisa beda rasio, jadi jangan deklarasikan angka palsu.
+		const hasCustomImage = Boolean(loaderData?.meta?.imageUrl?.trim());
+		const canonicalUrl = `${SITE_URL}/invitation/${params.slug}`;
 
 		return {
 			meta: [
@@ -62,13 +67,18 @@ export const Route = createFileRoute("/invitation/$slug")({
 				{ property: "og:title", content: title },
 				{ property: "og:description", content: description },
 				{ property: "og:type", content: "website" },
+				{ property: "og:url", content: canonicalUrl },
 				{ property: "og:site_name", content: "Anas & Mila" },
 				{ property: "og:locale", content: "id_ID" },
 				{ property: "og:image", content: ogImage },
 				{ property: "og:image:secure_url", content: ogImage },
 				{ property: "og:image:type", content: ogImageType },
-				{ property: "og:image:width", content: "1200" },
-				{ property: "og:image:height", content: "630" },
+				...(hasCustomImage
+					? []
+					: [
+							{ property: "og:image:width", content: "1200" },
+							{ property: "og:image:height", content: "630" },
+						]),
 				{ property: "og:image:alt", content: title },
 				{ name: "twitter:card", content: "summary_large_image" },
 				{ name: "twitter:title", content: title },
