@@ -200,7 +200,6 @@ describe("sendMessages", () => {
 						text: "Buka undangan:",
 						link: "https://anaslabs.my.id/invitation/budi",
 					},
-					ref_id: "r",
 				},
 			],
 		});

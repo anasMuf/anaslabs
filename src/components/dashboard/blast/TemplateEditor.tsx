@@ -19,7 +19,6 @@ interface Props {
 	guests: DashboardGuest[];
 	guestTotal: number;
 	linkPreview: LinkPreviewInfo;
-	linkVersion: string;
 }
 
 const SAMPLE_GUEST = {
@@ -35,7 +34,6 @@ export function TemplateEditor({
 	guests: initialGuests,
 	guestTotal: initialGuestTotal,
 	linkPreview,
-	linkVersion,
 }: Props) {
 	const toast = useToast();
 	const [templates, setTemplates] = useState<BlastTemplateView[]>(initial);
@@ -53,7 +51,7 @@ export function TemplateEditor({
 	const [body, setBody] = useState(active?.body ?? "");
 
 	const sample = guests.find((guest) => guest.id === sampleId) ?? SAMPLE_GUEST;
-	const preview = renderTemplate(body, sample, { linkVersion });
+	const preview = renderTemplate(body, sample);
 	const validation = useMemo(() => validateTemplate(body), [body]);
 	const overLimit = preview.length > TEMPLATE_MAX_LENGTH;
 

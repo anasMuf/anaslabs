@@ -11,6 +11,12 @@
  * - Kirim tautan (kartu preview OG): `POST {base}/api/v2/send-link` dengan
  *   `message: { text, link }`. Bila paket/akun menolak endpoint ini, pesan
  *   dikirim ulang lewat `send-message` supaya tautan tetap sampai.
+ *
+ * Catatan `send-link` (hasil uji langsung, bukan tebakan):
+ * - URL **tidak boleh** mengandung query string (`?v=...`). Kalau ada, Wablas
+ *   mengirim JSON payload sebagai teks, bukan kartu preview.
+ * - Item **tidak** perlu `ref_id`; respons juga tidak meng-echo-nya. Hasil
+ *   karena itu dicocokkan lewat nomor telepon.
  */
 
 import { prepareLinkPreviewMessage } from "./link-preview";
@@ -420,7 +426,6 @@ export async function sendMessages(
 							text: prepareLinkPreviewMessage(row.message).text,
 							link,
 						},
-						ref_id: row.refId,
 					})),
 					fetchImpl,
 				)),

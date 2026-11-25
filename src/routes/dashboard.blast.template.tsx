@@ -19,15 +19,13 @@ export const Route = createFileRoute("/dashboard/blast/template")({
 			guests: page.rows,
 			guestTotal: page.total,
 			linkPreview: buildLinkPreview(meta, resolveLinkVersion(meta.updatedAt)),
-			linkVersion: resolveLinkVersion(meta.updatedAt),
 		};
 	},
 	component: BlastTemplatePage,
 });
 
 function BlastTemplatePage() {
-	const { templates, guests, guestTotal, linkPreview, linkVersion } =
-		Route.useLoaderData();
+	const { templates, guests, guestTotal, linkPreview } = Route.useLoaderData();
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -40,7 +38,6 @@ function BlastTemplatePage() {
 				guests={guests}
 				guestTotal={guestTotal}
 				linkPreview={linkPreview}
-				linkVersion={linkVersion}
 			/>
 		</div>
 	);

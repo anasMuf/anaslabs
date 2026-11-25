@@ -71,8 +71,6 @@ export interface TemplateGuest {
 export interface TemplateContext {
 	coupleName?: string;
 	siteUrl?: string;
-	/** Versi cache-buster untuk preview WhatsApp; null = tanpa query. */
-	linkVersion?: string | null;
 }
 
 const VARIABLE_PATTERN = /\{([A-Za-z]+)\}/g;
@@ -87,9 +85,9 @@ function valuesFor(
 		grup: guest.groupName?.trim() || "tamu",
 		alamat: guest.address?.trim() || "-",
 		diundang: guest.invited?.trim() || "-",
-		link: `${context.siteUrl ?? SITE_URL}/invitation/${guest.slug}${
-			context.linkVersion ? `?v=${encodeURIComponent(context.linkVersion)}` : ""
-		}`,
+		// Tanpa query string: `send-link` Wablas mengirim JSON mentah (bukan kartu)
+		// bila URL mengandung `?v=...`, jadi link blast harus bersih.
+		link: `${context.siteUrl ?? SITE_URL}/invitation/${guest.slug}`,
 		mempelai: context.coupleName?.trim() || DEFAULT_COUPLE_NAME,
 	};
 }

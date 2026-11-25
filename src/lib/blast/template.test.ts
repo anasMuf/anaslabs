@@ -74,6 +74,13 @@ describe("renderTemplate", () => {
 		).toBe("https://contoh.test/invitation/budi-santoso|A & B");
 	});
 
+	it("renders a clean guest link without a query string", () => {
+		// `?v=...` membuat `send-link` Wablas mengirim JSON mentah, bukan kartu.
+		expect(renderTemplate("{link}", guest)).toBe(
+			"https://anaslabs.my.id/invitation/budi-santoso",
+		);
+	});
+
 	it("is case-insensitive for variable names", () => {
 		expect(renderTemplate("Halo {NAMA}", guest)).toBe("Halo Budi Santoso");
 	});

@@ -5,8 +5,6 @@ import type { GuestSource } from "../guest-import";
 import { getSupabaseAdmin } from "../supabase-admin";
 import { loadAudienceSnapshot } from "./audience-server";
 import { planAudience } from "./eligibility";
-import { resolveLinkVersion } from "./link-preview";
-import { loadInvitationMeta } from "./meta-server";
 import { renderTemplate, TEMPLATE_MAX_LENGTH } from "./template";
 import { loadTemplateMap } from "./template-server";
 import type {
@@ -113,15 +111,11 @@ export const queueBlast = createServerFn({ method: "POST" })
 		}
 
 		const templates = await loadTemplateMap();
-		const { meta } = await loadInvitationMeta();
-		const linkVersion = resolveLinkVersion(meta.updatedAt);
 		const prepared = plan.eligible.map((entry) => ({
 			guestId: entry.guest.id,
 			source: entry.channel,
 			phone: entry.guest.phone ?? "",
-			message: renderTemplate(templates[entry.channel].body, entry.guest, {
-				linkVersion,
-			}),
+			message: renderTemplate(templates[entry.channel].body, entry.guest),
 		}));
 
 		const tooLong = prepared.filter(

@@ -131,11 +131,11 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 			toast({
 				tone: "success",
 				message:
-					"Versi link diperbarui. Link baru akan memakai ?v=… dan memuat ulang halaman…",
+					"Versi OG diperbarui. Kartu yang sudah terkirim di WhatsApp tidak ikut berubah.",
 			});
 			window.location.reload();
 		} catch {
-			toast({ message: "Gagal menyegarkan versi link." });
+			toast({ message: "Gagal menyegarkan versi OG." });
 		} finally {
 			setBusy(null);
 		}
@@ -238,7 +238,7 @@ export function OgEditor({ meta }: { meta: InvitationMetaView }) {
 						disabled={busy !== null}
 						className="rounded-full border border-inv-rule px-4 py-2.5 font-body text-[11px] text-inv-muted transition-colors hover:bg-inv-ink/5 hover:text-inv-ink disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
 					>
-						{busy === "bump" ? "Menyegarkan…" : "Segarkan preview WhatsApp"}
+						{busy === "bump" ? "Menyegarkan…" : "Segarkan versi OG"}
 					</button>
 				</div>
 			</form>

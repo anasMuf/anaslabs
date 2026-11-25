@@ -5,8 +5,6 @@ import type { GuestSource } from "../guest-import";
 import { getSupabaseAdmin } from "../supabase-admin";
 import { effectiveBlastChannel } from "./attribution";
 import { readChannelCredentials } from "./channel-server";
-import { resolveLinkVersion } from "./link-preview";
-import { loadInvitationMeta } from "./meta-server";
 import { renderTemplate, TEMPLATE_MAX_LENGTH } from "./template";
 import { readTemplateBody } from "./template-server";
 import { sendMessages, WablasError } from "./wablas";
@@ -97,18 +95,13 @@ export const sendSingleInvitation = createServerFn({ method: "POST" })
 		});
 
 		const body = await readTemplateBody(channel);
-		const { meta } = await loadInvitationMeta();
-		const message = renderTemplate(
-			body,
-			{
-				name: guest.name,
-				groupName: guest.group_name,
-				address: guest.address,
-				invited: guest.invited,
-				slug: guest.slug,
-			},
-			{ linkVersion: resolveLinkVersion(meta.updatedAt) },
-		);
+		const message = renderTemplate(body, {
+			name: guest.name,
+			groupName: guest.group_name,
+			address: guest.address,
+			invited: guest.invited,
+			slug: guest.slug,
+		});
 		if (message.length > TEMPLATE_MAX_LENGTH) {
 			return {
 				ok: false,
