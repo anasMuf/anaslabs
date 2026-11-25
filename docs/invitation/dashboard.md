@@ -222,8 +222,20 @@ Deliverable: koreksi data dari dashboard tanpa membunuh link yang sudah beredar.
       yang sama memulihkannya.
 - [x] `src/components/dashboard/GuestEditDialog.tsx` — dialog ubah data (datalist
       grup & DIUNDANG, nomor dinormalisasi ke `62…`) + konfirmasi hapus.
-- [x] `src/routes/dashboard.tamu.tsx` — tombol "Ubah" per baris; baris lokal dan
-      angka ringkasan diperbarui tanpa memuat ulang seluruh tabel.
+- [x] `src/routes/dashboard.tamu.tsx` — kolom Aksi berupa menu titik tiga
+      (`RowActionsMenu`): Detail, Ubah, Salin link, Salin pesan, dan
+      Tandai/Batalkan terkirim. Baris lokal dan angka ringkasan diperbarui tanpa
+      memuat ulang seluruh tabel.
+- [x] `src/components/dashboard/GuestDetailDialog.tsx` — tampilan baca-saja
+      (grup, alamat, DIUNDANG, tipe, HP, nomor pengirim, status kirim/buka, link)
+      plus pratinjau pesan WhatsApp utuh. Tamu `fisik` tidak menampilkan link
+      maupun pesan (sesuai anti-pattern di bawah).
+- [x] `src/lib/guest-message.ts` + tes — render pesan penuh memakai template
+      kanal efektif (`blastChannel ?? source`), sehingga teks yang disalin sama
+      dengan yang akan dikirim blast. URL tetap di dalam teks (bukan dipisah
+      seperti payload `send-link`).
+- [x] `src/lib/clipboard.ts` — `copyText` bersama (dipakai `CopyButton` dan menu
+      baris) dengan fallback `execCommand` untuk konteks non-HTTPS.
 - [ ] Verifikasi E2E lewat UI setelah dev server di-restart.
 
 ## Task berikutnya

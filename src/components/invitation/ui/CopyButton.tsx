@@ -1,33 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { copyText } from "#/lib/clipboard";
 
 type CopyState = "idle" | "copied" | "error";
-
-async function copyText(value: string): Promise<boolean> {
-	try {
-		if (navigator.clipboard?.writeText) {
-			await navigator.clipboard.writeText(value);
-			return true;
-		}
-	} catch {
-		// Clipboard API needs a secure context; fall back to the legacy path.
-	}
-
-	try {
-		const textarea = document.createElement("textarea");
-		textarea.value = value;
-		textarea.setAttribute("readonly", "");
-		textarea.style.position = "fixed";
-		textarea.style.top = "-1000px";
-		textarea.style.opacity = "0";
-		document.body.appendChild(textarea);
-		textarea.select();
-		const copied = document.execCommand("copy");
-		textarea.remove();
-		return copied;
-	} catch {
-		return false;
-	}
-}
 
 interface CopyButtonProps {
 	value: string;

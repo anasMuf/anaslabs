@@ -1,11 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import GuestDetailDialog from "#/components/dashboard/GuestDetailDialog";
 import GuestEditDialog from "#/components/dashboard/GuestEditDialog";
+import RowActionsMenu from "#/components/dashboard/RowActionsMenu";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
-import CopyButton from "#/components/invitation/ui/CopyButton";
 import { useToast } from "#/components/invitation/ui/Toast";
 import { effectiveBlastChannel } from "#/lib/blast/attribution";
+import { DEFAULT_TEMPLATES } from "#/lib/blast/template";
+import { listBlastTemplates } from "#/lib/blast/templates";
+import { copyText } from "#/lib/clipboard";
 import { GUEST_PAGE_SIZE, GUEST_SOURCE_LABELS } from "#/lib/guest-import";
+import { renderGuestMessage, type TemplateBodies } from "#/lib/guest-message";
 import {
 	type DashboardGuest,
 	EMPTY_GUEST_FILTERS,
@@ -34,6 +39,8 @@ const EMPTY_OPTIONS: GuestFilterOptions = {
 	mila: { groups: [], addresses: [] },
 };
 
+const EMPTY_TEMPLATES: TemplateBodies = { ...DEFAULT_TEMPLATES };
+
 function FilterField({
 	label,
 	htmlFor,
@@ -61,17 +68,31 @@ export const Route = createFileRoute("/dashboard/tamu")({
 		// A missing migration must not blow up the page: show it as a notice so the
 		// fix (run 0003 + 0004) is right in front of the user.
 		try {
-			const [initial, stats, options] = await Promise.all([
+			const [initial, stats, options, templateList] = await Promise.all([
 				listGuestsPage({ data: { offset: 0, limit: GUEST_PAGE_SIZE } }),
 				getGuestStats(),
 				getGuestFilterOptions(),
+				listBlastTemplates(),
 			]);
-			return { initial, stats, options, error: null as string | null };
+			const templates = Object.fromEntries(
+				templateList.templates.map((template) => [
+					template.source,
+					template.body,
+				]),
+			) as TemplateBodies;
+			return {
+				initial,
+				stats,
+				options,
+				templates,
+				error: null as string | null,
+			};
 		} catch (error) {
 			return {
 				initial: { rows: [] as DashboardGuest[], total: 0 },
 				stats: EMPTY_STATS,
 				options: EMPTY_OPTIONS,
+				templates: EMPTY_TEMPLATES,
 				error:
 					error instanceof Error ? error.message : "Gagal memuat daftar tamu.",
 			};
@@ -90,6 +111,7 @@ function DashboardGuests() {
 		initial,
 		stats: initialStats,
 		options,
+		templates,
 		error,
 	} = Route.useLoaderData();
 
@@ -103,6 +125,7 @@ function DashboardGuests() {
 	const [failure, setFailure] = useState<string | null>(error);
 	const [savingId, setSavingId] = useState<string | null>(null);
 	const [editing, setEditing] = useState<DashboardGuest | null>(null);
+	const [detail, setDetail] = useState<DashboardGuest | null>(null);
 	const [filtersOpen, setFiltersOpen] = useState(false);
 
 	const filtersActive = Object.values(filters).some(Boolean);
@@ -234,6 +257,26 @@ function DashboardGuests() {
 		} finally {
 			setSavingId(null);
 		}
+	}
+
+	async function copyLink(guest: DashboardGuest) {
+		const ok = await copyText(invitationUrl(guest.slug));
+		toast({
+			tone: ok ? "success" : "error",
+			message: ok
+				? `Link undangan ${guest.name} disalin.`
+				: "Gagal menyalin link. Salin manual dari dialog detail.",
+		});
+	}
+
+	async function copyMessage(guest: DashboardGuest) {
+		const ok = await copyText(renderGuestMessage(guest, templates));
+		toast({
+			tone: ok ? "success" : "error",
+			message: ok
+				? `Pesan WhatsApp untuk ${guest.name} disalin.`
+				: "Gagal menyalin pesan. Salin manual dari dialog detail.",
+		});
 	}
 
 	function handleSaved(updated: DashboardGuest) {
@@ -590,33 +633,42 @@ function DashboardGuests() {
 										)}
 									</td>
 									<td className="px-4 py-3">
-										<div className="flex items-center justify-end gap-2">
-											{guest.delivery === "digital" ? (
-												<CopyButton
-													value={invitationUrl(guest.slug)}
-													label="Link"
-													copiedLabel="Tersalin"
-												/>
-											) : null}
-											<button
-												type="button"
-												onClick={() => void toggleSent(guest)}
-												disabled={savingId === guest.id}
-												className="whitespace-nowrap rounded-full border border-inv-rule px-2.5 py-1 font-body text-[10px] text-inv-muted transition-colors hover:bg-inv-ink/5 hover:text-inv-ink disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-											>
-												{savingId === guest.id
-													? "Menyimpan…"
-													: guest.sent
-														? "Batalkan"
-														: "Tandai"}
-											</button>
-											<button
-												type="button"
-												onClick={() => setEditing(guest)}
-												className="whitespace-nowrap rounded-full border border-inv-rule px-2.5 py-1 font-body text-[10px] text-inv-muted transition-colors hover:bg-inv-ink/5 hover:text-inv-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-inv-accent"
-											>
-												Ubah
-											</button>
+										<div className="flex justify-end">
+											<RowActionsMenu
+												label={`Aksi untuk ${guest.name}`}
+												items={[
+													{
+														label: "Detail",
+														onSelect: () => setDetail(guest),
+													},
+													{
+														label: "Ubah",
+														onSelect: () => setEditing(guest),
+													},
+													...(guest.delivery === "digital"
+														? [
+																{
+																	label: "Salin link",
+																	onSelect: () => void copyLink(guest),
+																},
+																{
+																	label: "Salin pesan",
+																	onSelect: () => void copyMessage(guest),
+																},
+															]
+														: []),
+													{
+														label:
+															savingId === guest.id
+																? "Menyimpan…"
+																: guest.sent
+																	? "Batalkan terkirim"
+																	: "Tandai terkirim",
+														disabled: savingId === guest.id,
+														onSelect: () => void toggleSent(guest),
+													},
+												]}
+											/>
 										</div>
 									</td>
 								</tr>
@@ -645,6 +697,21 @@ function DashboardGuests() {
 					</p>
 				) : null}
 			</div>
+
+			{detail ? (
+				<GuestDetailDialog
+					guest={detail}
+					link={invitationUrl(detail.slug)}
+					message={renderGuestMessage(detail, templates)}
+					onClose={() => setDetail(null)}
+					onEdit={() => {
+						setDetail(null);
+						setEditing(detail);
+					}}
+					onCopyLink={() => void copyLink(detail)}
+					onCopyMessage={() => void copyMessage(detail)}
+				/>
+			) : null}
 
 			{editing ? (
 				<GuestEditDialog
