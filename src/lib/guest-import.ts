@@ -193,18 +193,45 @@ export function digitsOnly(raw: string | null | undefined): string {
 }
 
 /**
- * `08xx`/`8xx` become `62…` because Wablas (and WhatsApp) expect the country
- * code. Anything that does not look like a phone number becomes `null` rather
- * than being stored half-formed.
+ * Sanitiser for the phone input: keeps a single leading `+` as the international
+ * marker and drops every other non-digit character. `+44 7911-123456` becomes
+ * `+447911123456` while `(0812) 3456 7890` becomes `081234567890`.
+ *
+ * The `+` is what tells {@link normalizeGuestPhone} that the country code is
+ * already included, so it is not rewritten to the Indonesian `62` prefix.
+ */
+export function phoneInput(raw: string | null | undefined): string {
+	const value = (raw ?? "").trim();
+	const digits = digitsOnly(value);
+	return value.startsWith("+") && digits ? `+${digits}` : digits;
+}
+
+/**
+ * Resolves a phone value to the bare digit form that Wablas/WhatsApp expect.
+ *
+ * - A leading `+` means the value already carries a country code, so the digits
+ *   are kept as-is (e.g. `+44 7911 123456` → `447911123456`).
+ * - Without a `+`, local Indonesian input is assumed: `08xx`/`8xx` become `62…`
+ *   and anything already starting with `62` is kept.
+ * - Other digit strings (e.g. `60123456789`) are treated as already including
+ *   their country code and kept.
+ *
+ * We deliberately do not map the code to a country name: the digits themselves
+ * are enough, and a bare local number from another country cannot be told apart
+ * from an Indonesian one. Anything implausible becomes `null` rather than being
+ * stored half-formed.
  */
 export function normalizeGuestPhone(
 	raw: string | null | undefined,
 ): string | null {
-	const digits = digitsOnly(raw);
+	const value = (raw ?? "").trim();
+	const international = value.startsWith("+");
+	const digits = digitsOnly(value);
 	if (!digits) return null;
 
 	let candidate: string;
-	if (digits.startsWith("62")) candidate = digits;
+	if (international) candidate = digits;
+	else if (digits.startsWith("62")) candidate = digits;
 	else if (digits.startsWith("0")) candidate = `62${digits.slice(1)}`;
 	else if (digits.startsWith("8")) candidate = `62${digits}`;
 	else candidate = digits;

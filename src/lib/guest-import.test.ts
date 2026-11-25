@@ -5,6 +5,7 @@ import {
 	guestNameKey,
 	normalizeGuestPhone,
 	parseGuestTable,
+	phoneInput,
 	planGuestImport,
 	slugifyGuestName,
 } from "./guest-import";
@@ -187,12 +188,41 @@ describe("digitsOnly", () => {
 	});
 });
 
+describe("phoneInput", () => {
+	it("keeps a leading + as the international marker", () => {
+		expect(phoneInput("+44 7911-123456")).toBe("+447911123456");
+		expect(phoneInput("+62 812 3456 7890")).toBe("+6281234567890");
+	});
+
+	it("drops symbols but keeps local digits when there is no +", () => {
+		expect(phoneInput("(0812) 3456 7890")).toBe("081234567890");
+		expect(phoneInput("0812.3456/7890")).toBe("081234567890");
+	});
+
+	it("returns an empty string for blanks", () => {
+		expect(phoneInput("")).toBe("");
+		expect(phoneInput(null)).toBe("");
+	});
+});
+
 describe("normalizeGuestPhone", () => {
 	it("converts local numbers to the 62 country code", () => {
 		expect(normalizeGuestPhone("0812-3456-7890")).toBe("6281234567890");
 		expect(normalizeGuestPhone("+62 812 3456 7890")).toBe("6281234567890");
 		expect(normalizeGuestPhone("6281234567890")).toBe("6281234567890");
 		expect(normalizeGuestPhone("812 3456 7890")).toBe("6281234567890");
+	});
+
+	it("keeps other country codes instead of forcing 62", () => {
+		expect(normalizeGuestPhone("+60 12-345 6789")).toBe("60123456789");
+		expect(normalizeGuestPhone("+65 8123 4567")).toBe("6581234567");
+		expect(normalizeGuestPhone("+1 415 555 2671")).toBe("14155552671");
+		expect(normalizeGuestPhone("+44 7911 123456")).toBe("447911123456");
+	});
+
+	it("keeps already-prefixed digits without a +", () => {
+		expect(normalizeGuestPhone("60123456789")).toBe("60123456789");
+		expect(normalizeGuestPhone("447911123456")).toBe("447911123456");
 	});
 
 	it("returns null for blanks and implausible values", () => {

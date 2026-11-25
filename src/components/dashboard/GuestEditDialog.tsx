@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
-import { digitsOnly, GUEST_SOURCE_LABELS } from "#/lib/guest-import";
+import { GUEST_SOURCE_LABELS, phoneInput } from "#/lib/guest-import";
 import type { DashboardGuest } from "#/lib/guests";
 import { archiveGuest, updateGuest } from "#/lib/guests";
 
@@ -282,13 +282,13 @@ export default function GuestEditDialog({
 									<input
 										id="guest-phone"
 										type="tel"
-										inputMode="numeric"
+										inputMode="tel"
 										value={form.phone}
 										onChange={(event) =>
-											update("phone", digitsOnly(event.target.value))
+											update("phone", phoneInput(event.target.value))
 										}
 										maxLength={20}
-										placeholder="08xx…"
+										placeholder="08xx… atau +60…"
 										className={fieldClass}
 									/>
 								</div>
