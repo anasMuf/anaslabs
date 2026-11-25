@@ -305,8 +305,8 @@ export function TemplateEditor({
 					linkPreviewFirst
 				/>
 				<p className="font-body text-[10px] leading-relaxed text-inv-muted">
-					Pesan dikirim apa adanya sebagai teks, jadi tautan tetap terlihat dan
-					bisa diketuk. Letakkan{" "}
+					Tautan dirender sebagai kartu preview di akhir pesan, jadi label
+					seperti “Buka undangan:” tidak menggantung. Letakkan{" "}
 					<span className="text-inv-ink">{"{link}"}</span> di baris terakhir
 					agar urutan template sama dengan pratinjau.
 				</p>

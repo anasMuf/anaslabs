@@ -6,12 +6,15 @@ import {
 } from "@tanstack/react-router";
 import { InvitationContentProvider } from "#/components/invitation/InvitationContentProvider";
 import { ToastProvider } from "#/components/invitation/ui/Toast";
+import {
+	defaultOgImageUrl,
+	resolveLinkVersion,
+} from "#/lib/blast/link-preview";
 import { getInvitationMeta } from "#/lib/blast/og";
 import { getGuest } from "#/lib/guest";
 import { getInvitationContent } from "#/lib/invitation-content";
 import { defaultContent } from "#/lib/invitation-content-default";
 import { getInvitationView } from "#/lib/invitation-view";
-import { SITE_URL } from "#/lib/site";
 
 function ogImageMime(url: string): string {
 	const path = url.split("?")[0]?.toLowerCase() ?? "";
@@ -43,7 +46,7 @@ export const Route = createFileRoute("/invitation/$slug")({
 			loaderData?.meta?.description?.trim() || defaultDescription;
 		const ogImage =
 			loaderData?.meta?.imageUrl?.trim() ||
-			`${SITE_URL}/invitation/og-card.jpg`;
+			defaultOgImageUrl(resolveLinkVersion(loaderData?.meta?.updatedAt));
 		const ogImageType = ogImageMime(ogImage);
 
 		return {

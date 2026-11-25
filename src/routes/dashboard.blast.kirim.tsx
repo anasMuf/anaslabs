@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { MessagePreview } from "#/components/dashboard/blast/MessagePreview";
 import { SearchableSelect } from "#/components/dashboard/SearchableSelect";
 import { useToast } from "#/components/invitation/ui/Toast";
-import { buildLinkPreview } from "#/lib/blast/link-preview";
+import { buildLinkPreview, resolveLinkVersion } from "#/lib/blast/link-preview";
 import { getInvitationMeta } from "#/lib/blast/og";
 import {
 	getBlastAudience,
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/dashboard/blast/kirim")({
 			status,
 			guests: guests.rows,
 			guestTotal: guests.total,
-			linkPreview: buildLinkPreview(meta),
+			linkPreview: buildLinkPreview(meta, resolveLinkVersion(meta.updatedAt)),
 		};
 	},
 	component: BlastSendPage,
