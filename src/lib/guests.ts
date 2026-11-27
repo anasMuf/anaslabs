@@ -740,6 +740,111 @@ export const markGuestOpened = createServerFn({ method: "POST" })
 		return { ok: true };
 	});
 
+/** Lightweight active-guest list for browser-side contact matching. */
+export interface GuestOption {
+	id: string;
+	name: string;
+	slug: string;
+	source: GuestSource;
+	groupName: string | null;
+	phone: string | null;
+}
+
+export const listGuestOptions = createServerFn({ method: "GET" }).handler(
+	async (): Promise<GuestOption[]> => {
+		await requireDashboardUser();
+		const supabase = getSupabaseAdmin();
+
+		const { data, error } = await supabase
+			.from("guests")
+			.select("id, name, slug, source_sheet, group_name, phone")
+			.is("archived_at", null)
+			.order("name_key", { ascending: true })
+			.order("id", { ascending: true });
+
+		if (error) {
+			throw new Error(needsMigration(error) ? MIGRATION_HINT : error.message);
+		}
+
+		return (
+			data as Array<{
+				id: string;
+				name: string;
+				slug: string;
+				source_sheet: GuestSource;
+				group_name: string | null;
+				phone: string | null;
+			}>
+		).map((row) => ({
+			id: row.id,
+			name: row.name,
+			slug: row.slug,
+			source: row.source_sheet,
+			groupName: row.group_name,
+			phone: row.phone,
+		}));
+	},
+);
+
+/**
+ * Contact import: apply confirmed phone numbers only.
+ *
+ * Deliberately a narrow update — name, group, slug, delivery, and archival
+ * state are never touched by this flow. Each row is written separately so one
+ * bad id cannot roll back the rest.
+ */
+export interface GuestPhoneApplyResult {
+	ok: boolean;
+	updated: number;
+	failed: Array<{ id: string; error: string }>;
+}
+
+export const applyGuestPhones = createServerFn({ method: "POST" })
+	.inputValidator(
+		(data: { entries?: Array<{ id?: unknown; phone?: unknown }> }) => ({
+			entries: (Array.isArray(data?.entries) ? data.entries : [])
+				.slice(0, 2000)
+				.map((entry) => ({
+					id: String(entry?.id ?? "")
+						.trim()
+						.slice(0, 64),
+					phone: String(entry?.phone ?? ""),
+				})),
+		}),
+	)
+	.handler(async ({ data }): Promise<GuestPhoneApplyResult> => {
+		await requireDashboardUser();
+
+		const supabase = getSupabaseAdmin();
+		const now = new Date().toISOString();
+		let updated = 0;
+		const failed: GuestPhoneApplyResult["failed"] = [];
+
+		for (const entry of data.entries) {
+			const phone = normalizeGuestPhone(entry.phone);
+			if (!entry.id || !phone) {
+				failed.push({
+					id: entry.id || "?",
+					error: phone ? "ID tamu kosong." : "Nomor tidak valid.",
+				});
+				continue;
+			}
+
+			const { error } = await supabase
+				.from("guests")
+				.update({ phone, updated_at: now })
+				.eq("id", entry.id);
+
+			if (error) {
+				failed.push({ id: entry.id, error: error.message });
+			} else {
+				updated += 1;
+			}
+		}
+
+		return { ok: failed.length === 0, updated, failed };
+	});
+
 /**
  * Slug → display name for the invitation page and the wall.
  *

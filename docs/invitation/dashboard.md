@@ -238,6 +238,38 @@ Deliverable: koreksi data dari dashboard tanpa membunuh link yang sudah beredar.
       baris) dengan fallback `execCommand` untuk konteks non-HTTPS.
 - [ ] Verifikasi E2E lewat UI setelah dev server di-restart.
 
+## Task 3b — Impor kontak (nomor saja)
+
+Deliverable: isi nomor WhatsApp dari ekspor kontak tanpa menyentuh identitas tamu.
+
+- [x] `src/lib/contact-import.ts` + tes — deteksi header Google Contacts
+      (`First/Middle/Last Name`, `File As`, `Phone 1/2 - Value`) maupun CSV
+      sederhana (`Name, Phone`); nomor dinormalisasi ke `62…` (termasuk nilai
+      tanpa prefix dan sel berisi `:::` ganda); baris tanpa nama/nomor dilewati.
+- [x] Saran matching (exact → token overlap → substring) dengan penanda **ambigu**
+      untuk nama kembar, sehingga UI tidak pernah memilih tamu secara diam-diam.
+- [x] `src/components/dashboard/ContactImportPanel.tsx` — panel di
+      `/dashboard/impor`: unggah `.csv`/`.xlsx` (dibaca di browser via
+      `read-excel-file`, file tidak dikirim ke server) atau tempel CSV; tabel
+      matching per baris. Pemilih nomor (bila >1) dan pemilih tamu sama-sama
+      memakai `SearchableSelect` (pencarian aktif, saran di atas) dengan prop
+      `portal` agar popover tidak terpotong `overflow-x-auto` tabel.
+- [x] Daftar tamu pada matching **mengikuti sheet yang dipilih** di panel impor
+      atas (`source`): saran, opsi, dan validasi hanya memakai tamu sheet itu;
+      mengganti sheet me-rematch baris yang sudah dimuat.
+- [x] `SearchableSelect` — prop `portal` (opt-in) merender daftar lewat portal
+      `position: fixed`, menutup saat halaman di-scroll/di-resize. Pemakaian lain
+      tidak berubah (default `absolute`).
+- [x] Status per baris: **Isi**, **Sudah sama**, **Konflik — dilewati** (default)
+      dengan opsi **Timpa nomor**, **Ganda** (dua kontak → satu tamu, wajib
+      diselesaikan), dan **belum dipilih**.
+- [x] `listGuestOptions` + `applyGuestPhones` (`src/lib/guests.ts`) —
+      `applyGuestPhones` hanya menulis kolom `phone`; nama, grup, slug, tipe, dan
+      status arsip tidak disentuh.
+- [x] Anti-pattern dikunci: tidak membuat/mengarsipkan tamu, tidak mengubah
+      slug, tidak menyimpan nomor mentah, tidak menimpa konflik tanpa aksi user.
+- [ ] Verifikasi E2E dengan `contacts (1).xlsx` setelah dev server di-restart.
+
 ## Task berikutnya
 
 - Task 4: tab Wall (lihat + hapus) memakai `listWallCards`/`deleteWallCard`.

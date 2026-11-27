@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import ContactImportPanel from "#/components/dashboard/ContactImportPanel";
 import { useToast } from "#/components/invitation/ui/Toast";
 import {
 	GUEST_SOURCE_LABELS,
@@ -146,6 +147,8 @@ function DashboardImport() {
 
 				{preview ? <ImportSummary preview={preview} /> : null}
 			</div>
+
+			<ContactImportPanel source={source} />
 
 			{applied ? (
 				<div className="rounded-3xl border border-inv-accent/30 bg-inv-card px-5 py-4">
